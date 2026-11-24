@@ -1,0 +1,5 @@
+# Modern GTM is open to search engines and to AI crawlers and assistants.
+User-agent: *
+Allow: /
+
+Sitemap: https://moderngtm.ai/sitemap.xml

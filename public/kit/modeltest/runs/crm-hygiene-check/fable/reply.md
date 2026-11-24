@@ -1,0 +1,5 @@
+**15 of your 24 open deals need a fix; 9 are clean.** Four are critical: three close dates are already in the past (Northgate Cold Chain, a $96,000 Commit deal, plus Brightwater Haulage and Oakhurst Pallet), and Silverline Freightways has no amount.
+
+Of the other 11, look first at Corvell Storage, a $64,000 Commit deal with no logged activity since Oct 9 (42 days against your 30-day rule). The rest are 2 deals with no next step, 3 more past 30 days without activity, and 5 with a single contact.
+
+The full checklist, with a suggested fix for each deal, is in `crm-hygiene-check.html`, saved next to this reply. Nothing was changed: this check only reads, and with no CRM connected the fixes are yours to apply by hand. Once one is connected, tell me which fixes you accept and I'll apply them through update-opportunity. I used only pipeline.csv and company-facts.md, took today as Friday, Nov 20, 2026, and applied your 30-day activity rule; my other assumptions, and the checks the export can't support, are at the end of the file.

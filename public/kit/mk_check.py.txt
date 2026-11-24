@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+"""Re-point the plugin page's own checks at the merged preview. The checks themselves are unchanged; only what
+the merge renamed is renamed here, and every lookup is kept inside the plugin area (#plg)."""
+import re
+src = open("/home/claude/provider/check.cjs", encoding="utf-8").read()
+def once(s, a, b, n=1):
+    assert s.count(a) == n, (a, s.count(a)); return s.replace(a, b)
+s = src
+s = once(s, "const URL = 'http://localhost:8766/index.html';", "const URL = 'http://localhost:8766/merged/index.html';")
+s = once(s, "await p.goto(URL + (opt.hash ? '#' + opt.hash : ''), { waitUntil: 'load' });", "await p.goto(URL + '#' + (opt.hash || 'plugins'), { waitUntil: 'load' });")
+s = s.replace("'method'", "'plugins-method'").replace('[data-view="method"]', '[data-view="plugins-method"]')
+s = once(s, "document.getElementById('data')", "document.getElementById('plg-data')", src.count("document.getElementById('data')"))
+assert "getElementById('data')" not in s
+s = s.replace("'#q'", "'#sk-q'")
+s = s.replace("[data-copy]", "[data-pcopy]")
+s = re.sub(r"(?<=['\" >+~,(])\.(cell|finds|grp|lab|nm|row|rows|say|seg)(?![\w-])", lambda m: ".p-" + m.group(1), s)
+# lookups stay inside the plugin area
+s = s.replace("document.querySelectorAll(", "document.getElementById('plg').querySelectorAll(").replace("document.querySelector(", "document.getElementById('plg').querySelector(")
+s = re.sub(r"\b(p|q|ph|deep|dk|ns|a)\.locator\(", lambda m: m.group(1) + ".locator('#plg').locator(", s)
+# what is different by design
+s = once(s, "await count('.mast nav') === 0 && await count('nav.tabs') === 1", "await p.locator('.mast nav').count() === 1 && await count('nav.tabs') === 1")
+import os
+TITLE = "Modern GTM" if os.environ.get("PREVIEW") == "0" else "Modern GTM: merged preview"
+s = once(s, "await p.title() === 'Plugins for GTM teams on Modern GTM'", "await p.title() === '" + TITLE + "'")
+s = s.replace("document.getElementById('plg').querySelector('.mast')", "document.querySelector('.mast')")
+s = s.replace("document.getElementById('plg').querySelectorAll('[id]')", "document.querySelectorAll('[id]')")
+# in the merged site an unknown address falls back to Home, as on the site today
+s = once(s, "ok('unknown address falls back to the list of plugins', await onView(p) === 'plugins');", "ok('unknown address falls back to Home', await p.evaluate(() => Array.from(document.querySelectorAll('[data-view].on')).map(v => v.dataset.view).join(',')) === 'home');")
+# the 60-second film is not on the site
+s = once(s, "ok('film is present', await count('#film video source[src=\"explainer.mp4\"]') === 1);", "ok('the film is left out', await count('#film') === 0 && await count('video') === 0);")
+# the first view is opened by address already, so step away once to let the loop arrive at it
+s = once(s, "  for (const v of VIEWS) {\n    await go(p, v);\n    ok('view ' + v", "  await go(p, 'overview');\n  for (const v of VIEWS) {\n    await go(p, v);\n    ok('view ' + v")
+open("check_merged.cjs", "w", encoding="utf-8").write(s)
+print("written", len(s.splitlines()), "lines;", "renamed selectors:", len(re.findall(r"\.p-(cell|finds|grp|lab|nm|row|rows|say|seg)", s)))

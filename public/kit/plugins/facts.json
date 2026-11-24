@@ -1,0 +1,1345 @@
+{
+ "account-context": {
+  "desc_words": 52,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "account record, opps, contacts, activities"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "recent correspondence with the account domain"
+   },
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "account plans, proposals, MSAs"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "most recent call record + key point"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "internal chatter - deal desk, escalations"
+   }
+  ],
+  "gated": "the owner DM, posted when the user asks, within the chat connector's permissions; follow-on record fixes hand off to update-opportunity / log-activity",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "log-activity",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1604
+ },
+ "account-plan": {
+  "desc_words": 58,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "account, opps, activities; highlight sync-back"
+   },
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "existing plan doc, proposals, QBR decks; the plan doc output"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "their stated goals and initiatives"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "active threads and topics"
+   },
+   {
+    "type": "enrichment",
+    "required": false,
+    "used_for": "public signals on their goals"
+   }
+  ],
+  "gated": "doc refresh in place; crm summary + next-step sync the user accepts, within connector permissions, verified per field",
+  "sched_own": true,
+  "value_ban": true,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "expansion-whitespace",
+   "forecast",
+   "stakeholder-map"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1702
+ },
+ "account-research": {
+  "desc_words": 67,
+  "tools": [
+   {
+    "type": "enrichment",
+    "required": false,
+    "used_for": "company research, signals, contact background"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "does this account already exist, and whose is it"
+   }
+  ],
+  "gated": "none (record creation/logging hands off to the the skills that make changes (update-opportunity, log-activity and others))",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "draft-outreach",
+   "log-activity",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1609
+ },
+ "account-tiering": {
+  "desc_words": 45,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the account set with opps and contacts"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "inbound-signal scoring row"
+   }
+  ],
+  "gated": "none (field fixes hand off to update-opportunity / the crm hygiene flow)",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": true,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1604
+ },
+ "call-prep": {
+  "desc_words": 56,
+  "tools": [
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "resolve the meeting, attendees"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "account, open opps, contacts, activity history"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "what the last calls actually said"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "last 2-3 exchanges with attendees"
+   },
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "plans/proposals mentioning the account"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "internal deal context"
+   }
+  ],
+  "gated": "none (prep only reads)",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "call-summary"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1909
+ },
+ "call-summary": {
+  "desc_words": 69,
+  "tools": [
+   {
+    "type": "transcripts",
+    "required": true,
+    "used_for": "the call itself"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "account/opp to anchor updates"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "drafting the customer follow-up"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "the internal summary destination"
+   }
+  ],
+  "gated": "adds the CRM writes and sends the user asks for, within connector permissions, with citations",
+  "sched_own": true,
+  "value_ban": true,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "log-activity",
+   "setup",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1972
+ },
+ "close-plan": {
+  "desc_words": 55,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the opp record + contact roles"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "their stated problems, metrics, quantified pain"
+   },
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "prior proposals; the output docs"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "commitments in writing; procurement/legal threads; champion draft"
+   }
+  ],
+  "gated": "crm next-step/close-date via update-opportunity, as the user accepts, within connector permissions, verified with citations",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "deal-advance-gap",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1714
+ },
+ "competitive-intelligence": {
+  "desc_words": 74,
+  "tools": [
+   {
+    "type": "enrichment",
+    "required": false,
+    "used_for": "competitor public signals - launches, pricing moves, news"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "deals tagged competitive; win/loss by competitor"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "what customers actually say about the competitor"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "competitor mentions in threads"
+   }
+  ],
+  "gated": "none - competitor-field backfills hand off to update-opportunity",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": true,
+  "gated_none": true,
+  "refs": [
+   "customer-voice",
+   "draft-outreach",
+   "handle-objection",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": true,
+  "schedule_section": false,
+  "words": 1676
+ },
+ "create-an-asset": {
+  "desc_words": 42,
+  "tools": [
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "the org's approved content, templates, proof points"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "account/opportunity facts for personalization"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "the customer's own words - pains, metrics, quotes"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "commitments and context already in writing"
+   }
+  ],
+  "gated": "none (the render is the deliverable; sending and logging hand off to draft-outreach / log-activity)",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "draft-outreach",
+   "log-activity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1673
+ },
+ "crm-hygiene-check": {
+  "desc_words": 58,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the opp audit"
+   },
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "stage-criteria evidence check (e.g. proposal doc exists)"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "next-step suggestions from recent context"
+   }
+  ],
+  "gated": "none - fixes hand off to update-opportunity",
+  "sched_own": true,
+  "value_ban": true,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1592
+ },
+ "customer-health": {
+  "desc_words": 54,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "account, opps, activities, cases/tickets if modeled"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "cadence trend vs prior period"
+   },
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "meeting cadence trend"
+   },
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "success plan, past QBR decks, notes"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "sentiment and commitments from recent calls"
+   }
+  ],
+  "gated": "health/status field updates the user accepts, within connector permissions, verified; meeting booking hands to schedule-meeting",
+  "sched_own": true,
+  "value_ban": true,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "expansion-whitespace",
+   "renewal-radar",
+   "schedule-meeting"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1712
+ },
+ "customer-voice": {
+  "desc_words": 47,
+  "tools": [
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "the primary quote source"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "customer statements in threads"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "account/domain scope + attribution"
+   },
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "account-named notes docs"
+   }
+  ],
+  "gated": "none (this skill only reads; a quote never triggers an action)",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1530
+ },
+ "daily-briefing": {
+  "desc_words": 53,
+  "tools": [
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "today's meetings"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "account context per meeting, closing-soon opps, stale flags"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "waiting customer emails"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "\"last call said\" context per meeting"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "deal-channel highlights"
+   }
+  ],
+  "gated": "posting or emailing the briefing to a destination the user names or set the schedule up with, within connector permissions; other actions hand off to the skills that make changes (update-opportunity, log-activity and others), which act on the user's request within connector permissions",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": true,
+  "gated_none": false,
+  "refs": [
+   "log-activity",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": true,
+  "schedule_section": false,
+  "words": 1551
+ },
+ "deal-advance-gap": {
+  "desc_words": 56,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "opp state, contact roles, activity history"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "last exchange per deal contact"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "open commitments in both directions"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "internal blockers raised (deal desk, legal, security)"
+   }
+  ],
+  "gated": "none - this skill only reads; updates hand off to update-opportunity / log-activity",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "deal-review",
+   "forecast",
+   "log-activity",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1650
+ },
+ "deal-review": {
+  "desc_words": 41,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the opp, contact roles, activity history"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "last exchange per deal contact, 60 days"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "decisions, objections, commitments from recent calls"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "internal mentions - deal desk, exec asks, concerns"
+   }
+  ],
+  "gated": "none - suggestions hand off to update-opportunity",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "forecast",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1638
+ },
+ "deal-signals": {
+  "desc_words": 66,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the open-pipeline sweep"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "competitor mentions, inbound waiting, champion silence"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "competitor mentions in recent calls"
+   }
+  ],
+  "gated": "none - fixes hand off to update-opportunity / draft-outreach / schedule-meeting",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": true,
+  "gated_none": true,
+  "refs": [
+   "draft-outreach",
+   "forecast",
+   "renewal-radar",
+   "schedule-meeting",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": true,
+  "schedule_section": true,
+  "words": 1691
+ },
+ "deal-slip-scenario": {
+  "desc_words": 57,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the quarter's open + closed-won pipeline"
+   }
+  ],
+  "gated": "none - this skill only models; any resulting date or category change hands off to update-opportunity",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "forecast",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1582
+ },
+ "draft-outreach": {
+  "desc_words": 60,
+  "tools": [
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "prior-thread check; the draft itself"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "contact/account lookup, open opps, activity history"
+   },
+   {
+    "type": "enrichment",
+    "required": false,
+    "used_for": "hook research when no history exists"
+   },
+   {
+    "type": "sales engagement",
+    "required": false,
+    "used_for": "adding the contact to a sequence when asked (Apollo, Outreach, Salesloft)"
+   }
+  ],
+  "gated": "the send or the sequence add, when the user asks, within the connector's permissions; logging hands to log-activity",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "account-research",
+   "log-activity",
+   "setup"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1979
+ },
+ "end-of-day": {
+  "desc_words": 50,
+  "tools": [
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "today's calls as normalized records"
+   },
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "today's external meetings (the checklist to reconcile)"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "current-state check; proposed field updates"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "commitments made in writing today"
+   }
+  ],
+  "gated": "none here - all writes flow through call-summary, log-activity, and update-opportunity, as the user accepts, within connector permissions",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": true,
+  "gated_none": true,
+  "refs": [
+   "call-prep",
+   "call-summary",
+   "daily-briefing",
+   "log-activity",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": true,
+  "schedule_section": true,
+  "words": 1850
+ },
+ "expansion-whitespace": {
+  "desc_words": 57,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "what they've bought, opps, child accounts; opp creation"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "teams/use cases mentioned but never sold to"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "same - expansion signals in their own words"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "colleagues' relationships (via stakeholder-map)"
+   }
+  ],
+  "gated": "opportunity creation the user accepts, within connector permissions, verified per record with evidence citations",
+  "sched_own": true,
+  "value_ban": true,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "stakeholder-map"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1666
+ },
+ "forecast": {
+  "desc_words": 70,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the quarter's open + closed pipeline; category fixes"
+   }
+  ],
+  "gated": "forecast-category updates via update-opportunity, as the user accepts, within connector permissions, verified per deal",
+  "sched_own": true,
+  "value_ban": true,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "deal-slip-scenario",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1680
+ },
+ "handle-objection": {
+  "desc_words": 69,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the deal's stage, size, players; win/loss history"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "customer-voice quotes; how the objection landed"
+   },
+   {
+    "type": "docs",
+    "required": false,
+    "used_for": "case studies, ROI docs, vetted security/compliance docs"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "the objection thread, if it arrived in writing"
+   }
+  ],
+  "gated": "none (the reply goes through draft-outreach)",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "customer-voice",
+   "draft-outreach",
+   "win-loss-review"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1597
+ },
+ "inbox-sweep": {
+  "desc_words": 35,
+  "tools": [
+   {
+    "type": "email",
+    "required": true,
+    "used_for": "the sweep itself; reply drafts"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "matching senders to owned accounts; opp grounding"
+   },
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "availability for scheduling replies"
+   }
+  ],
+  "gated": "reply sends the user asks for, within the email connector's permissions; logging hands to log-activity",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "lead-triage",
+   "log-activity",
+   "setup",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 2002
+ },
+ "lead-triage": {
+  "desc_words": 53,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "lead lookup; existing account/owner check"
+   },
+   {
+    "type": "enrichment",
+    "required": false,
+    "used_for": "company size, industry, funding, news; title validation"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "prior threads from this domain"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "handoff message to the lead-routing channel"
+   }
+  ],
+  "gated": "none - record updates hand off to update-opportunity / log-activity; the handoff chat post goes out when the user asks, within the chat connector's permissions",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "draft-outreach",
+   "log-activity",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1802
+ },
+ "log-activity": {
+  "desc_words": 72,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "record resolution; the activity write; read mode"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "the call content being logged"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "the thread being logged"
+   },
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "the meeting time"
+   }
+  ],
+  "gated": "the activity create the user asks for, within connector permissions, verified, with citations",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1730
+ },
+ "pipeline-review": {
+  "desc_words": 64,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "open pipeline + 2 quarters of closed for baselines"
+   }
+  ],
+  "gated": "none - fixes hand off to update-opportunity",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": true,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "log-activity",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1588
+ },
+ "renewal-radar": {
+  "desc_words": 45,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the renewal calendar (renewal opps, contracts, or renewal-date fields)"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "open escalations, champion/signer changes"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "escalations raised internally"
+   }
+  ],
+  "gated": "record fixes via update-opportunity and renewal-opp creation, as the user accepts, within connector permissions, verified per record",
+  "sched_own": true,
+  "value_ban": true,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "expansion-whitespace",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1656
+ },
+ "rep-context": {
+  "desc_words": 53,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the rep's pipeline + logged activity"
+   },
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "external-meeting count, if visibility exists"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "what they've been raising in team/deal channels"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "skipped unless shared-inbox visibility exists"
+   }
+  ],
+  "gated": "none (a 1:1 follow-up message is a chat draft, posted when the user asks)",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1499
+ },
+ "route-lead": {
+  "desc_words": 60,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the unrouted queue; account/opp ownership match; the ownership write"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "the handoff note to the recipient"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "the info-request draft when the record is thin"
+   }
+  ],
+  "gated": "ownership changes the router accepts, within connector permissions, verified per record with the rule/override reason cited",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": true,
+  "gated_none": false,
+  "refs": [
+   "lead-triage",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": true,
+  "schedule_section": true,
+  "words": 1730
+ },
+ "schedule-meeting": {
+  "desc_words": 63,
+  "tools": [
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "availability; the invite"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "resolve contacts/opps; the event log"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "the propose-by-email and booking-link paths"
+   },
+   {
+    "type": "scheduling link",
+    "required": false,
+    "used_for": "the user's Calendly link, when they ask to send it"
+   }
+  ],
+  "gated": "calendar event creation and the crm event log the user asks for, within connector permissions, each verified",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "setup"
+  ],
+  "schedule_in_desc": true,
+  "schedule_section": false,
+  "words": 2017
+ },
+ "setup": {
+  "desc_words": 80,
+  "tools": [
+   {
+    "type": "every connected tool",
+    "required": false,
+    "used_for": "one cheap read to see what answers"
+   },
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "role and book inference, dashboard data"
+   },
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "dashboard meetings row"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "learning the user's writing voice from sent mail; waiting-email row"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "recent-call context tiles"
+   }
+  ],
+  "gated": "adds write actions to dashboard tiles (each runs when the user clicks it, within connector permissions)",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [
+   "crm-hygiene-check",
+   "daily-briefing",
+   "end-of-day",
+   "weekly-wrap"
+  ],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "call-summary",
+   "crm-hygiene-check",
+   "daily-briefing",
+   "draft-outreach",
+   "end-of-day",
+   "inbox-sweep",
+   "schedule-meeting",
+   "weekly-wrap"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 2656
+ },
+ "stakeholder-map": {
+  "desc_words": 56,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "contact roles, contacts, reporting lines; contact creation"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "last exchange per contact, reply direction"
+   },
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "who has actually attended meetings"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "who spoke, what stance they took"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "colleagues with their own relationships at the account"
+   }
+  ],
+  "gated": "contact creation the user accepts, within connector permissions, verified per record with source citations",
+  "sched_own": true,
+  "value_ban": true,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "account-context"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1719
+ },
+ "team-pipeline": {
+  "desc_words": 43,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "team membership, team opps, closed-won"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "what reps have already flagged in the team channel"
+   }
+  ],
+  "gated": "none - hygiene fixes hand off to update-opportunity; Monday questions post to chat when the user asks",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "forecast",
+   "log-activity",
+   "pipeline-review",
+   "rep-context",
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1595
+ },
+ "update-opportunity": {
+  "desc_words": 68,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "read the record; the update"
+   }
+  ],
+  "gated": "the update itself - as the user asks or accepts, within connector permissions, verified per record, citations on untrusted-sourced values",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [
+   "crm-hygiene-check",
+   "deal-advance-gap",
+   "deal-review",
+   "forecast",
+   "weekly-wrap"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1658
+ },
+ "weekly-wrap": {
+  "desc_words": 45,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "closed / moved / new opps this week"
+   },
+   {
+    "type": "calendar",
+    "required": false,
+    "used_for": "external-meeting count; Monday lookahead"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "customer-thread count this week"
+   },
+   {
+    "type": "chat",
+    "required": false,
+    "used_for": "the team-channel post"
+   }
+  ],
+  "gated": "the chat post, when the user asks, within the chat connector's permissions",
+  "sched_own": true,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": false,
+  "refs": [],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1605
+ },
+ "win-loss-review": {
+  "desc_words": 43,
+  "tools": [
+   {
+    "type": "crm",
+    "required": false,
+    "used_for": "the closed-opp set + stage history"
+   },
+   {
+    "type": "transcripts",
+    "required": false,
+    "used_for": "stated loss reasons, objections in the biggest deals"
+   },
+   {
+    "type": "email",
+    "required": false,
+    "used_for": "late-stage threads on the biggest wins/losses"
+   }
+  ],
+  "gated": "none - field backfills hand off to update-opportunity",
+  "sched_own": false,
+  "value_ban": false,
+  "names_hygiene_flow": false,
+  "setup_routines": [],
+  "schedule_in_desc_text": false,
+  "gated_none": true,
+  "refs": [
+   "update-opportunity"
+  ],
+  "schedule_in_desc": false,
+  "schedule_section": false,
+  "words": 1530
+ }
+}

@@ -1,0 +1,235 @@
+// Checks on the merged preview at the level of the whole site: navigation, the new home opening, the site's own
+// tools still working, and nothing leaking between the site and the plugin area. Exit code 1 on any failure.
+//   python3 merge.py ... && python3 mk_test.py && NODE_PATH=/opt/npm-tools/node_modules node check_site.cjs
+//   PREVIEW=0 checks the page that goes to the site; without it, the staging copy with its strip.
+//   USE_CASES=1 expects the use-case index on the home page (use_cases.json beside this file, or USE_CASES_JSON);
+//   without it, the list of the site's parts that the index replaces.
+const { chromium } = require('playwright');
+const fs = require('fs');
+const AXE = fs.readFileSync('/home/claude/work/axe/node_modules/axe-core/axe.min.js', 'utf8');
+const URL = 'http://localhost:8766/merged/index.html';
+// DOMAIN=1: the domain version, where domain.py gives the Latest list a Changes view after Contribute.
+const DOMAIN = process.env.DOMAIN === '1';
+const SITE = ['home', 'research', 'report', 'playbooks', 'tools', 'evidence', 'about', 'contribute'].concat(DOMAIN ? ['changes'] : []);
+const PLG = ['plugins', 'overview', 'skills', 'fit', 'rollout', 'configure', 'marketing', 'customer-support', 'small-business', 'chatgpt-sales', 'plugins-method'];
+const NAVCUR = { home: '', research: 'Research', report: 'Research', playbooks: 'Playbooks', tools: 'Tools', evidence: 'Evidence', about: 'About', contribute: 'About', changes: '' };
+const UC = process.env.USE_CASES === '1';
+const UCD = UC ? JSON.parse(fs.readFileSync(process.env.USE_CASES_JSON || __dirname + '/use_cases.json', 'utf8')) : null;
+let pass = 0, fail = 0;
+const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console.log('FAIL', name, extra === undefined ? '' : JSON.stringify(extra)); } };
+
+(async () => {
+  const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+  const errors = [];
+  const open = async (w, h, opt = {}) => {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, javaScriptEnabled: opt.js !== false, reducedMotion: 'reduce', colorScheme: opt.dark ? 'dark' : 'light' });
+    const p = await ctx.newPage();
+    p.on('pageerror', e => errors.push(e.message));
+    p.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+    p.on('requestfailed', r => errors.push('failed ' + r.url()));
+    await p.goto(URL + (opt.hash ? '#' + opt.hash : ''), { waitUntil: 'load' });
+    await p.waitForTimeout(400);
+    return p;
+  };
+  const go = async (p, hash) => { await p.evaluate(h => { location.hash = h; }, hash); await p.waitForTimeout(180); };
+  const state = p => p.evaluate(() => ({
+    on: [...document.querySelectorAll('[data-view].on')].map(v => v.dataset.view).join(),
+    cur: [...document.querySelectorAll('.mast .nav a[aria-current]')].map(a => a.textContent.trim()).join(),
+    plg: document.documentElement.classList.contains('plg-on'),
+    bar: getComputedStyle(document.querySelector('.plg .tabs')).display !== 'none',
+    foot: getComputedStyle(document.querySelector('.plgfoot')).display !== 'none',
+    y: scrollY, focus: document.activeElement ? document.activeElement.tagName : '', over: document.documentElement.scrollWidth - document.documentElement.clientWidth
+  }));
+
+  const p = await open(1280, 900);
+  // ------------------------------------------------------------------ structure
+  ok((DOMAIN ? 'twenty' : 'nineteen') + ' views, the site first', (await p.evaluate(() => [...document.querySelectorAll('[data-view]')].map(v => v.dataset.view))).join() === SITE.concat(PLG).join());
+  ok('home shows first', (await state(p)).on === 'home');
+  ok('one masthead, one footer', await p.locator('header.mast').count() === 1 && await p.locator('footer.foot').count() === 1);
+  ok('six links in the navigation', (await p.locator('.mast .nav a').allTextContents()).join('|') === 'Research|Playbooks|Tools|Plugins|Evidence|About');
+  ok('Plugins is a link inside the page', await p.locator('.mast .nav a[href="#plugins"]').count() === 1 && await p.locator('.foot a[href="#plugins"]').count() === 1 && await p.locator('.idx a[href="#plugins"]').count() === (UC ? 0 : 1));
+  ok('the only link to another artifact is the public guide, as on the site today', (await p.evaluate(() => [...document.querySelectorAll('a[href*="claude.ai/artifact"]')].map(a => a.getAttribute('href')))).join() === 'https://claude.ai/artifact/R1zhguTGsN4CcfA4qhgMfG');
+  ok('unique ids', await p.evaluate(() => { const ids = [...document.querySelectorAll('[id]')].map(e => e.id); return ids.length === new Set(ids).size; }));
+  const dead = await p.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].map(a => a.getAttribute('href').slice(1)).filter(h => h && !document.getElementById(h) && !document.querySelector('[data-view="' + h + '"]')));
+  ok('every in-page link has a target', dead.length === 0, dead.slice(0, 8));
+  ok('one h1 in each view', (await p.evaluate(() => [...document.querySelectorAll('[data-view]')].map(v => v.querySelectorAll('h1').length))).every(n => n === 1));
+  if (process.env.PREVIEW === '0') ok('the site carries no preview strip and keeps its title', await p.locator('.pvw').count() === 0 && await p.title() === 'Modern GTM');
+  else ok('the staging copy is marked as a preview', (await p.locator('.pvw').textContent()).includes('Preview.') && await p.title() === 'Modern GTM: merged preview');
+  ok('the 60-second film is not on the site', await p.locator('video').count() === 0 && !(await p.content()).includes('explainer.mp4') && !(await p.content()).includes('poster.jpg'));
+  ok('no address uses a reserved name', await p.evaluate(() => ![...document.querySelectorAll('[id],[data-view]')].some(e => /^(settings|sidebar|customize|upgrade|downloads|comment-.*)$/.test(e.id || e.dataset.view))));
+
+  // ------------------------------------------------------------------ one router for every view
+  for (const v of SITE.concat(PLG)) {
+    await go(p, v === 'home' ? 'research' : 'home');
+    await go(p, v);
+    const s = await state(p);
+    const inPlg = PLG.includes(v);
+    ok('view ' + v, s.on === v, s);
+    ok('navigation marks ' + v, s.cur === (inPlg ? 'Plugins' : NAVCUR[v]), s.cur);
+    ok('plugin row and foot only in the plugin area: ' + v, s.plg === inPlg && s.bar === inPlg && s.foot === inPlg, s);
+    ok('top of ' + v, s.y === 0);
+    ok('focus goes to the heading in ' + v, s.focus === 'H1', s.focus);
+    ok('no sideways scroll in ' + v, s.over <= 0, s.over);
+  }
+  await go(p, 'no-such-place');
+  ok('an unknown address falls back to Home', (await state(p)).on === 'home');
+  await go(p, 'maturity');
+  ok('a section address opens its view on the site', (await state(p)).on === 'tools' && await p.evaluate(() => { const r = document.getElementById('maturity').getBoundingClientRect(); return r.top >= 40 && r.top < 220; }));
+  await go(p, 'method');
+  ok('the site keeps its own method address', (await state(p)).on === 'about');
+  await go(p, 'skill-forecast');
+  ok('a skill address opens the skill', (await state(p)).on === 'skills' && await p.evaluate(() => document.getElementById('skill-forecast').open));
+  await p.click('.plg .tabs .back'); await p.waitForTimeout(150);
+  ok('the way back leads to the list of plugins', (await state(p)).on === 'plugins');
+  await p.click('.mast .wm'); await p.waitForTimeout(150);
+  ok('the wordmark leads home', (await state(p)).on === 'home');
+  await p.click('.mast .nav a[href="#plugins"]'); await p.waitForTimeout(150);
+  ok('the navigation leads to the plugins', (await state(p)).on === 'plugins');
+  await p.click('.plist a.pl[href="#overview"]'); await p.waitForTimeout(150);
+  ok('a plugin opens from the list', (await state(p)).on === 'overview');
+  await p.goBack(); await p.waitForTimeout(200);
+  ok('the back button returns to the list', (await state(p)).on === 'plugins');
+
+  // ------------------------------------------------------------------ home leads with a finding
+  await go(p, 'home');
+  ok('the headline carries the figure', await p.locator('[data-view="home"] h1').textContent() === 'All 500 U.S. revenue leaders in one survey use AI. 20.6% call their AI strategy production-ready.');
+  ok('two rows in the figure', (await p.locator('.gap .gr b').allTextContents()).join() === '100%,20.6%');
+  ok('bars match the figures', (await p.evaluate(() => [...document.querySelectorAll('.gap .gt i')].map(i => Math.round(i.getBoundingClientRect().width / i.parentElement.getBoundingClientRect().width * 1000) / 10))).join() === '100,20.6');
+  const cap = await p.locator('.gap figcaption').textContent();
+  ok('grade, basis, vendor flag, population and dates are stated', /^C\s*Self-reported, vendor survey\./.test(cap) && cap.includes('Salesloft, a vendor') && cap.includes('500 U.S. revenue leaders') && cap.includes('200 or more employees') && cap.includes('May 28–June 10, 2026'), cap);
+  ok('the figure links to the register', await p.locator('.gap figcaption a[href="#evidence"]').count() === 1);
+  ok('the site is still introduced, with both actions', (await p.locator('.hero .lede').textContent()).startsWith('Modern GTM is a working library') && (await p.locator('.hero .acts a').allTextContents()).join('|') === 'Read the report|Check where your team stands');
+  ok('the list under it carries the other three findings', await p.locator('[data-view="home"] .finds li').count() === 3 && !(await p.locator('[data-view="home"] .finds').textContent()).includes('Salesloft'));
+  ok('the register summary is filled in', (await p.locator('[data-view="home"] [data-evsum]').textContent()).includes('94 records') && await p.locator('[data-view="home"] [data-strip] *').count() > 88);
+  ok('the picture sits under Our read, with the old headline', await p.evaluate(() => { const band = document.querySelector('.band'); const prev = band.previousElementSibling; return !!band.querySelector('#score svg') && band.querySelector('h2').textContent === 'Enable agents like new hires. Orchestrate the whole team.' && prev.querySelector('h2').textContent.startsWith('Our read') && !document.querySelector('.hero #score'); }));
+  if (UC) {
+    // ---------------------------------------------------------------- home: the use-case index
+    const squash = t => t.replace(/\s+/g, '');
+    ok('the index takes the place of the list of parts', await p.locator('.idx').count() === 0 && await p.locator('#use-cases table.uc').count() === 1
+      && await p.locator('#use-cases h2').textContent() === 'Start with the work your team does');
+    ok('the labs are flagged as vendors where the index first names them', (await p.locator('#use-cases .lede').textContent()).includes('Anthropic and OpenAI, both AI labs and vendors'));
+    const rows = await p.evaluate(() => [...document.querySelectorAll('#use-cases tbody tr')].map(tr => ({
+      id: tr.id, job: tr.querySelector('th b').textContent, what: tr.querySelector('th span').textContent,
+      cells: [...tr.querySelectorAll('td')].map(td => td.innerText),
+      links: [...tr.querySelectorAll('td')].map(td => td.querySelector('a') ? td.querySelector('a').getAttribute('href') : '') })));
+    ok('thirteen jobs, in the order of the data', rows.length === 13 && rows.map(r => r.job).join('|') === UCD.jobs.map(j => j.job).join('|'));
+    ok('each job has its line and its own address', rows.every((r, i) => r.what === UCD.jobs[i].what && r.id === 'uc-' + UCD.jobs[i].slug));
+    ok('five column heads, four counts in a row', (await p.locator('#use-cases thead th').allTextContents()).map(t => t.split(' ')[0]).join('|') === 'GTM|Evidence|Play|From|From' && rows.every(r => r.cells.length === 4));
+    const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+    const want = j => [
+      j.records.count ? plural(j.records.count, 'record') + Object.entries(j.records.by_grade).map(([g, c]) => g + c).join('') : 'No record yet',
+      j.example ? j.example.label + j.example.why : 'None yet',
+      j.anthropic ? plural(j.anthropic.skills, 'skill') + (j.anthropic.plugin === 'Sales' ? '' : 'In its ' + j.anthropic.plugin + ' plugin') : 'No skill',
+      j.openai ? plural(j.openai.skills, 'skill') : 'No skill'].map(squash);
+    const wrong = rows.map((r, i) => [r.job, r.cells.map(squash), want(UCD.jobs[i])]).filter(x => x[1].join('|') !== x[2].join('|'));
+    ok('every cell says what the data says', wrong.length === 0, wrong.slice(0, 2));
+    const wantLinks = j => [j.records.count ? '#evidence' : '', j.example ? j.example.href : '', j.anthropic ? j.anthropic.href : '', j.openai ? j.openai.href : ''];
+    ok('every count links where the data says', rows.every((r, i) => r.links.join('|') === wantLinks(UCD.jobs[i]).join('|')));
+    const reg = UCD.register;
+    ok('the counts add up to the register', UCD.jobs.reduce((a, j) => a + j.records.count, 0) === reg.on_one_job
+      && reg.on_one_job + reg.the_revenue_organization_as_a_whole + reg.beyond_the_revenue_organization + reg.marketing === reg.records
+      && (await p.locator('[data-view="home"] [data-evsum]').textContent()).includes(reg.records + ' records'));
+    const note = await p.locator('#use-cases .ucn').textContent();
+    ok('the note gives the rest of the register and marks the read as ours', note.includes('is our read') && note.includes('Of the register’s ' + reg.records + ' records, ' + reg.on_one_job + ' bear on one job')
+      && note.includes('(' + reg.the_revenue_organization_as_a_whole + ')') && note.includes('(' + reg.beyond_the_revenue_organization + ')') && note.includes('(' + reg.marketing + ')'), note);
+    ok('grade marks use the register\'s own marks', await p.evaluate(() => [...document.querySelectorAll('#use-cases .ucg .mk')].every(m => (m.textContent === 'A' && m.classList.contains('mk-A')) || (m.textContent === 'B' && m.classList.contains('mk-B')) || (m.textContent === 'C' && m.classList.contains('mk-C')) || m.classList.contains('mk-x'))));
+    ok('a count read aloud names its job and its grades', (await p.locator('#uc-support td a').first().getAttribute('aria-label')) === '24 records on support in the register: 3 graded A, 15 graded B, 6 graded C'
+      && (await p.locator('#uc-crm-updates td a').first().getAttribute('aria-label')) === '3 skills for CRM updates in Anthropic’s Sales plugin');
+    ok('it is still a table to a screen reader', await p.evaluate(() => { const t = document.querySelector('table.uc'); return t.getAttribute('role') === 'table' && t.querySelectorAll('[role="row"]').length === 14 && t.querySelectorAll('[role="columnheader"]').length === 5 && t.querySelectorAll('[role="rowheader"]').length === 13 && t.querySelectorAll('[role="cell"]').length === 52; }));
+    ok('on a laptop the column heads show and the cell labels do not', await p.evaluate(() => getComputedStyle(document.querySelector('.uc thead')).position !== 'absolute' && [...document.querySelectorAll('.uc .lb')].every(l => getComputedStyle(l).display === 'none')));
+    // every link of the index opens what it names, and brings it into view
+    const VIEW = h => h === 'evidence' ? 'evidence' : /^(charter|unit-cost|tools)$/.test(h) ? 'tools' : /^(scorecard|worked-handoff|playbooks)$/.test(h) ? 'playbooks' : h.startsWith('cjob-') ? 'overview' : h.startsWith('gjob-') ? 'chatgpt-sales' : h;
+    const hrefs = [...new Set(await p.evaluate(() => [...document.querySelectorAll('#use-cases a[href^="#"]')].map(a => a.getAttribute('href').slice(1))))];
+    ok('the index links to 26 places', hrefs.length === 26, hrefs.length);
+    const lost = [];
+    for (const h of hrefs) {
+      await go(p, 'home'); await go(p, h);
+      const st = await state(p);
+      const seen = await p.evaluate(h => { const el = document.getElementById(h) || document.querySelector('[data-view="' + h + '"]'); const r = el.getBoundingClientRect(); return r.top > -4 && r.top < innerHeight - 40 && r.height > 0; }, h);
+      if (st.on !== VIEW(h) || !seen) lost.push([h, st.on, seen]);
+    }
+    ok('every link of the index opens the view it names with its target in sight', lost.length === 0, lost.slice(0, 4));
+    ok('a job reached from the index is marked where the reader lands', await (async () => { await go(p, 'cjob-proposals'); return p.evaluate(() => getComputedStyle(document.querySelector('#cjob-proposals > span')).backgroundImage.includes('gradient')); })());
+    const uc = await open(1280, 900, { hash: 'use-cases' });
+    ok('the index has its own address on Home', (await state(uc)).on === 'home' && await uc.evaluate(() => { const r = document.getElementById('use-cases').getBoundingClientRect(); return r.top > -4 && r.top < 200; }));
+    await uc.context().close();
+    for (const [w, cols] of [[820, 4], [390, 2]]) {
+      const q = await open(w, 900, { hash: 'use-cases' });
+      ok('at ' + w + ' a job sits on its own line with its counts ' + cols + ' across, each under a label', await q.evaluate(cols => {
+        const tr = document.querySelector('#uc-support'); const th = tr.querySelector('th').getBoundingClientRect(); const tds = [...tr.querySelectorAll('td')].map(td => td.getBoundingClientRect());
+        const firstRow = tds.filter(r => Math.abs(r.top - tds[0].top) < 2).length;
+        return getComputedStyle(document.querySelector('.uc thead')).position === 'absolute' && tds.every(r => r.top >= th.bottom - 1) && firstRow === cols
+          && [...tr.querySelectorAll('.lb')].every(l => getComputedStyle(l).display !== 'none') && document.documentElement.scrollWidth <= document.documentElement.clientWidth;
+      }, cols));
+      ok('at ' + w + ' links in the index are large enough to tap', await q.evaluate(() => [...document.querySelectorAll('#use-cases td a')].every(a => { const r = a.getBoundingClientRect(); return r.height >= 24 && r.width >= 24; })));
+      await q.context().close();
+    }
+    await go(p, 'home');
+  }
+  const before = await p.locator('#scCap').textContent();
+  await p.click('#scOff'); await p.waitForTimeout(150);
+  ok('the picture still switches views', await p.locator('#scCap').textContent() !== before && await p.getAttribute('#scOff', 'aria-pressed') === 'true');
+  await p.click('#scNext'); await p.waitForTimeout(120);
+  ok('the picture still steps', (await p.locator('#scN').textContent()).startsWith('2 of'));
+  ok('headline contrast: the marked figure', await p.evaluate(() => { const h = getComputedStyle(document.querySelector('.hero h1 .hl')); return h.backgroundColor === 'rgb(228, 245, 96)' && h.color === 'rgb(30, 30, 50)'; }));
+
+  // ------------------------------------------------------------------ the site's own tools still work
+  await go(p, 'evidence');
+  const all = await p.locator('#regCount').textContent();
+  await p.fill('#q', 'Klarna'); await p.waitForTimeout(250);
+  const some = await p.locator('#regCount').textContent();
+  ok('the register still searches', all !== some && /Klarna/.test(await p.locator('#reg').textContent()), [all, some]);
+  await p.fill('#q', ''); await p.waitForTimeout(150);
+  await go(p, 'report');
+  await p.evaluate(() => { const hs = [...document.querySelectorAll('#report .art>h2[id]')]; hs[hs.length - 1].scrollIntoView(); }); await p.waitForTimeout(350);
+  ok('the report still marks the section in view', await p.evaluate(() => { const hs = [...document.querySelectorAll('#report .art>h2[id]')]; const cur = document.querySelector('#report .toc a[aria-current]'); return !!cur && cur.getAttribute('href') === '#' + hs[hs.length - 1].id; }));
+  await go(p, 'skills');
+  await p.fill('#sk-q', 'renewal'); await p.waitForTimeout(250);
+  ok('the skill list still filters', await p.evaluate(() => [...document.querySelectorAll('details.sk')].filter(e => !e.hidden).length) < 36);
+  await p.fill('#sk-q', ''); await p.waitForTimeout(150);
+  const keys = await p.evaluate(() => Object.keys(localStorage));
+  ok('saved choices keep to their own names', keys.every(k => /^(mg\.|mgtm-)/.test(k)), keys);
+
+  // ------------------------------------------------------------------ widths
+  for (const [w, h] of [[320, 640], [360, 760], [390, 844], [768, 1024], [1024, 768], [1920, 1080]]) {
+    const q = await open(w, h);
+    for (const v of ['home', 'plugins', 'skills', 'evidence']) {
+      await go(q, v);
+      ok('no sideways scroll at ' + w + ' in ' + v, (await state(q)).over <= 0);
+    }
+    await go(q, 'home');
+    const nav = await q.evaluate(() => { const n = document.querySelector('.mast .nav'); const vw = document.documentElement.clientWidth; return [...n.querySelectorAll('a')].every(a => { const r = a.getBoundingClientRect(); return r.left >= 0 && r.right <= vw && r.width > 0; }); });
+    ok('all six links in view at ' + w, nav);
+    ok('figure fits at ' + w, await q.evaluate(() => { const g = document.querySelector('.gap').getBoundingClientRect(); return g.left >= 0 && g.right <= document.documentElement.clientWidth; }));
+    await q.context().close();
+  }
+
+  // ------------------------------------------------------------------ phone
+  const ph = await open(390, 844, { hash: 'overview' });
+  await ph.evaluate(() => scrollTo(0, 1600)); await ph.waitForTimeout(200);
+  ok('on a phone the plugin row stays in reach', await ph.evaluate(() => { const r = document.querySelector('.plg .tabs').getBoundingClientRect(); return r.top >= -1 && r.top < 2; }));
+  await ph.context().close();
+
+  // ------------------------------------------------------------------ without scripts
+  const ns = await open(1280, 900, { js: false });
+  ok('without scripts every view is on the page', await ns.evaluate(() => [...document.querySelectorAll('[data-view]')].every(v => v.getBoundingClientRect().height > 0)));
+  ok('without scripts the plugin row lists every plugin page', await ns.evaluate(() => getComputedStyle(document.querySelector('.plg .tabs [data-nav="all"]')).display !== 'none'));
+  await ns.context().close();
+
+  // ------------------------------------------------------------------ accessibility (axe) on the views the merge changed or added to
+  for (const [w, h, dark] of [[1280, 900, false], [390, 844, false], [1280, 900, true]]) {
+    const a = await open(w, h, { dark });
+    for (const v of ['home', 'research', 'evidence', 'plugins']) {
+      await go(a, v);
+      await a.evaluate(AXE);
+      const r = await a.evaluate(async () => { const res = await axe.run(document, { resultTypes: ['violations'] }); return res.violations.map(x => x.id + ' x' + x.nodes.length + ' e.g. ' + x.nodes[0].target.join(' ')); });
+      ok('axe ' + v + ' ' + w + (dark ? ' dark' : ' light'), r.length === 0, r);
+    }
+    await a.context().close();
+  }
+
+  ok('no script errors', errors.length === 0, errors.slice(0, 6));
+  console.log(pass + ' passed, ' + fail + ' failed');
+  await browser.close();
+  process.exit(fail ? 1 : 0);
+})();

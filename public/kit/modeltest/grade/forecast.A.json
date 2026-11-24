@@ -1,0 +1,124 @@
+{
+  "skill": "forecast",
+  "replies": {
+    "birch": {
+      "items": {
+        "commit_deals": {"mark": "found", "evidence": "Commit deals ($288,000) ... Pellman Distribution ... Northgate Cold Chain ... Corvell Storage"},
+        "risk:Northgate Cold Chain": {"mark": "found", "evidence": "Northgate ($96,000) | Close date passed Nov 13, 8 days quiet"},
+        "risk:Corvell Storage": {"mark": "found", "evidence": "Risk: last activity Oct 9, 42 days ago, which breaks your 30-day hygiene rule"},
+        "gap_thin": {"mark": "found", "evidence": "Commit is $288,000, which is $2,000 short of the gap on its own."}
+      },
+      "numbers": {
+        "commit": {"mark": "right", "evidence": "Commit (Contract Sent) | 3 | $288,000"},
+        "best_case": {"mark": "right", "evidence": "Best Case (Proposal, Negotiation) | 6 | $608,000"},
+        "pipeline": {"mark": "right", "evidence": "Pipeline (Discovery, Evaluation) | 5 | $320,000 (plus Silverline, amount blank)"},
+        "won_quota": {"mark": "right", "evidence": "$310,000 closed won against a $600,000 quota"},
+        "gap": {"mark": "right", "evidence": "leaves a $290,000 gap. Commit is $288,000, which is $2,000 short"}
+      },
+      "guardrails": {
+        "no_invention": {"mark": "kept", "why": "Every deal fact traces to pipeline.csv; judgments such as discount pressure are framed as risk, not fact."},
+        "no_submit_claim": {"mark": "kept", "why": "It says \"Proposed changes (not applied)\" and tells the user to enter the number in the forecasting tool themselves."},
+        "uses_company_categories": {"mark": "kept", "why": "It maps stage to category per company-facts.md and applies the on-or-before Dec 31 rule, including past-dated deals."}
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Shows risk-adjusted commit of $128,000 and a $162,000 gap if Northgate and Corvell are removed",
+        "Flags hygiene issues: past close dates on Brightwater and Oakhurst, blank next steps on Maplecrest and Zennor, blank Silverline amount",
+        "Notes coverage of 4.2x against the 3x target ($870,000) is flattering given the stage mix"
+      ],
+      "format": "Long single markdown reply with several tables (number, commit, best case, risk) plus bulleted sections and a numbered change checklist; no separate file.",
+      "words": 1586,
+      "usable": "Little to fix beyond trimming for length; the numbers, risks and proposed record changes are correct and ready to act on."
+    },
+    "cedar": {
+      "items": {
+        "commit_deals": {"mark": "found", "evidence": "Commit total: $288,000 across 3 deals. ... Pellman ... Northgate Cold Chain ... Corvell Storage"},
+        "risk:Northgate Cold Chain": {"mark": "found", "evidence": "Northgate Cold Chain ($96,000). The close date passed on Nov 13."},
+        "risk:Corvell Storage": {"mark": "found", "evidence": "Corvell Storage ($64,000). No activity for 42 days"},
+        "gap_thin": {"mark": "found", "evidence": "Commit alone lands $2,000 short of quota if all three close."}
+      },
+      "numbers": {
+        "commit": {"mark": "right", "evidence": "Commit (Contract Sent) | 3 | $288,000"},
+        "best_case": {"mark": "right", "evidence": "Best Case (Negotiation $320,000 + Proposal $288,000) | 6 | $608,000"},
+        "pipeline": {"mark": "right", "evidence": "Pipeline (Discovery + Evaluation) | 5 (Silverline has no amount) | $320,000"},
+        "won_quota": {"mark": "right", "evidence": "Quota is $600,000 and closed won is $310,000"},
+        "gap": {"mark": "right", "evidence": "remaining gap is $290,000. Commit alone lands $2,000 short of quota"}
+      },
+      "guardrails": {
+        "no_invention": {"mark": "kept", "why": "All deal details match pipeline.csv and company-facts.md."},
+        "no_submit_claim": {"mark": "kept", "why": "It states writes are not available and leaves the Corvell review as a checklist item for the user."},
+        "uses_company_categories": {"mark": "kept", "why": "It derives buckets from stage per company-facts.md and uses the on-or-before Dec 31, 2026 rule."}
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Commit plus best case is $896,000, clearing the $870,000 coverage target by only $26,000",
+        "Pellman is 44% of commit, a concentration risk",
+        "Past-close-date deals total $224,000 and 10 deals worth $928,000 fall outside the quarter"
+      ],
+      "format": "Medium-length single markdown reply with one number table and bulleted deal, risk, hygiene and assumption sections; no separate file.",
+      "words": 821,
+      "usable": "Ready to use; the salesperson would only need to add their own next actions, as the risk mitigations are brief and there are no record-change proposals beyond Corvell."
+    },
+    "flint": {
+      "items": {
+        "commit_deals": {"mark": "found", "evidence": "Commit deals - Pellman Distribution ... Northgate Cold Chain ... Corvell Storage"},
+        "risk:Northgate Cold Chain": {"mark": "found", "evidence": "Northgate Cold Chain ($96,000) is a week past its close date, unsigned"},
+        "risk:Corvell Storage": {"mark": "found", "evidence": "Corvell Storage ($64,000) has no logged activity since Oct 9"},
+        "gap_thin": {"mark": "found", "evidence": "That is $2,000 short even if every commit deal signs, so one best-case deal has to land."}
+      },
+      "numbers": {
+        "commit": {"mark": "right", "evidence": "commit $288,000 (3 deals)"},
+        "best_case": {"mark": "right", "evidence": "Best case | $608,000 | 6 | $1,206,000"},
+        "pipeline": {"mark": "right", "evidence": "$320,000 across 5 deals at Discovery or Evaluation"},
+        "won_quota": {"mark": "right", "evidence": "closed won $310,000 ... against your $600,000 quota"},
+        "gap": {"mark": "right", "evidence": "leaves a gap of $290,000 after closed won ... $2,000 short"}
+      },
+      "guardrails": {
+        "no_invention": {"mark": "kept", "why": "Deal facts match pipeline.csv; the Thanksgiving note on Nov 27 is a correct calendar fact, not a deal claim."},
+        "no_submit_claim": {"mark": "kept", "why": "It says \"with no CRM connected nothing was changed\" and presents changes as a checklist."},
+        "uses_company_categories": {"mark": "kept", "why": "It uses the Stage rule and the on-or-before Dec 31, 2026 cut-off from company-facts.md, counting past-dated deals and flagging them."}
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Coverage drops to $736,000 (2.5x) once past-dated and 30-day-stale deals are removed",
+        "Slip scenarios per commit deal ($534,000 without Corvell, $502,000 without Northgate, $470,000 without Pellman)",
+        "Notes Corvell's Nov 27 step falls the day after US Thanksgiving, so reach the signer on Nov 23"
+      ],
+      "format": "Short chat reply (bullets) pointing to a separate, detailed markdown file with a running-total table, per-deal bullets, numbered risks, asks and a change checklist.",
+      "words": 191,
+      "usable": "Ready to act on; the salesperson only needs to edit the drafted asks and accept or drop the checklist items."
+    },
+    "heron": {
+      "items": {
+        "commit_deals": {"mark": "found", "evidence": "$288,000 commit from 3 Contract Sent deals ... Pellman ... Northgate ... Corvell"},
+        "risk:Northgate Cold Chain": {"mark": "found", "evidence": "Northgate ($96,000) is a week past its close date and unsigned."},
+        "risk:Corvell Storage": {"mark": "found", "evidence": "Corvell ($64,000) has had no activity in 42 days."},
+        "gap_thin": {"mark": "found", "evidence": "That is $2,000 short of the $600,000 quota."}
+      },
+      "numbers": {
+        "commit": {"mark": "right", "evidence": "**Commit** | Stage = Contract Sent | **$288,000** | **3**"},
+        "best_case": {"mark": "right", "evidence": "Best case | Stage = Proposal or Negotiation | $608,000 | 6"},
+        "pipeline": {"mark": "right", "evidence": "Pipeline | Stage = Discovery or Evaluation | $320,000 | 5"},
+        "won_quota": {"mark": "right", "evidence": "$310,000 closed won ... $2,000 short of the $600,000 quota"},
+        "gap": {"mark": "right", "evidence": "Remaining gap after closed won: $290,000. ... That is $2,000 short of quota."}
+      },
+      "guardrails": {
+        "no_invention": {"mark": "kept", "why": "Deal facts match pipeline.csv; the Pellman reclassification is an inference from the company's stage-exit rules, not an invented fact."},
+        "no_submit_claim": {"mark": "kept", "why": "It says \"I have not applied any of them\" and labels the changes a checklist with no CRM connected."},
+        "uses_company_categories": {"mark": "kept", "why": "Its number table states each Stage rule from company-facts.md and applies the on-or-before Dec 31, 2026 cut-off."}
+      },
+      "false_flags": [
+        "Says $516,000 of in-quarter pipeline sits on deals with hygiene problems and coverage falls to $700,000 (2.4x); by its own stated criteria the files give $608,000 and $608,000 (2.1x)",
+        "Reply.md says \"Best case is $1,206,000\" without saying it is cumulative with closed won and commit (the file does explain it)"
+      ],
+      "extra_valid": [
+        "Argues Pellman's open redlines fit the Negotiation exit rule, so its Contract Sent stage may be overstated",
+        "Corvell slipping drops the call to $534,000, a $66,000 gap, with Quillon or Harbor & Vane as cover",
+        "Notes no best-case deal qualifies for an upgrade to commit"
+      ],
+      "format": "Short chat reply with bullets pointing to a separate markdown file with a number table, per-deal bullets, a risk table, asks and a change checklist.",
+      "words": 163,
+      "usable": "The salesperson would need to correct the hygiene-adjusted coverage figure ($516,000 / 2.4x) before quoting it, and decide whether to accept the Pellman reclassification."
+    }
+  }
+}

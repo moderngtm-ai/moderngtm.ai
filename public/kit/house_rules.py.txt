@@ -1,0 +1,96 @@
+"""House-rules check: the mechanical parts of the Modern GTM style rules, run on rendered site text or on a text file."""
+import asyncio, re, sys, json
+from pathlib import Path
+
+SMALL = r'(one|two|three|four|five|six|seven|eight|nine)'
+BIG = r'(ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)'
+UNIT = r'(days?|weeks?|months?|quarters?|years?|hours?|minutes?|seconds?|people|percent|points?|seats?|times)'
+ALLOW_CAPS = set('''GTM AI Modern CRM Q1 Q2 Q3 Q4 SDR SDRs AE AEs CS RevOps API SEC NPS ARR ROI KPI RFP JSON PDF US U.S. B2B NRR EBITDA P&L
+ Fiserv Salesforce Klarna Vercel Fin HubSpot Intercom Gartner McKinsey BCG Bain Stanford Microsoft Gong Salesloft LeanData Highspot Seismic Apollo Shopify Zapier Carta Bloomberry Instantly
+ Claude Anthropic OpenAI ChatGPT Zeal Nathan Fierley Sales Appendix Figure Table Case Phase Gate Manual Assisted Redesigned Orchestrated November October September August July June May April March February January December
+ Playbooks Research Tools Evidence About Contribute Home Elevate Project One I A B C'''.split())
+
+ALLOW = [
+ "It was revised on November 20, 2026 after an external review, and Appendix C",       # date comma, then a second clause
+ "so its row says so, and section 8 lists",                                            # two clauses
+ "where a customer leaves without asking for more help, and configured handoffs",       # a clause set off by commas
+ "counting all replies over all emails sent, and describes",                            # a clause set off by commas
+ "saved hours are absorbed by lower-value work, and the productivity case",             # two clauses
+ "measured its own way, and most are self-reported",                                    # two clauses
+ "the case moved from first to fourth, and operator figures",                           # an item holds "and"
+ "compiled with Claude, an AI model, and a person reviews",                             # a name set off by commas
+ "Klarna, Salesforce, Shopify, Vercel, Zapier",                                         # table cell without a conjunction
+ "Stanford Digital Economy Lab, Quarterly Journal of Economics",                        # table cell without a conjunction
+ "at one point in time", "compressed into one quarter", "One year later",              # idiom, "one", a source title
+ "AI and the Redefinition of GTM Work: Leaders, Laggards and the Evidence", "Enterprise AI in the Earnings Record: Q3 2026",  # report titles keep title case
+ "Business data privacy, security, and compliance",                                     # a source's own title
+ "Ten costs to plan for",                                                               # a heading starts with the number
+]
+
+def sentences(t):
+    return [s.strip() for s in re.split(r'(?<=[.?!])\s+|\n+', t) if s.strip()]
+
+def serial_commas(t):
+    out = []
+    for s in sentences(t):
+        for m in re.finditer(r'([^,;:()]+), ([^,;:()]+(?:, [^,;:()]+)*), (and|or) ([^,;:()]+)', s):
+            series = [m.group(1)] + m.group(2).split(', ') + [m.group(4)]
+            first = re.split(r'\b(?:of|from|by|with|to|in|on|for|as|that|are|is|were|was|include|includes|including|names?|named|covers?|lists?|use|uses|using|across|between|among|than|like|say|says|or|and)\b', series[0])[-1]
+            items = [first] + series[1:]
+            if any(re.search(r'\b(and|or)\b', x) for x in items[:-1]) or re.search(r'\b(and|or)\b', ' '.join(items[-1].split()[:6])):
+                continue
+            # a clause after the conjunction (subject + verb) is a compound sentence, not a series
+            if re.match(r'\s*(it|they|we|this|that|these|those|each|its|their|the [a-z]+ (is|are|was|were|has|have|can|will|does|do|says|said)|[A-Z][a-z]+ (is|are|was|were|has|have|can|will|does|says|said))\b', m.group(4)):
+                continue
+            if len(items) >= 3 and all(len(x.split()) <= 9 for x in items[1:-1]):
+                out.append(m.group(0)[:150])
+    return out
+
+def check(text, heads=()):
+    v = {}
+    def add(k, s):
+        s = re.sub(r'\s+', ' ', s).replace('*', '')
+        if not any(a in s or s.strip() in a for a in ALLOW): v.setdefault(k, []).append(s[:170])
+    for m in re.finditer(r'[^.\n]{0,60}!(?!=)[^.\n]{0,20}', text): add('exclamation mark', m.group(0))
+    for m in re.finditer(r'[^.\n]{0,50}(—| – )[^.\n]{0,50}', text): add('dash aside', m.group(0))
+    for m in re.finditer(r'[^.\n]{0,50}\bhumans\b[^.\n]{0,30}', text, re.I): add('"humans"', m.group(0))
+    for m in re.finditer(r'[^.\n]{0,50}(\bhandover\b|\bthesis\b|hypothes\w*|conjectur\w*)[^.\n]{0,30}', text, re.I): add('retired term', m.group(0))
+    for s in serial_commas(text): add('serial comma', s)
+    for s in sentences(text):
+        for m in re.finditer(r'\b' + BIG + r'\b', s, re.I):
+            if m.start() > 0 and 'http' not in s[max(0, m.start()-160):m.start()] and '-' not in s[max(0, m.start()-1):m.start()] and not re.match(r'[#*\s]*$', s[:m.start()]): add('number word for 10 or more', s[max(0, m.start()-40):m.end()+30])
+        for m in re.finditer(r'\b' + SMALL + r'[ -]' + UNIT + r'\b', s, re.I):
+            if m.start() > 0 and 'http' not in s[max(0, m.start()-160):m.start()] and '-' not in s[max(0, m.start()-1):m.start()]: add('number word with a unit', s[max(0, m.start()-40):m.end()+30])
+    for m in re.finditer(r'(?:^|[.?]\s)(Not [^.?!\n]{1,40}\. [A-Z][^.?!\n]{1,40}\.)', text): add('"Not X. Y." slogan', m.group(1))
+    for h in heads:
+        words = re.findall(r"[A-Za-z][A-Za-z&.'-]*", h)
+        caps = [w for i, w in enumerate(words[1:]) if w[0].isupper() and w.strip(".'") not in ALLOW_CAPS and not w.isupper()]
+        prev_colon = re.findall(r':\s+([A-Z][a-z]+)', h)
+        caps = [w for w in caps if w not in prev_colon]
+        if len(caps) >= 2: add('title-case heading', h)
+    return v
+
+async def site(url):
+    from playwright.async_api import async_playwright
+    res = {}
+    async with async_playwright() as pw:
+        b = await pw.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
+        pg = await b.new_page(viewport={'width': 1280, 'height': 900}); await pg.goto(url); await pg.wait_for_timeout(700)
+        views = await pg.evaluate("""[...document.querySelectorAll('[data-view]')].map(v=>{const c=v.cloneNode(true);c.querySelectorAll('pre,script,style,svg title').forEach(x=>x.remove());
+          c.querySelectorAll('td,th,li,p,h1,h2,h3,h4,figcaption,dt,dd,summary,label,button,option').forEach(x=>x.append('\\n'));
+          return [v.id,c.textContent,[...v.querySelectorAll('h1,h2,h3,h4')].map(h=>h.textContent.trim()),(c.textContent.match(/go-to-market/g)||[]).length]})""")
+        await b.close()
+    for vid, text, heads, gtm in views:
+        r = check(text, heads)
+        if vid != 'report' and gtm > 1: r['"go-to-market" spelled out more than once'] = [f'{gtm} times']
+        if r: res[vid] = r
+    return res
+
+if __name__ == '__main__':
+    arg = sys.argv[1]
+    res = asyncio.run(site(arg)) if arg.startswith('http') else {arg: check(Path(arg).read_text(encoding='utf-8'), re.findall(r'^#+ (.+)$', Path(arg).read_text(encoding='utf-8'), re.M))}
+    n = sum(len(x) for r in res.values() for x in r.values())
+    for vid, r in res.items():
+        for k, xs in r.items():
+            for x in xs: print(f'{vid:11s} | {k:28s} | {x}')
+    print(f'{n} possible breaches')

@@ -1,0 +1,40 @@
+# Modern GTM
+
+Canonical address: https://moderngtm.ai/
+
+> Evidence, plays and tools for revenue teams of people and agents: graded research on AI in go-to-market work, with playbooks for agent enablement and orchestration. Evidence through November 23, 2026.
+
+Every finding in the register carries a grade (A financial, B measured, C survey, forecast or narrative) and a basis (observed, self-reported, estimated or forecast). Neither means a figure was independently verified. A forecast or a target is graded C whatever its units. Most findings are self-reported, and vendor sources are flagged. Claude, an AI model made by Anthropic, compiles each finding and checks it against the source it links to. A second AI model, GPT-6.2 Astra, made by OpenAI, rechecked the register on November 20, 2026. Nathan Fierley decides what goes in and edits what is published. Nothing here has been peer reviewed. Each finding credits who spotted it, who compiled it, who checked its source and who edited it. No one pays to appear on the site.
+
+## Research
+
+- [AI and the Redefinition of GTM Work](/#report): the full report, with eight findings, five cases and a 90-day plan
+- [Research overview](/#research): summaries and four figures
+
+## Evidence
+
+- [Evidence register](/#evidence): 94 records, each with its population, period, basis, grade and source
+- [Register as JSON](/evidence.json)
+
+## Playbooks and tools
+
+- [Playbooks](/#playbooks): agent enablement, orchestration and a 90-day path to a scale, hold or stop decision
+- [Tools](/#tools): unit cost calculator, agent charter, launch checklist and maturity check
+
+## Plugins
+
+- [Plugins](/#plugins): what Anthropic and OpenAI, both AI labs and vendors, publish for revenue teams, with one page for each plugin
+- [Claude Sales plugin](/#overview): 36 skills, each with what it does, reads and can change, then fit, rollout and configuration
+- [ChatGPT for Sales](/#chatgpt-sales): 18 skills as ChatGPT reported them from an installed copy, checked against OpenAI's pages
+- [Claude Sales skills as JSON](/skills.json)
+
+Claude compiled the plugin pages. The ratings in the Claude Sales entry are its own read and await their editor's review, and nothing in the ChatGPT for Sales entry is rated.
+
+## Contributing
+
+- [Contribute](/#contribute): what a proposed finding needs and how proposals are reviewed
+- [About and method](/#about)
+- [Changes](/#changes): what changed in the register and on the site, by date
+- [Propose a finding](https://github.com/moderngtm-ai/moderngtm.ai/issues/new?template=finding.yml): a GitHub issue form
+- [Report a correction](https://github.com/moderngtm-ai/moderngtm.ai/issues/new?template=correction.yml): a GitHub issue form
+- [Files behind the site](https://github.com/moderngtm-ai/moderngtm.ai): the public repository, build kit included

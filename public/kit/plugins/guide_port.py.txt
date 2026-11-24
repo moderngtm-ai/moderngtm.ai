@@ -1,0 +1,332 @@
+# -*- coding: utf-8 -*-
+"""Port the configuration guide into this entry's markup.
+
+The guide ("Configuring the Claude Sales plugin for your company", by Nathan Fierley) is read from a saved copy
+of its published page. Its words are kept as written, apart from the two lists of edits below: STYLE_EDITS for the
+site's style rules, and CHECK_EDITS for statements that two other labs' models found at odds with the plugin's files.
+Otherwise only the markup changes: class names that belong to this page's look, tables that stack on a phone, and
+skill names that link to the skill's own row.
+
+    port(path) -> dict of HTML fragments, one for each section, plus the AI-ready edition
+"""
+import html
+import re
+
+import core as C
+
+ROLE_KEYS = ["sdr", "ae", "am", "lead", "ops", "founder"]   # the order of the guide's six role blocks
+
+# The only changes to the guide's wording. Four meet the Modern GTM style rules (no serial comma unless an item
+# holds "and"; numerals with units). The fifth is made in port(): one note spoke of buttons that are now a menu.
+# Each must match exactly once, so a change to the guide's text stops the build instead of slipping through.
+STYLE_EDITS = [
+    ("Connect your tools, point Claude at your source documents, and ask it to customize the plugin.",
+     "Connect your tools, point Claude at your source documents and ask it to customize the plugin."),
+    ("Come back, tell Claude what to add, and save again.", "Come back, tell Claude what to add and save again."),
+    ("where prospect documents are saved, and whether to finish CRM onboarding.", "where prospect documents are saved and whether to finish CRM onboarding."),
+    ("The coverage target is three times quota.", "The coverage target is 3 times quota."),
+]
+
+# Corrections made on November 22, 2026, after two other labs' models checked the entry against the plugin's files,
+# in two rounds. A finding numbered F is from the first round and one numbered O from the second. Where a second-round
+# finding touched a sentence the first round had already changed, the earlier entry carries the newer wording.
+# Each is the smallest change that makes the sentence agree with the file. "v" is the guide's visible text and "e" its
+# AI-ready edition. Each must match exactly once in its layer. The guide's own published copy does not carry them yet:
+# that is its author's to change. (finding, layer, old, new)
+CHECK_EDITS = [
+    ("F54", "v", "Out of the box, the Claude Sales plugin knows nothing about your company, so its skills have to ask.",
+     "Out of the box, the Claude Sales plugin knows nothing about your company, so its skills infer what they can, fall back on a labeled default or ask."),
+    ("F54", "v", "Asks what your ideal customer looks like, then scores against the answer.",
+     "With no ideal customer written down, scores on intent alone. Asks about it only if the answer would change the priority."),
+    ("F54", "v", "Asks what the ideal customer looks like, then scores against the answer",
+     "With no ideal customer written down, scores on intent alone. Asks about it only if the answer would change the priority"),
+    ("F54", "e", "Asks what the ideal customer looks like, then scores against the answer",
+     "With no ideal customer written down, scores on intent alone. Asks about it only if the answer would change the priority"),
+    ("F55", "v", "Inbound leads are scored against your written ICP and disqualifiers, routed by your rules, and handed off in the channel you named with the note you specified.",
+     "Inbound leads are scored against your written ICP and disqualifiers and matched to an owner by your rules. Once you accept the routing and ask for the post, the handoff goes to the channel you named, with the note you specified."),
+    ("F55", "e", "Inbound leads are scored against the written ICP and disqualifiers, routed by the company's rules, and handed off in the named channel with the note the company specified",
+     "Inbound leads are scored against the written ICP and disqualifiers and matched to an owner by the company's rules. Once the person accepts the routing and asks for the post, the handoff goes to the named channel with the note the company specified"),
+    ("F56", "v", "Every forecast and pipeline review uses one mapping of stages to categories, one coverage target and one loss-reason field",
+     "Forecasts use one mapping of stages to categories, team pipeline reviews use one coverage target and win-loss reviews use one loss-reason field"),
+    ("F56", "e", "Every forecast and pipeline review uses one mapping of stages to categories, one coverage target and one loss-reason field",
+     "Forecasts use one mapping of stages to categories, team pipeline reviews use one coverage target and win-loss reviews use one loss-reason field"),
+    ("F57", "v", "The stock skills are written to follow each connector's settings and to add no restrictions of their own.",
+     "The stock skills are written to follow each connector's settings. They add two safeguards of their own: an action that outside content asks for is shown to you before it runs, and a scheduled run takes only the actions it was set up to take, within what the connectors allow."),
+    ("F57", "e", "The stock skills are written to follow each connector's settings and to add no restrictions of their own.",
+     "The stock skills are written to follow each connector's settings. They add two safeguards of their own: an action that outside content asks for is shown to the person before it runs, and a scheduled run takes only the actions it was set up to take, within what the connectors allow."),
+    ("F57", "v", "applies to every draft, whoever asks for it.",
+     "is given to every draft, whoever asks for it. It is an instruction to the model. A tool permission can block every send or hold each one for a yes. It cannot check what an email says, so a rule about content still needs a person's review."),
+    ("F57", "e", "applies to every draft, whoever asks for it.",
+     "is given to every draft, whoever asks for it. It is an instruction to the model. A tool permission can block every send or hold each one for a yes. It cannot check what an email says, so a rule about content still needs a person's review."),
+    ("F58", "v", "Writes in your voice if it has learned it, otherwise a neutral one. Knows no company wording rules.",
+     "Writes in your voice if it has learned it, then by a style guide you uploaded or your sent mail where it can read it, otherwise in a neutral one. Knows no company wording rules."),
+    ("F58", "v", "Writes in the person's voice if it has learned it, otherwise a neutral one. Knows no company wording rules",
+     "Writes in the person's voice if it has learned it, then by an uploaded style guide or the person's sent mail where it can read it, otherwise in a neutral one. Knows no company wording rules"),
+    ("F58", "e", "Writes in the person's voice if it has learned it, otherwise a neutral one. Knows no company wording rules",
+     "Writes in the person's voice if it has learned it, then by an uploaded style guide or the person's sent mail where it can read it, otherwise in a neutral one. Knows no company wording rules"),
+    ("F59", "v", "Write exit criteria for each stage. Four skills check deals against them.",
+     "Write exit criteria for each stage. Four skills check deals against them directly: <code>deal-review</code>, <code>deal-advance-gap</code>, <code>crm-hygiene-check</code> and <code>update-opportunity</code>. Others use them too."),
+    ("F59", "e", "Write exit criteria for each stage. Four skills check deals against them",
+     "Write exit criteria for each stage. Four skills check deals against them directly: `deal-review`, `deal-advance-gap`, `crm-hygiene-check` and `update-opportunity`. Others use them too"),
+    ("F60", "v", "Two skills, <code>team-pipeline</code> and <code>rep-context</code>, are written for leaders.",
+     "Three skills, <code>team-pipeline</code>, <code>rep-context</code> and <code>win-loss-review</code>, are written for leaders."),
+    ("F60", "e", "Two skills, `team-pipeline` and `rep-context`, are written for leaders.",
+     "Three skills, `team-pipeline`, `rep-context` and `win-loss-review`, are written for leaders."),
+    ("F61", "v", "Under each fact are the skills that lean on it.",
+     "Under each fact are skills that lean on it. The lists are examples and not a full count."),
+    ("F61", "v", "<code>call-prep</code><code>deal-review</code><code>deal-advance-gap</code><code>lead-triage</code><code>stakeholder-map</code>",
+     "<code>call-prep</code><code>call-summary</code><code>deal-review</code><code>deal-advance-gap</code><code>lead-triage</code><code>stakeholder-map</code><code>account-plan</code>"),
+    ("F61", "e", "`call-prep`, `deal-review`, `deal-advance-gap`, `lead-triage`, `stakeholder-map` |",
+     "`call-prep`, `call-summary`, `deal-review`, `deal-advance-gap`, `lead-triage`, `stakeholder-map`, `account-plan` |"),
+    ("F61", "v", "<code>deal-review</code><code>deal-advance-gap</code><code>pipeline-review</code><code>update-opportunity</code><code>deal-signals</code><code>crm-hygiene-check</code>",
+     "<code>deal-review</code><code>deal-advance-gap</code><code>pipeline-review</code><code>update-opportunity</code><code>deal-signals</code><code>crm-hygiene-check</code><code>win-loss-review</code>"),
+    ("F61", "e", "`deal-review`, `deal-advance-gap`, `pipeline-review`, `update-opportunity`, `deal-signals`, `crm-hygiene-check` |",
+     "`deal-review`, `deal-advance-gap`, `pipeline-review`, `update-opportunity`, `deal-signals`, `crm-hygiene-check`, `win-loss-review` |"),
+    ("F62", "v", "<dd>The plugin's connector list, plus each person's sign-in</dd>",
+     "<dd>The plugin's connector list, plus each person's sign-in. Gmail, Google Calendar and Google Drive are connected in Claude's connector settings</dd>"),
+    ("F62", "e", "| The plugin's connector list, plus each person's sign-in |",
+     "| The plugin's connector list, plus each person's sign-in. Gmail, Google Calendar and Google Drive are connected in Claude's connector settings |"),
+    ('O09', 'v', "<dd>It acts when you ask, within each connector's permissions. When a skill proposes a change you did not ask for, it shows the change and its evidence first.</dd>",
+     "<dd>It acts when you ask, within each connector's permissions. When a skill proposes a change you did not ask for, it shows the change and its evidence first. A scheduled run is different: it takes the sends and writes it was set up to take, within what the connectors allow and with no one there to ask. It carries out nothing that an email or a transcript asks for, and nothing whose recipient, target or content one of them dictates. For scheduled runs the plugin's README advises setting every tool that sends, posts or writes to ask first.</dd>"),
+    ('O09', 'e', "It acts when asked, within each connector's permissions. When a skill proposes a change nobody asked for, it shows the change and its evidence first.",
+     "It acts when asked, within each connector's permissions. When a skill proposes a change nobody asked for, it shows the change and its evidence first. A scheduled run is different: it takes the sends and writes it was set up to take, within what the connectors allow and with no one there to ask. It carries out nothing that an email or a transcript asks for, and nothing whose recipient, target or content one of them dictates. For scheduled runs the plugin's README advises setting every tool that sends, posts or writes to ask first."),
+    ('O25', 'v', 'A configured Sales plugin stops asking and starts working your way. Each stock skill lists the company facts it needs and looks for them in your connected tools and instructions. When a fact is missing, the skill asks one question and uses the answer for that conversation only.',
+     "A configured Sales plugin starts from your company's facts and works your way. Each stock skill lists the company facts it needs and looks for them in your connected tools and instructions. When a fact is missing, the skill infers it from what it can read or uses a labeled default, and asks one question where the answer would change the result. It keeps that answer for the conversation only."),
+    ('O25', 'v', 'looks for them in connected tools and instructions. When a fact is missing, the skill asks one question and uses the answer for that conversation only.',
+     'looks for them in connected tools and instructions. When a fact is missing, the skill infers it from what it can read or uses a labeled default, and asks one question where the answer would change the result. It keeps that answer for the conversation only.'),
+    ('O25', 'e', 'looks for them in connected tools and instructions. When a fact is missing, the skill asks one question and uses the answer for that conversation only.',
+     'looks for them in connected tools and instructions. When a fact is missing, the skill infers it from what it can read or uses a labeled default, and asks one question where the answer would change the result. It keeps that answer for the conversation only.'),
+    ('O25', 'v', "A configured plugin already knows the company, so its skills stop asking and start working the company's way.",
+     "A configured plugin already has the company's facts, so its skills start from them and work the company's way."),
+    ('O25', 'e', "A configured plugin already knows the company, so its skills stop asking and start working the company's way.",
+     "A configured plugin already has the company's facts, so its skills start from them and work the company's way."),
+    ('O26', 'v', 'Infers what it can from the CRM, and asks which stages count as commit.',
+     "Uses the CRM's own forecast category where it has one. Otherwise infers the categories from your stages, and asks which stages count as commit only if the answer depends on it."),
+    ('O26', 'v', 'Infers what it can from the CRM, and asks which stages count as commit |',
+     "Uses the CRM's own forecast category where it has one. Otherwise infers the categories from the stages, and asks which stages count as commit only if the answer depends on it |"),
+    ('O26', 'e', 'Infers what it can from the CRM, and asks which stages count as commit |',
+     "Uses the CRM's own forecast category where it has one. Otherwise infers the categories from the stages, and asks which stages count as commit only if the answer depends on it |"),
+    ('O26', 'v', 'Uses your mapping of stages to forecast categories.',
+     'Uses your mapping of stages to forecast categories, where the CRM has no forecast category of its own.'),
+    ('O26', 'v', "Uses the company's mapping of stages to forecast categories |",
+     "Uses the company's mapping of stages to forecast categories, where the CRM has no forecast category of its own |"),
+    ('O26', 'e', "Uses the company's mapping of stages to forecast categories |",
+     "Uses the company's mapping of stages to forecast categories, where the CRM has no forecast category of its own |"),
+    ('O26', 'v', 'Asks where renewal dates live.',
+     'Reads where renewal dates live from the CRM and from what it already knows about your company, and asks once only if neither tells it.'),
+    ('O26', 'v', '| Asks where renewal dates live |',
+     '| Reads where renewal dates live from the CRM and from what it already knows about the company, and asks once only if neither tells it |'),
+    ('O26', 'e', '| Asks where renewal dates live |',
+     '| Reads where renewal dates live from the CRM and from what it already knows about the company, and asks once only if neither tells it |'),
+]
+CHECK_FINDINGS = sorted({f for f, *_ in CHECK_EDITS})
+
+
+def _sec(g, sid):
+    m = re.search(r'<section id="%s">(.*?)</section>' % sid, g, re.S)
+    if not m:
+        raise SystemExit("guide: section %s not found" % sid)
+    return m.group(1)
+
+
+def _between(h, start, end):
+    i = h.index(start)
+    j = h.index(end, i)
+    return h[:i], h[i:j], h[j:]
+
+
+def _skill_links(h):
+    """A skill named in running text links to its row. The name keeps its code style."""
+    def rep(m):
+        sid = m.group(1)
+        return f'<a class="skl" href="#skill-{sid}"><code>{sid}</code></a>' if sid in C.SK else m.group(0)
+    return re.sub(r"<code>([a-z][a-z-]+)</code>", rep, h)
+
+
+def _skill_chips(inner):
+    """Inside a list of skills, names become the same marked chips used everywhere else on the page."""
+    def rep(m):
+        sid = m.group(1)
+        return C.chip(sid) if sid in C.SK else m.group(0)
+    return re.sub(r"<code>([a-z][a-z-]+)</code>", rep, inner)
+
+
+def _common(h):
+    h = re.sub(r' style="[^"]*"', "", h)
+    h = h.replace('<th class="caps" scope="col">', '<th scope="col">')
+    h = h.replace('<dt class="caps">', "<dt>")
+    h = re.sub(r'<span class="caps">(.*?)</span>', r"<h4>\1</h4>", h)
+    h = h.replace('class="fine"', 'class="note"')
+    h = h.replace('<ul class="list">', "<ul>")
+    h = re.sub(r'<ol class="steps">(.*?)</ol>',
+               lambda m: '<ol class="wk">' + re.sub(r"<li>(.*?)</li>", r"<li><span>\1</span></li>", m.group(1), flags=re.S) + "</ol>",
+               h, flags=re.S)
+    h = h.replace('<div class="plain">', '<div class="box">')
+    h = h.replace('<div class="duo">', '<div class="g2">').replace('<div class="card">', '<div class="def">')
+    return _skill_links(h)
+
+
+def _table(h, name, wide=False):
+    """Give a table the site's stacking pattern: each cell carries its column's label for narrow screens."""
+    m = re.search(r'<table class="%s">(.*?)</table>' % name, h, re.S)
+    if not m:
+        raise SystemExit("guide: table %s not found" % name)
+    body = m.group(1)
+    labels = [re.sub(r"<[^>]+>", "", x).strip() for x in re.findall(r"<th[^>]*>(.*?)</th>", body, re.S)]
+
+    def row(rm):
+        cells = re.findall(r"<td>(.*?)</td>", rm.group(1), re.S)
+        if len(cells) != len(labels):
+            raise SystemExit("guide: table %s has a row with %d cells" % (name, len(cells)))
+        return "<tr>" + "".join(f'<td data-l="{html.escape(l, quote=True)}">{c}</td>' for l, c in zip(labels, cells)) + "</tr>"
+    head, tail = body.split("<tbody>", 1)
+    tail = re.sub(r"<tr>(.*?)</tr>", row, tail, flags=re.S)
+    cls = "stack wide" if wide else "stack"
+    return h[:m.start()] + f'<table class="{cls} t-{name}">' + head + "<tbody>" + tail + "</table>" + h[m.end():]
+
+
+def port(path):
+    g = open(path, encoding="utf-8").read()
+    out = {}
+    # the AI-ready edition is a separate text and keeps every word; the edits apply to the page's own sections
+    i = g.index('<script type="application/json" id="ai-md">')
+    j = g.index("</script>", i)
+    head, edition, tail = g[:i], g[i:j], g[j:]
+    for old, new in STYLE_EDITS:
+        if (head + tail).count(old) != 1:
+            raise SystemExit("guide: expected one match for a style edit, found %d: %s" % ((head + tail).count(old), old))
+        head, tail = head.replace(old, new), tail.replace(old, new)
+    import json as _json
+    esc = lambda t: _json.dumps(t, ensure_ascii=False)[1:-1]          # the edition is one JSON string
+    for finding, layer, old, new in CHECK_EDITS:
+        if layer == "v":
+            if (head + tail).count(old) != 1:
+                raise SystemExit("guide: expected one match in the visible text for %s, found %d: %s" % (finding, (head + tail).count(old), old[:60]))
+            head, tail = head.replace(old, new), tail.replace(old, new)
+        else:
+            if edition.count(esc(old)) != 1:
+                raise SystemExit("guide: expected one match in the edition for %s, found %d: %s" % (finding, edition.count(esc(old)), old[:60]))
+            edition = edition.replace(esc(old), esc(new))
+    g = head + edition + tail
+    out["check_edits"] = len(CHECK_EDITS)
+    out["check_findings"] = CHECK_FINDINGS
+
+    # ------------------------------------------------------------------ opener
+    out["deck"] = re.search(r'<p class="deck">(.*?)</p>', g, re.S).group(1).strip()
+    out["film"] = re.search(r'(<figure class="film" id="film">.*?</figure>)', g, re.S).group(1)
+    out["byline"] = [re.sub(r"<[^>]+>", "", x).strip() for x in
+                     re.findall(r"<span>(.*?)</span>", re.search(r'<div class="byline">(.*?)</div>', g, re.S).group(1), re.S)]
+
+    # ------------------------------------------------------------------ what you get
+    o = _sec(g, "outcome")
+    pre, ledger, post = _between(o, '<div class="ledger"', '<p class="fine">')
+    rows = re.findall(r'<div class="ask" role="cell">(.*?)</div><div class="stock" role="cell">(.*?)</div><div class="conf" role="cell">(.*?)</div>', ledger, re.S)
+    if len(rows) != 5:
+        raise SystemExit("guide: expected five comparison rows, found %d" % len(rows))
+    tbl = ['<div class="scroll"><table class="stack t-cmp"><thead><tr><th scope="col">You ask</th><th scope="col">Stock plugin</th><th scope="col">Configured plugin</th></tr></thead><tbody>']
+    for a, s, c in rows:
+        tbl.append(f'<tr><td data-l="You ask">{a}</td><td data-l="Stock plugin">{s}</td><td data-l="Configured plugin">{c}</td></tr>')
+    tbl.append("</tbody></table></div>\n")
+    o = pre + "".join(tbl) + post
+    pre, cards, post = _between(o, '<div class="cards">', "<h3>What it does not do</h3>")
+    items = re.findall(r'<div class="card"><h4><svg.*?</svg>(.*?)</h4><p>(.*?)</p></div>', cards, re.S)
+    if len(items) != 4:
+        raise SystemExit("guide: expected four benefit blocks, found %d" % len(items))
+    o = pre + '<ul class="princ">' + "".join(f"<li><b>{t.strip()}</b>{p.strip()}</li>" for t, p in items) + "</ul>\n" + post
+    out["outcome"] = _common(o)
+
+    # ------------------------------------------------------------------ what each role gets
+    r = _sec(g, "roles")
+    pre, cards, post = _between(r, '<div class="roles">', '<p class="fine"')
+    arts = re.findall(r'<article class="role">(.*?)</article>', cards, re.S)
+    if len(arts) != len(ROLE_KEYS):
+        raise SystemExit("guide: expected six role blocks, found %d" % len(arts))
+    blocks = []
+    out["role_names"] = {}
+    for key, art in zip(ROLE_KEYS, arts):
+        name = re.search(r"<h3>(.*?)</h3>", art, re.S).group(1).strip()
+        gets = re.search(r'<p class="gets">(.*?)</p>', art, re.S).group(1).strip()
+        out["role_names"][key] = name
+        rows = []
+        for cls, dt, ddcls, dd in re.findall(r'<div(?: class="(written)")?>\s*<dt class="caps">(.*?)</dt>\s*<dd(?: class="(\w+)")?>(.*?)</dd>\s*</div>', art, re.S):
+            dd = dd.strip()
+            if ddcls == "skills":
+                rows.append(f'<div><dt>{dt}</dt><dd class="chips">{_skill_chips(dd)}</dd></div>')
+            elif cls == "written":
+                rows.append(f'<div><dt>{dt}</dt><dd class="eg">{dd}</dd></div>')
+            else:
+                rows.append(f"<div><dt>{dt}</dt><dd>{dd}</dd></div>")
+        blocks.append(f'<div class="def rolecard" data-grole="{key}"><h3>{name}</h3><p>{gets}</p><dl class="kv">{"".join(rows)}</dl></div>')
+    out["role_setup"] = _common(pre + '<div class="g2 rolecards">' + "".join(blocks) + "</div>\n" + post)
+
+    # ------------------------------------------------------------------ who changes what
+    s = _sec(g, "seats")
+    s = _table(s, "overlap", wide=True)
+    out["seats"] = _common(s)
+
+    # ------------------------------------------------------------------ what you configure
+    l = _sec(g, "layers")
+    l = (l.replace('<div class="levels">', '<div class="lvls">').replace('<div class="level hot">', '<div class="lv hot">')
+          .replace('<div class="level">', '<div class="lv">').replace('<div class="level-head">', '<div class="lv-head">'))
+    l = l.replace('<span class="tag">the part you customize</span>', '<span class="hl">the part you customize</span>')
+    out["layers"] = _common(l)
+
+    # ------------------------------------------------------------------ how to configure it
+    t = _sec(g, "steps")
+    t = (t.replace('<div class="phases">', '<div class="cphases">').replace('<div class="phase">', '<div class="cphase">')
+          .replace('<div class="code">', '<div class="codeblk">').replace('<button class="copy"', '<button class="btn sm"')
+          .replace('<div class="quick">', '<div class="box quick">'))
+    out["steps"] = _common(t)
+
+    # ------------------------------------------------------------------ the facts to write down
+    f = _sec(g, "facts")
+    pre, _filt, post = _between(f, '<div class="filter"', '<div class="status">')
+    f = pre + "{ROLEPICK}\n" + post
+    n = [0]
+
+    def fact(m):
+        n[0] += 1
+        return f'<div class="fact" id="fact-{n[0]:02d}" data-roles="{m.group(1)}">'
+    f = re.sub(r'<div class="fact" data-roles="([a-z ]*)">', fact, f)
+    if n[0] != 17:
+        raise SystemExit("guide: expected 17 facts, found %d" % n[0])
+    f = re.sub(r'<div class="skills">(.*?)</div>', lambda m: '<div class="chips">' + _skill_chips(m.group(1)) + "</div>", f, flags=re.S)
+    old = "The role buttons follow the starting map in the role section above."
+    if old not in f:
+        raise SystemExit("guide: the note under the facts changed")
+    f = f.replace(old, "The role choice follows the starting map in the role section above.")
+    out["facts"] = _common(f)
+    out["fact_ids"] = {html.unescape(name): f"fact-{i:02d}" for i, name in
+                       enumerate(re.findall(r'<label for="f\d\d">(.*?)</label>', f), 1)}
+
+    # ------------------------------------------------------------------ do it with Claude
+    h = _sec(g, "for-claude")
+    h = h.replace('<div class="handoff">', '<div class="hand">').replace('<div class="meta">', '<div class="tbar">')
+    out["for_claude"] = _common(h)
+    out["ai_md"] = re.search(r'<script type="application/json" id="ai-md">(.*?)</script>', g, re.S).group(1)
+
+    # ------------------------------------------------------------------ tips, pitfalls, example, questions
+    p = _sec(g, "tips")
+    p = p.replace('<div class="tipflow">', '<div class="tipflow">').replace('<ul class="tips">', '<ul class="princ">')
+    out["tips"] = _common(p)
+    out["pitfalls"] = _common(_table(_sec(g, "pitfalls"), "fix"))
+    out["example"] = _common(_table(_sec(g, "example"), "delta"))
+    out["questions"] = _common(_sec(g, "questions"))
+
+    # ------------------------------------------------------------------ sources (they join this entry's list)
+    src = _sec(g, "sources")
+    out["sources_note"] = re.search(r"<p>(.*?)</p>", src, re.S).group(1).strip()
+    out["sources"] = [x.strip() for x in re.findall(r"<li>(.*?)</li>", src, re.S)]
+    out["colophon"] = [re.sub(r"<[^>]+>", "", x).strip() for x in
+                       re.findall(r"<p>(.*?)</p>", g[g.index("<footer"):g.index("</footer>")], re.S)]
+    return out
+
+
+if __name__ == "__main__":
+    import sys
+    d = port(sys.argv[1] if len(sys.argv) > 1 else "src/guide.html")
+    for k, v in d.items():
+        print(k, len(v) if hasattr(v, "__len__") else v)
+    blob = " ".join(v for v in d.values() if isinstance(v, str))
+    left = sorted(set(re.findall(r'class="([^"]+)"', blob)))
+    print("classes in the port:", left)

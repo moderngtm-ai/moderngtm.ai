@@ -1,0 +1,38 @@
+{
+ "pipeline-review": {
+  "cedar": "haiku",
+  "heron": "sonnet",
+  "grove": "opus",
+  "ember": "fable"
+ },
+ "crm-hygiene-check": {
+  "birch": "haiku",
+  "cedar": "sonnet",
+  "amber": "opus",
+  "flint": "fable"
+ },
+ "forecast": {
+  "cedar": "haiku",
+  "birch": "sonnet",
+  "heron": "opus",
+  "flint": "fable"
+ },
+ "call-summary": {
+  "cedar": "haiku",
+  "birch": "sonnet",
+  "ember": "opus",
+  "heron": "fable"
+ },
+ "inbox-sweep": {
+  "grove": "haiku",
+  "cedar": "sonnet",
+  "heron": "opus",
+  "ember": "fable"
+ },
+ "lead-triage": {
+  "birch": "haiku",
+  "heron": "sonnet",
+  "delta": "opus",
+  "amber": "fable"
+ }
+}

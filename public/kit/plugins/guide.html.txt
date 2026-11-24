@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuring the Claude Sales plugin</title>
+<meta name="description" content="What a configured Claude Sales plugin does for each sales role, and how to set it up: six things to configure, four phases, and the company facts worth writing down.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400..800&display=swap">
+<style>
+:root{
+  /* Layout: a paper ledger. A contents rail on the left, one reading column on the right.
+     One rule runs through the page and the film that goes with it: a gray outline means stock, violet means configured.
+     The colors are the JotBolt palette (jotbolt.com). Lime is kept for check marks and the one button on the dark band. */
+  --paper:#FAFAF3;
+  --card:#FFFFFF;
+  --ink:#1E1E32;
+  --muted:#575665;
+  --line:#D9D9CC;
+  --accent:#493AC4;
+  --soft:#EFEDF7;
+  --dark:#292747;
+  --on-dark:#FAFAF3;
+  --on-dark-muted:#DDDBED;
+  --signal:#E4F560;
+  --display:"Bricolage Grotesque","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --body:"Manrope","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:3px}
+a:hover{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+p{margin:0 0 16px;max-width:60ch;text-wrap:pretty}
+li,dd,dt,td,figcaption{text-wrap:pretty}
+ul,ol{margin:0;padding:0}
+code{font:500 .86em/1.3 var(--mono);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 7px;white-space:nowrap}
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(18px,4vw,56px)}
+.skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;z-index:10}
+.skip:focus{left:12px}
+.skip:hover{color:var(--paper)}
+.caps{font:700 13px/1.3 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- hero */
+.topline{display:flex;justify-content:space-between;gap:8px 24px;flex-wrap:wrap;padding-top:24px;font-size:15px;color:var(--muted)}
+.hero{padding:44px 0 52px}
+.mark{width:44px;height:auto;display:block}
+h1{font:700 64px/1.04 var(--display);letter-spacing:-.02em;margin:18px 0 0}
+h1 .l{display:block;overflow:hidden;padding-bottom:.14em;margin-bottom:-.14em}
+h1 .l>span{display:block}
+h1 .l:last-child{color:var(--accent)}
+.hero-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:end;margin-top:36px}
+.deck{font-size:20px;line-height:1.5;max-width:29em;margin:0 0 26px;text-wrap:pretty}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:26px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:999px;border:2px solid var(--ink);background:transparent;color:var(--ink);font:600 16px/1 var(--body);text-decoration:none;cursor:pointer;transition:transform .15s ease,background .15s ease,color .15s ease}
+.btn:hover{transform:translateY(-1px);color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{color:#fff}
+.byline{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px;color:var(--muted)}
+.byline strong{color:var(--ink);font-weight:600}
+.film{margin:0}
+.film .frame{border-radius:22px;overflow:hidden;border:1px solid var(--line);background:var(--ink);aspect-ratio:16/9}
+.film video{display:block;width:100%;height:100%;object-fit:cover;background:var(--ink)}
+.film figcaption{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:15px;color:var(--muted)}
+.film .missing{display:none}
+.film.failed .missing{display:inline}
+.counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.counts div{padding:20px 18px 20px 0}
+@media (min-width:761px){.counts div+div{padding-left:22px;border-left:1px solid var(--line)}}
+.counts b{display:block;font:800 56px/1 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.counts span{display:block;margin-top:8px;font-size:16px;line-height:1.4;color:var(--muted)}
+
+/* ---------- shell */
+.shell{display:grid;grid-template-columns:212px minmax(0,1fr);gap:clamp(28px,4.6vw,76px);align-items:start}
+.rail{position:sticky;top:20px;padding:clamp(28px,4vw,52px) 0 24px}
+.rail ol{list-style:none;display:grid;gap:2px;margin-top:12px}
+.rail a{display:block;padding:7px 8px 7px 0;font-size:16px;line-height:1.3;color:var(--muted);text-decoration:none;border-radius:8px}
+.rail a:hover{color:var(--ink)}
+.rail a[aria-current="true"]{color:var(--accent);font-weight:700}
+main{min-width:0;max-width:960px}
+section{padding:72px 0;border-top:1px solid var(--line)}
+main>section:first-child{border-top:0}
+h2{font:700 46px/1.06 var(--display);letter-spacing:-.016em;margin:0 0 18px;text-wrap:balance}
+h3{font:700 26px/1.2 var(--display);letter-spacing:-.006em;margin:48px 0 12px;text-wrap:balance}
+.lede{font-size:20px;line-height:1.5;max-width:54ch}
+.fine{font-size:15px;color:var(--muted)}
+.list{list-style:none;display:grid;gap:10px;max-width:60ch}
+.list li{position:relative;padding-left:22px}
+.list li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+/* ---------- 01 ledger */
+.ledger{display:grid;gap:10px;margin:30px 0 12px}
+.ledger .row{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr) minmax(0,1.14fr);gap:10px;align-items:stretch}
+.ledger .head{align-items:end}
+.ledger .head span{padding:0 6px}
+.ask{align-self:center;justify-self:start;background:var(--dark);color:var(--on-dark);border-radius:22px;padding:11px 18px;font:700 16px/1.35 var(--body)}
+.stock,.conf{border-radius:16px;padding:14px 18px;font-size:16px;line-height:1.45}
+.stock{border:2px solid #797786;color:var(--ink)}
+.conf{background:var(--accent);color:#fff;font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px}
+.card h3,.card h4{font:700 21px/1.25 var(--display);letter-spacing:0;margin:0 0 8px;display:flex;gap:10px;align-items:flex-start}
+.card h4 svg{flex:none;width:22px;height:22px;margin-top:2px}
+.card p{margin:0;font-size:16px}
+.plain{border-left:4px solid var(--ink);padding:4px 0 4px 22px;margin-top:8px}
+.plain p{font-size:17px}
+.plain p:last-child{margin-bottom:0}
+
+/* ---------- 02 roles */
+.roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
+.role{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 26px 24px;display:flex;flex-direction:column;gap:16px}
+.role h3{margin:0;font-size:28px}
+.role .gets{font-size:18px;line-height:1.45;margin:0}
+.role dl{margin:0;display:grid;gap:14px}
+.role dt{margin-bottom:5px}
+.role dd{margin:0;font-size:16px;line-height:1.5}
+.role .leans{font:700 18px/1.35 var(--display);color:var(--accent)}
+.skills{display:flex;flex-wrap:wrap;gap:6px}
+.written{padding-top:14px;border-top:1px solid var(--line)}
+
+/* ---------- 03 seats */
+.seats{display:grid;gap:16px;margin-top:28px}
+.seat{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 26px 28px}
+.seat>header{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.seat h3{margin:0 0 6px;font-size:28px}
+.seat>header p{margin:0;color:var(--muted);font-size:16px;line-height:1.5;max-width:58ch}
+.seat>header p.pointer{font:700 22px/1.3 var(--display);color:var(--accent);margin:0 0 8px}
+.seat .quad{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 34px}
+.seat .caps{display:block;margin-bottom:10px}
+.seat .list{gap:8px;font-size:16px;line-height:1.5}
+.seat .steps{gap:10px}
+.overlap td:last-child{color:var(--accent);font-weight:600}
+.who{font-size:15px;line-height:1.45;color:var(--muted);margin:0 0 16px}
+.who b{color:var(--ink);font-weight:600}
+
+/* ---------- 04 levels */
+.levels{display:grid;gap:36px;margin:32px 0 8px}
+.level-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-bottom:14px}
+.level-head h3{margin:0}
+.level-head .fine{margin:0}
+.tag{display:inline-block;border:2px solid var(--accent);color:var(--accent);border-radius:999px;padding:5px 12px;font:700 14px/1.2 var(--body)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px}
+.level.hot .tile{border-color:var(--accent);background:var(--soft)}
+.tile h4{font:700 21px/1.2 var(--display);margin:0 0 6px}
+.tile p{font-size:16px;margin:0 0 12px}
+.tile dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:15px;line-height:1.45}
+.tile dt{color:var(--muted)}
+.tile dd{margin:0}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+
+/* ---------- 04 phases */
+.phases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
+.phase{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 26px 26px}
+.phase h3{margin:0 0 12px}
+.steps{list-style:none;counter-reset:s;display:grid;gap:14px}
+.steps li{counter-increment:s;position:relative;padding-left:44px;font-size:16px;line-height:1.5}
+.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font:800 16px/30px var(--display);text-align:center}
+.phase .fine{margin:16px 0 0}
+.code{position:relative;background:var(--dark);color:var(--on-dark);border-radius:18px;padding:22px 24px 22px;margin:14px 0 18px}
+.code pre{margin:0;font:500 15px/1.65 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;padding-right:96px}
+.copy{position:absolute;top:12px;right:12px;border:1.5px solid rgba(250,250,243,.6);background:transparent;color:var(--on-dark);border-radius:999px;padding:9px 16px;font:700 15px/1 var(--body);cursor:pointer}
+.copy:hover{background:rgba(250,250,243,.12)}
+.copy.is-done{background:var(--signal);color:var(--ink);border-color:var(--signal)}
+.quick{border:2px solid var(--ink);border-radius:20px;padding:22px 26px;margin-top:22px}
+.quick h3{margin:0 0 12px}
+
+/* ---------- 05 facts */
+.filter{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:26px 0 6px}
+.filter .caps{flex-basis:100%;margin-bottom:2px}
+.chipbtn{border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:9px 15px;font:700 15px/1.1 var(--body);cursor:pointer}
+.chipbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.status{display:flex;justify-content:space-between;gap:10px 24px;flex-wrap:wrap;margin:14px 0 6px;font-size:15px;color:var(--muted)}
+.status b{color:var(--ink);font-variant-numeric:tabular-nums}
+.facts{border-bottom:1px solid var(--line)}
+.fact{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,1.25fr);gap:6px 18px;padding:16px 2px;border-top:1px solid var(--line);align-items:start;transition:opacity .2s ease}
+.fact input{appearance:none;-webkit-appearance:none;width:24px;height:24px;margin:2px 0 0;border:2px solid var(--ink);border-radius:7px;background:var(--card);cursor:pointer;display:grid;place-content:center}
+.fact input:checked{background:var(--accent);border-color:var(--accent)}
+.fact input:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:translateY(-1px) rotate(45deg)}
+.fact label{font:700 21px/1.25 var(--display);cursor:pointer;display:block;margin-bottom:8px}
+.fact .write{font-size:16px;line-height:1.5;margin:0}
+.facts[data-role="sdr"] .fact:not([data-roles~="sdr"]),
+.facts[data-role="ae"] .fact:not([data-roles~="ae"]),
+.facts[data-role="am"] .fact:not([data-roles~="am"]),
+.facts[data-role="lead"] .fact:not([data-roles~="lead"]),
+.facts[data-role="founder"] .fact:not([data-roles~="founder"]){opacity:.34}
+
+/* ---------- 06 hand-off */
+.handoff{background:var(--dark);color:var(--on-dark);border-radius:26px;padding:44px 48px}
+.handoff p{color:var(--on-dark)}
+.handoff ol{list-style:none;counter-reset:h;display:grid;gap:12px;margin:22px 0 26px;max-width:56ch}
+.handoff ol li{counter-increment:h;position:relative;padding-left:46px;font-size:17px;line-height:1.5}
+.handoff ol li::before{content:counter(h);position:absolute;left:0;top:-2px;width:32px;height:32px;border-radius:50%;background:var(--signal);color:var(--ink);font:800 16px/32px var(--display);text-align:center}
+.handoff .say{display:block;margin-top:6px;font:600 16px/1.5 var(--mono);color:var(--signal)}
+.handoff .btn{background:var(--signal);border-color:var(--signal);color:var(--ink)}
+.handoff .btn.is-done{background:var(--on-dark);border-color:var(--on-dark);color:var(--dark)}
+.handoff .meta{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.handoff .meta span{font-size:15px;color:var(--on-dark-muted)}
+.preview{margin:28px 0 0;border-top:1px solid rgba(250,250,243,.3);padding:18px 0 0;max-height:300px;overflow:auto;font:500 15px/1.6 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;color:var(--on-dark-muted)}
+#ai-md-fallback{display:block;width:100%;height:220px;margin-top:16px;border:0;border-radius:14px;padding:14px;font:500 13px/1.5 var(--mono);color:var(--ink);background:#fff}
+#ai-md-fallback[hidden]{display:none}
+
+/* ---------- 07 tips */
+.tipflow h3{margin:32px 0 16px;padding-top:14px;border-top:2px solid var(--ink)}
+.tips{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 30px}
+.tips li{font-size:16px;line-height:1.5}
+.tips b{display:block;font:700 19px/1.3 var(--display);margin-bottom:2px}
+
+/* ---------- tables */
+.scroll{overflow-x:auto;margin-top:26px}
+table{width:100%;border-collapse:collapse;font-size:16px;line-height:1.45;min-width:620px}
+th{text-align:left;padding:0 14px 10px 0;vertical-align:bottom}
+td{padding:14px 14px 14px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{font:700 19px/1.3 var(--display)}
+.fix td:last-child{color:var(--accent);font-weight:600}
+.delta td:nth-child(2){color:var(--muted);font-variant-numeric:tabular-nums}
+.delta td:last-child{font:700 19px/1.3 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+
+/* ---------- 10 questions */
+.faq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 44px;margin:28px 0 0}
+.faq dt{font:700 21px/1.3 var(--display);margin-bottom:6px}
+.faq dd{margin:0;font-size:16px;line-height:1.55}
+.sources{list-style:none;display:grid;gap:10px;font-size:16px;max-width:60ch}
+.colophon{border-top:2px solid var(--ink);margin-top:10px;padding-top:22px;padding-bottom:56px;display:flex;justify-content:space-between;gap:12px 40px;flex-wrap:wrap;font-size:15px;color:var(--muted)}
+.colophon p{margin:0;max-width:52ch}
+
+/* ---------- narrow screens */
+@media (max-width:1060px){
+  h1{font-size:52px}
+  h2{font-size:40px}
+  .shell{grid-template-columns:1fr;gap:0}
+  .rail{position:static;padding-bottom:8px}
+  .rail ol{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 20px}
+}
+@media (max-width:900px){
+  .hero-row{grid-template-columns:1fr;align-items:start}
+  .tips{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  h1{font-size:38px}
+  h2{font-size:32px}
+  h3{font-size:23px;margin-top:40px}
+  section{padding:48px 0}
+  .hero{padding:32px 0 40px}
+  .hero-row{gap:28px;margin-top:26px}
+  .handoff{padding:28px 22px}
+  .counts b{font-size:42px}
+  .counts{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;position:relative}
+  .counts::after{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid var(--line)}
+  .counts div:nth-child(even){padding-left:22px;border-left:1px solid var(--line)}
+  .cards,.roles,.tiles,.duo,.phases,.faq,.tips,.seat .quad{grid-template-columns:1fr}
+  .ledger{gap:22px}
+  .ledger .head{display:none}
+  .ledger .row{grid-template-columns:1fr;gap:8px}
+  .stock::before,.conf::before{display:block;font:700 13px/1.3 var(--body);letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px}
+  .stock::before{content:"Stock";color:var(--muted)}
+  .conf::before{content:"Configured";color:rgba(255,255,255,.8)}
+  .fact{grid-template-columns:30px minmax(0,1fr)}
+  .fact .write{grid-column:2}
+  .code pre{padding-right:0;padding-top:34px}
+  /* tables become stacked rows on a phone, so no column hides off-screen */
+  .scroll{overflow-x:visible}
+  table{min-width:0}
+  thead{display:none}
+  table,tbody,tr,td{display:block}
+  tr{border-top:1px solid var(--line);padding:14px 0}
+  td{border:0;padding:0 0 10px}
+  td:last-child{padding-bottom:0}
+  td:nth-child(n+2)::before{display:block;font:700 13px/1.3 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .fix td:nth-child(2)::before{content:"What goes wrong"}
+  .fix td:last-child::before{content:"Do this instead"}
+  .overlap td:nth-child(2)::before{content:"Who can set it"}
+  .overlap td:nth-child(3)::before{content:"If both do"}
+  .overlap td:last-child::before{content:"Keep it clean by"}
+  .delta td:nth-child(2)::before{content:"Stock"}
+  .delta td:last-child::before{content:"Configured"}
+}
+@media (max-width:480px){
+  .rail ol{grid-template-columns:1fr}
+}
+
+/* ---------- one orchestrated moment: the title rises as it does on the film's end card */
+@media (prefers-reduced-motion:no-preference){
+  h1 .l>span{animation:rise .75s cubic-bezier(.2,.8,.2,1) both}
+  h1 .l:nth-child(2)>span{animation-delay:.08s}
+  .mark path{stroke-dasharray:64;stroke-dashoffset:64;animation:draw .45s .5s ease-out forwards}
+  @keyframes rise{from{transform:translateY(108%)}to{transform:none}}
+  @keyframes draw{to{stroke-dashoffset:0}}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.fact{transition:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#outcome">Skip to the guide</a>
+
+<header class="wrap">
+  <div class="topline">
+    <span>A guide by Nathan Fierley</span>
+    <span>Checked against Sales plugin 2.1.0 on November 16, 2026</span>
+  </div>
+  <div class="hero">
+    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#493AC4"/><path d="M18.5 33l9.5 9.5 18-21" fill="none" stroke="#E4F560" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h1><span class="l"><span>Configuring the Claude Sales plugin</span></span> <span class="l"><span>for your company</span></span></h1>
+    <div class="hero-row">
+      <div>
+        <p class="deck">Out of the box, the Claude Sales plugin knows nothing about your company, so its skills have to ask. Configure it once and they work from your ICP, your stages and your wording rules. This guide starts with what you get, role by role, then shows how to set it up.</p>
+        <div class="actions">
+          <a class="btn primary" href="#outcome">See what you get</a>
+          <a class="btn" href="#for-claude">Hand it to Claude</a>
+        </div>
+        <div class="byline">
+          <span><strong>Nathan Fierley</strong></span>
+          <span>For sellers, operators and admins</span>
+          <span>About 25 minutes to read</span>
+        </div>
+      </div>
+      <figure class="film" id="film">
+        <div class="frame">
+          <video controls preload="none" playsinline poster="poster.jpg" aria-label="A 60-second explainer: a configured Claude Sales plugin">
+            <source src="explainer.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption><span>The 60-second version, with sound</span><span class="missing">The video did not load here.</span></figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="counts">
+    <div><b>6</b><span>things to configure</span></div>
+    <div><b>3</b><span>levels: your tools, your company, each person</span></div>
+    <div><b>4</b><span>phases, from install to shared</span></div>
+    <div><b>17</b><span>company facts the 36 stock skills ask for</span></div>
+  </div>
+</header>
+
+<div class="wrap shell">
+  <nav class="rail" aria-label="Contents">
+    <span class="caps">Contents</span>
+    <ol>
+      <li><a href="#outcome">What you get</a></li>
+      <li><a href="#roles">What each role gets</a></li>
+      <li><a href="#seats">Who changes what</a></li>
+      <li><a href="#layers">What you configure</a></li>
+      <li><a href="#steps">How to configure it</a></li>
+      <li><a href="#facts">The facts to write down</a></li>
+      <li><a href="#for-claude">Do it with Claude</a></li>
+      <li><a href="#tips">Tips from a real build</a></li>
+      <li><a href="#pitfalls">Pitfalls to avoid</a></li>
+      <li><a href="#example">A worked example</a></li>
+      <li><a href="#questions">Questions people ask</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <!-- ============================================================ 01 -->
+    <section id="outcome">
+      <h2>A plugin that already knows your company</h2>
+      <p class="lede">A configured Sales plugin stops asking and starts working your way. Each stock skill lists the company facts it needs and looks for them in your connected tools and instructions. When a fact is missing, the skill asks one question and uses the answer for that conversation only. Configuration writes those answers down once.</p>
+
+      <div class="ledger" role="table" aria-label="Five everyday requests, stock and configured">
+        <div class="row head caps" role="row"><span role="columnheader">You ask</span><span role="columnheader">Stock plugin</span><span role="columnheader">Configured plugin</span></div>
+        <div class="row" role="row"><div class="ask" role="cell">Triage this inbound lead</div><div class="stock" role="cell">Asks what your ideal customer looks like, then scores against the answer.</div><div class="conf" role="cell">Scores against your written ICP and disqualifiers, and names your handoff channel.</div></div>
+        <div class="row" role="row"><div class="ask" role="cell">Prep me for tomorrow's call</div><div class="stock" role="cell">Uses your CRM's stage names, and asks which qualification method you run.</div><div class="conf" role="cell">Builds discovery questions around your qualification method.</div></div>
+        <div class="row" role="row"><div class="ask" role="cell">Draft a follow-up</div><div class="stock" role="cell">Writes in your voice if it has learned it, otherwise a neutral one. Knows no company wording rules.</div><div class="conf" role="cell">Follows your messaging rules, approved proof points and signature.</div></div>
+        <div class="row" role="row"><div class="ask" role="cell">Write my forecast</div><div class="stock" role="cell">Infers what it can from the CRM, and asks which stages count as commit.</div><div class="conf" role="cell">Uses your mapping of stages to forecast categories.</div></div>
+        <div class="row" role="row"><div class="ask" role="cell">Which renewals are coming up?</div><div class="stock" role="cell">Asks where renewal dates live.</div><div class="conf" role="cell">Reads the field you named.</div></div>
+      </div>
+      <p class="fine">This comparison comes from reading what each stock skill asks for. It is not a benchmark.</p>
+
+      <h3>What configuration buys you</h3>
+      <div class="cards">
+        <div class="card"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#493AC4"/><path d="M7 12.4l3.4 3.4 6.6-7.6" fill="none" stroke="#E4F560" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Fewer repeated questions</h4><p>A stock answer lasts one conversation. A configured fact is there every time, for every skill that needs it.</p></div>
+        <div class="card"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#493AC4"/><path d="M7 12.4l3.4 3.4 6.6-7.6" fill="none" stroke="#E4F560" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>The same rules for everyone</h4><p>Every seller's skills use one ICP, one set of stage definitions and one set of wording rules.</p></div>
+        <div class="card"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#493AC4"/><path d="M7 12.4l3.4 3.4 6.6-7.6" fill="none" stroke="#E4F560" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Guardrails that travel</h4><p>A rule such as "no pricing by email" applies to every draft, whoever asks for it.</p></div>
+        <div class="card"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#493AC4"/><path d="M7 12.4l3.4 3.4 6.6-7.6" fill="none" stroke="#E4F560" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Honest gaps</h4><p>Where your company has not decided something, the configuration can say so. The skill then reports the gap instead of inventing a rule.</p></div>
+      </div>
+
+      <h3>What it does not do</h3>
+      <div class="plain">
+        <p>Configuration does not clean a messy CRM or settle a sales process you have not decided. It makes the plugin repeat your decisions, good or bad.</p>
+        <p>This guide makes no claims about time saved or deals won. The benefits above are how the plugin is designed to behave. Measure the results on your own team before you quote them.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 02 -->
+    <section id="roles">
+      <h2>One setup, and what each role gets from it</h2>
+      <p class="lede">One company configuration serves every role. Roles differ in which skills they use, and so in which facts matter most.</p>
+      <p>This map is a suggestion drawn from the skill descriptions. The plugin itself assigns nothing, and no skill is locked to a role.</p>
+
+      <div class="roles">
+        <article class="role">
+          <h3>SDR or BDR</h3>
+          <p class="gets">Inbound leads are scored against your written ICP and disqualifiers, routed by your rules, and handed off in the channel you named with the note you specified.</p>
+          <dl>
+            <div><dt class="caps">Leans on</dt><dd class="leans">ICP and disqualifiers · Routing and handoff · Value proposition · Wording rules for outreach</dd></div>
+            <div><dt class="caps">Skills used most</dt><dd class="skills"><code>lead-triage</code><code>route-lead</code><code>account-research</code><code>draft-outreach</code><code>schedule-meeting</code><code>log-activity</code></dd></div>
+            <div><dt class="caps">Configuration tip</dt><dd>Define a qualified lead, who receives it and what the handoff note must contain.</dd></div>
+            <div class="written"><dt class="caps">Written down, it looks like this</dt><dd>A lead is qualified when a director or above confirms the problem and agrees to a call. Hand off in the inbound channel with company, contact, trigger and next step.</dd></div>
+          </dl>
+        </article>
+        <article class="role">
+          <h3>Account executive</h3>
+          <p class="gets">The deal skills check each deal against your stage exit criteria and your qualification method, and your forecast uses one mapping of stages to categories.</p>
+          <dl>
+            <div><dt class="caps">Leans on</dt><dd class="leans">Stage exit criteria · Qualification method · Stakeholders and approvals · Competitors · Objections · Forecast categories</dd></div>
+            <div><dt class="caps">Skills used most</dt><dd class="skills"><code>call-prep</code><code>call-summary</code><code>stakeholder-map</code><code>deal-review</code><code>deal-advance-gap</code><code>close-plan</code><code>handle-objection</code><code>update-opportunity</code><code>forecast</code></dd></div>
+            <div><dt class="caps">Configuration tip</dt><dd>Write exit criteria for each stage. Four skills check deals against them.</dd></div>
+            <div class="written"><dt class="caps">Written down, it looks like this</dt><dd>A deal leaves Discovery only when the economic buyer is named and the next meeting is booked.</dd></div>
+          </dl>
+        </article>
+        <article class="role">
+          <h3>Account manager or CSM</h3>
+          <p class="gets">Renewal and health skills read the fields you named, so upcoming renewals come from your data instead of a question.</p>
+          <dl>
+            <div><dt class="caps">Leans on</dt><dd class="leans">Renewal data location · Health and adoption fields · Product catalog · Where success metrics live</dd></div>
+            <div><dt class="caps">Skills used most</dt><dd class="skills"><code>customer-health</code><code>renewal-radar</code><code>expansion-whitespace</code><code>customer-voice</code><code>account-plan</code><code>account-context</code></dd></div>
+            <div><dt class="caps">Configuration tip</dt><dd>Name the renewal field first. The renewal skill calls that mapping "the whole game".</dd></div>
+            <div class="written"><dt class="caps">Written down, it looks like this</dt><dd>Renewal date is the Contract End Date field on the company record. Flag any renewal inside 120 days with no meeting booked.</dd></div>
+          </dl>
+        </article>
+        <article class="role">
+          <h3>Sales leader</h3>
+          <p class="gets">Every forecast and pipeline review uses one mapping of stages to categories, one coverage target and one loss-reason field.</p>
+          <dl>
+            <div><dt class="caps">Leans on</dt><dd class="leans">Forecast categories · Coverage target · Quota source · Loss-reason field · Team channels</dd></div>
+            <div><dt class="caps">Skills used most</dt><dd class="skills"><code>team-pipeline</code><code>rep-context</code><code>pipeline-review</code><code>forecast</code><code>win-loss-review</code><code>deal-slip-scenario</code></dd></div>
+            <div><dt class="caps">Configuration tip</dt><dd>Fix the category mapping and coverage target once, so every forecast reads the same way.</dd></div>
+            <div class="written"><dt class="caps">Written down, it looks like this</dt><dd>Commit means Contract Sent. Best case means Proposal and Negotiation. The coverage target is three times quota.</dd></div>
+          </dl>
+        </article>
+        <article class="role">
+          <h3>Revenue operations or enablement</h3>
+          <p class="gets">One reference page holds every fact, its source document and the open decisions.</p>
+          <dl>
+            <div><dt class="caps">Leans on</dt><dd class="leans">All of the facts, plus connectors, permissions and distribution</dd></div>
+            <div><dt class="caps">Skills used most</dt><dd class="skills"><code>setup</code><code>crm-hygiene-check</code><span>and spot checks of the rest</span></dd></div>
+            <div><dt class="caps">Configuration tip</dt><dd>Own the reference page.</dd></div>
+          </dl>
+        </article>
+        <article class="role">
+          <h3>Founder or full-cycle seller</h3>
+          <p class="gets">The facts you repeat most often are answered once, in every skill that needs them.</p>
+          <dl>
+            <div><dt class="caps">Leans on</dt><dd class="leans">ICP · Messaging rules · Voice</dd></div>
+            <div><dt class="caps">Skills used most</dt><dd>The daily skills from every other role.</dd></div>
+            <div><dt class="caps">Configuration tip</dt><dd>Start with the five facts you repeat most often.</dd></div>
+          </dl>
+        </article>
+      </div>
+      <p class="fine" style="margin-top:14px">The example lines are invented for a fictional company. They show the level of detail that works: one decision, stated plainly.</p>
+
+      <h3>What the stock plugin already does by role</h3>
+      <p>The plugin adapts to the person before you configure anything. Its <code>setup</code> skill infers a role from the CRM: AE, BDR or SDR, leader, or customer success. It then builds a role-aware dashboard and recommends three skills to start with. Two skills, <code>team-pipeline</code> and <code>rep-context</code>, are written for leaders.</p>
+
+      <h3>Where configuration differs by role</h3>
+      <ul class="list">
+        <li><strong>Emphasis.</strong> Every role shares the same facts, but each stresses different ones. Configure first the rows for the roles you actually have.</li>
+        <li><strong>Handoffs.</strong> Configuration pays most where work changes hands. Lead to AE needs routing rules and a handoff note. AE to account manager needs renewal dates and products recorded at close.</li>
+        <li><strong>The personal layer.</strong> Voice, signature, book and territory belong to one person. Let <code>setup</code> learn them, and keep them in that person's own instructions, not the shared plugin.</li>
+        <li><strong>Access.</strong> Owners on Team and Enterprise plans set tool permissions for the whole organization. Claude also acts with each person's own access in the CRM, so your CRM roles still apply.</li>
+      </ul>
+
+      <h3>One build or several</h3>
+      <p>Keep one build unless two teams truly sell differently. One build means one set of facts to maintain, and the skills already serve every role.</p>
+      <p>Separate builds drift apart, and each is another plugin to update. If two segments run different stages or messaging, split by segment, not by job title. Enterprise admins can then set which groups get which plugin.</p>
+    </section>
+
+    <!-- ============================================================ 03 -->
+    <section id="seats">
+      <h2>Admin, operator, seller: who changes what</h2>
+      <p class="lede">Roles decide which skills and facts matter. Seats decide who is allowed to change them. Three people shape a configuration, and each controls a different part of it.</p>
+      <p>On a plan of your own you hold all three seats, and nothing here conflicts. On a Team or Enterprise plan the seats are usually different people, so read yours first.</p>
+
+      <div class="seats">
+        <article class="seat">
+          <header><h3>The admin</h3><p class="pointer">Decide what each tool may do.</p><p>An Owner or Primary Owner of the Claude organization. On Enterprise, also anyone whose custom role manages the organization's libraries. The role labeled Admin in the members list does not open the plugin settings.</p></header>
+          <div class="quad">
+            <div><span class="caps">You control</span><ul class="list">
+              <li>Which connectors the organization has. Each member still signs in with their own account.</li>
+              <li>Tool permissions for everyone: always allow, needs approval or blocked. Members cannot loosen them.</li>
+              <li>Each plugin's availability: not available, available to install, installed by default or required. On Enterprise, by group.</li>
+              <li>What members may do themselves: create or upload plugins, share them, and publish them with or without review.</li>
+            </ul></div>
+            <div><span class="caps">You do not write</span><ul class="list">
+              <li>The sales facts. They belong to the operator.</li>
+              <li>Your settings decide who gets the build and what it may do.</li>
+            </ul></div>
+            <div><span class="caps">Your first move</span><ol class="steps">
+              <li>Add the connectors the plugin uses in organization settings. Making a plugin available does not add its connectors.</li>
+              <li>Allow reads, put sends, posts and CRM writes on approval, and block what must never run.</li>
+              <li>Decide the publishing policy before the operator submits anything.</li>
+              <li>When the configured build arrives, set its availability, and decide whether the stock Sales plugin stays visible beside it.</li>
+            </ol></div>
+            <div><span class="caps">Watch for</span><ul class="list">
+              <li>"Installed by default" can be turned off by a member. "Required" cannot.</li>
+              <li>A group's setting replaces the organization's for that group, and the most permissive setting wins across several groups.</li>
+              <li>Items shared by someone who has left keep working until you stop the sharing.</li>
+              <li>In Claude Code, a same-named plugin someone installed themselves loads in place of the copy synced from the organization.</li>
+            </ul></div>
+          </div>
+        </article>
+
+        <article class="seat">
+          <header><h3>The operator</h3><p class="pointer">Write the company facts down once.</p><p>Whoever owns the sales process and its tools: revenue operations, sales operations, enablement, or a sales leader or founder doing that job.</p></header>
+          <div class="quad">
+            <div><span class="caps">You control</span><ul class="list">
+              <li>The company facts and skill behavior. This is the build.</li>
+              <li>The reference page and the list of open decisions.</li>
+              <li>What goes to review, and when.</li>
+              <li>The update each time a source document changes.</li>
+            </ul></div>
+            <div><span class="caps">You depend on</span><ul class="list">
+              <li>The admin, for connectors, tool permissions and who receives the plugin.</li>
+              <li>Sellers, for how deals are really worked.</li>
+              <li>A reviewer's approval for each version, where publishing needs review.</li>
+            </ul></div>
+            <div><span class="caps">Your first move</span><ol class="steps">
+              <li>Gather the source documents and name the open decisions.</li>
+              <li>Customize a copy and review it like a contract.</li>
+              <li>Try it with a few sellers by sharing it with them directly.</li>
+              <li>Publish it to the organization, and agree with the admin who gets it.</li>
+            </ol></div>
+            <div><span class="caps">Watch for</span><ul class="list">
+              <li>Sellers' private copies and instructions drifting from yours. Collect the good parts, then ask them to retire the copies.</li>
+              <li>Wording rules that clash with personal voice. Say in the build that company rules win.</li>
+              <li>An update that never arrives. A published plugin changes only when you publish it again.</li>
+            </ul></div>
+          </div>
+        </article>
+
+        <article class="seat">
+          <header><h3>The seller</h3><p class="pointer">Use the company build, and add your voice.</p><p>An individual contributor using Claude on the company's plan.</p></header>
+          <div class="quad">
+            <div><span class="caps">You control</span><ul class="list">
+              <li>Your sign-in to each tool. Claude acts with your access, so it sees the CRM records you can see.</li>
+              <li>Your voice, signature and role, which <code>setup</code> learns.</li>
+              <li>Your own project instructions and your scheduled routines.</li>
+              <li>Your own plugins, where the organization lets members add them.</li>
+            </ul></div>
+            <div><span class="caps">You cannot change</span><ul class="list">
+              <li>A plugin the organization manages, or one a colleague shared with you.</li>
+              <li>A plugin marked required. It stays on.</li>
+              <li>Tool permissions set for the organization.</li>
+              <li>Which connectors the organization has. You can ask for one where requests are turned on.</li>
+            </ul></div>
+            <div><span class="caps">Your first move</span><ol class="steps">
+              <li>Open Plugins and look for a Sales plugin your organization already provides.</li>
+              <li>If there is one, use it. Add only your voice, role and schedules.</li>
+              <li>If there is none, start with the stock plugin and put your own facts in project instructions.</li>
+              <li>Send what works, and every question a skill still asks, to whoever owns the sales process.</li>
+            </ol></div>
+            <div><span class="caps">Watch for</span><ul class="list">
+              <li>Two Sales plugins turned on. Keep one.</li>
+              <li>Company facts in your instructions that disagree with the company build. Delete yours when the build arrives.</li>
+              <li>Your own voice in anything you share.</li>
+            </ul></div>
+          </div>
+        </article>
+      </div>
+
+      <h3>Where the seats overlap</h3>
+      <p>Most conflicts come from the same thing being set in two places. Each row says what happens then, and how to keep it clean.</p>
+      <div class="scroll">
+        <table class="overlap">
+          <thead><tr><th class="caps" scope="col">What</th><th class="caps" scope="col">Who can set it</th><th class="caps" scope="col">If both do</th><th class="caps" scope="col">Keep it clean by</th></tr></thead>
+          <tbody>
+            <tr><td>Company facts</td><td>A seller in project instructions. The operator in the plugin.</td><td>A skill can see two answers. No documented rule says which wins.</td><td>Keeping only personal facts in a seller's instructions once the company build exists</td></tr>
+            <tr><td>The plugin itself</td><td>A seller's own customized copy. The organization's managed build.</td><td>Members cannot edit the managed build. A private copy is a separate plugin with the same name.</td><td>One Sales plugin per person. Offer a good private copy to the operator, then retire it</td></tr>
+            <tr><td>What a tool may do</td><td>The admin, for everyone.</td><td>The organization's setting wins. If a write is blocked, the skill keeps working and hands over a checklist to apply by hand.</td><td>Putting hard limits in permissions, and telling sellers what is blocked</td></tr>
+            <tr><td>What data a skill sees</td><td>The admin enables the connector. Each person signs in.</td><td>Claude acts with each person's own access, so the same skill returns different records for different people.</td><td>Fixing access in the CRM, not in the plugin</td></tr>
+            <tr><td>Wording</td><td>The operator's wording rules. Each seller's learned voice.</td><td>A draft has to satisfy both.</td><td>Saying in the build that company wording rules outrank personal habit</td></tr>
+            <tr><td>Scheduled routines</td><td>Each seller, for themselves.</td><td>Every run acts within the organization's permissions.</td><td>Keeping sends, posts and writes on approval for scheduled runs</td></tr>
+            <tr><td>New versions</td><td>The operator publishes. A reviewer approves, where review is on.</td><td>Members stay on the approved version until the next one is approved, and pick it up at their next session.</td><td>Batching changes, and telling sellers what changed</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fine" style="margin-top:14px">The rules in this section come from Anthropic's help pages and docs, listed under Sources. Where they are silent, the table says so.</p>
+    </section>
+
+    <!-- ============================================================ 04 -->
+    <section id="layers">
+      <h2>Six things to configure, at three levels</h2>
+      <p class="lede">Customizing the plugin does its work at the company level. The tool and person levels are settings around it.</p>
+
+      <div class="levels">
+        <div class="level">
+          <div class="level-head"><h3>Your tools</h3><span class="fine">Set in connector settings.</span></div>
+          <div class="tiles">
+            <div class="tile"><h4>Connectors</h4><p>Which tools Claude can read and act in.</p><dl><dt>Set in</dt><dd>The plugin's connector list, plus each person's sign-in</dd><dt>Owner</dt><dd>An admin, or you on an individual plan</dd></dl></div>
+            <div class="tile"><h4>Tool permissions</h4><p>Whether each action is always allowed, needs approval or is blocked.</p><dl><dt>Set in</dt><dd>Each connector's tool permissions</dd><dt>Owner</dt><dd>Organization owners on Team and Enterprise plans</dd></dl></div>
+          </div>
+        </div>
+        <div class="level hot">
+          <div class="level-head"><h3>Your company</h3><span class="tag">the part you customize</span></div>
+          <div class="tiles">
+            <div class="tile"><h4>Company facts</h4><p>Your ICP, stages, qualification method, messaging, competitors and CRM habits.</p><dl><dt>Set in</dt><dd>Written into the skills</dd><dt>Owner</dt><dd>A sales leader, revenue operations or the founder</dd></dl></div>
+            <div class="tile"><h4>Skill behavior</h4><p>How a skill works your way: which recorder it reads, how it logs, what it must never do.</p><dl><dt>Set in</dt><dd>Edits to individual skills</dd><dt>Owner</dt><dd>The same owner</dd></dl></div>
+          </div>
+        </div>
+        <div class="level">
+          <div class="level-head"><h3>Each person</h3><span class="fine">Learned or set by each seller.</span></div>
+          <div class="tiles">
+            <div class="tile"><h4>Voice and role</h4><p>Each person's writing voice, signature, role and book.</p><dl><dt>Set in</dt><dd>Learned by the <code>setup</code> skill</dd><dt>Owner</dt><dd>Each seller</dd></dl></div>
+            <div class="tile"><h4>Schedules</h4><p>Which skills run on a cadence.</p><dl><dt>Set in</dt><dd>Scheduled tasks</dd><dt>Owner</dt><dd>Each seller or a team lead</dd></dl></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Two homes for company facts</h3>
+      <div class="duo">
+        <div class="card"><h4>Project instructions</h4><p>The light route, and the one the stock plugin suggests. Paste your ICP, stages and rules into the instructions of the project where you sell. The stock skills are written to use facts they find there before asking.</p></div>
+        <div class="card"><h4>The plugin</h4><p>The durable route. Claude writes the facts into the skills, and you share one package with the team.</p></div>
+      </div>
+      <p style="margin-top:16px">Start with project instructions if you sell alone and want results today. Move to the plugin when a second person needs the same setup.</p>
+
+      <h3>Use permissions for hard limits</h3>
+      <p>Put hard limits in tool permissions, not in skill text. The stock skills are written to follow each connector's settings and to add no restrictions of their own. A blocked tool is therefore the dependable way to stop an action. Skill text is the place for conventions, such as what a call note must contain.</p>
+
+      <h3>What you do not configure here</h3>
+      <p>Stage names, field names and picklists are read live from your CRM. Change them in the CRM, and the skills follow.</p>
+    </section>
+
+    <!-- ============================================================ 05 -->
+    <section id="steps">
+      <h2>How to configure it, in four phases</h2>
+      <p class="lede">Connect your tools, point Claude at your source documents, and ask it to customize the plugin. Claude reads the plugin and your tools, asks about what it cannot find, edits the skills, and hands back a plugin to review and install.</p>
+      <p class="fine">Menu names here are as of mid-November 2026, and Anthropic is renaming some of them.</p>
+
+      <div class="phases">
+        <div class="phase">
+          <h3>Phase 1: Set up</h3>
+          <p class="who"><b>Who:</b> each person. On Team and Enterprise plans, an admin enables the connectors first.</p>
+          <ol class="steps">
+            <li><strong>Install the Sales plugin.</strong> Open "Plugins" in the left sidebar, find Sales and select "Add". Some organizations still see the older sidebar name, "Customize".</li>
+            <li><strong>Connect the tools you sell with.</strong> Connect the CRM first, then email, then calendar. That is the order the plugin's <code>setup</code> skill follows. Salesforce and Microsoft 365 need an admin to enable them before anyone can sign in.</li>
+            <li><strong>Run setup.</strong> Say "set me up". The skill shows what is connected, infers your role from the CRM and builds a starter dashboard. It also learns your writing voice from sent mail and recommends three skills to start with.</li>
+          </ol>
+          <p class="fine">Setup saves nothing by itself. It offers a short voice summary for you to keep in your project instructions.</p>
+        </div>
+        <div class="phase">
+          <h3>Phase 2: Configure</h3>
+          <p class="who"><b>Who:</b> the operator who owns the sales process. A seller can do it for a copy of their own.</p>
+          <ol class="steps">
+            <li><strong>Gather your sources of truth.</strong> Collect the documents where sales decisions already live: ICP, messaging, stage definitions, qualification method and brand guide. Put them where Claude can read them, or attach them.</li>
+            <li><strong>Ask Claude to customize the plugin.</strong> Open the installed plugin, select "Customize", then "Let's go". Claude reads the plugin and your connected tools, confirms what it found and asks about gaps.</li>
+            <li><strong>Review what comes back.</strong> Claude returns a summary of what it learned and a plugin card. Open the skills you will use every day and read them. Then select "Save plugin".</li>
+          </ol>
+        </div>
+        <div class="phase">
+          <h3>Phase 3: Control</h3>
+          <p class="who"><b>Who:</b> the admin for permissions. Each person for their own schedules.</p>
+          <ol class="steps">
+            <li><strong>Set tool permissions.</strong> Each connector tool can be set to "Always allow", "Needs approval" or "Blocked". A sound start is reads allowed, with sends, posts and CRM writes on approval. On Team and Enterprise plans, owners set this for the whole organization.</li>
+            <li><strong>Schedule the routines.</strong> The <code>setup</code> skill offers four: a daily briefing, a CRM hygiene check, an end-of-day close-out and a weekly wrap. Create them from "Scheduled", then "New task".</li>
+            <li><strong>Decide what a scheduled run may do.</strong> The plugin's README advises keeping send, post and write tools on approval for scheduled runs. By design, a scheduled run takes only the actions you set it up to take. Anything else it finds becomes a proposal in its output.</li>
+          </ol>
+        </div>
+        <div class="phase">
+          <h3>Phase 4: Share and maintain</h3>
+          <p class="who"><b>Who:</b> the operator publishes. The admin sets who receives it.</p>
+          <ol class="steps">
+            <li><strong>Roll it out.</strong> Anthropic's tutorial lists three routes: send the plugin file, host it in a Git repository set up as a marketplace, or have an admin add it for the organization.</li>
+            <li><strong>Choose how people get it.</strong> Organization owners set each plugin as available to install, installed by default, required or not available. Enterprise admins can vary that by group.</li>
+            <li><strong>Keep it current.</strong> When a source document changes, tell Claude what changed and save the plugin again. A plugin shared directly updates for its recipients. One published to the organization must be published again.</li>
+          </ol>
+        </div>
+      </div>
+
+      <h3>A prompt to start from</h3>
+      <div class="code">
+        <button class="copy" type="button" id="copy-prompt" data-copy="prompt-text">Copy</button>
+<pre id="prompt-text">Customize the Sales plugin for my company.
+Our sources of truth are the documents in [folder or links].
+Use only what those documents and our connected tools say.
+Where something is undecided, list it as an open question. Do not fill it in.
+Do not copy prices, customer names or email addresses into the plugin.
+Do not rename the plugin or any skill.
+When you finish, show what changed in each skill and what you could not find.</pre>
+      </div>
+      <p>You do not need to cover everything in one session. Come back, tell Claude what to add, and save again.</p>
+      <p>If your organization already distributes the Sales plugin, members cannot edit that managed copy. Its owner should run the customization.</p>
+
+      <h3>In Claude Code</h3>
+      <p>The plugin's README gives two commands for Claude Code. Plugins saved to your Claude account also sync there when you sign in with that account.</p>
+      <p>Do one or the other. A copy you install from the marketplace loads in place of a same-named plugin synced from your account, so the stock plugin would stand in for your company's configured build.</p>
+      <div class="code">
+        <button class="copy" type="button" id="copy-cli" data-copy="cli-text">Copy</button>
+<pre id="cli-text">claude plugin marketplace add anthropics/knowledge-work-plugins
+claude plugin install sales@knowledge-work-plugins</pre>
+      </div>
+
+      <div class="quick">
+        <h3>Short on time?</h3>
+        <ol class="steps">
+          <li>Connect the CRM and email, then run setup.</li>
+          <li>Paste your ICP and stage definitions into your project instructions.</li>
+          <li>Customize the plugin when you want the setup shared.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================================================ 06 -->
+    <section id="facts">
+      <h2>The company facts worth writing down</h2>
+      <p class="lede">The 36 stock skills ask for the company facts below, grouped here into 17 rows. You do not need them all. Start with the rows your roles use.</p>
+
+      <div class="filter" role="group" aria-label="Show the facts a role should get right first">
+        <span class="caps">Show the facts to get right first for</span>
+        <button class="chipbtn" type="button" id="role-all" data-role="all" aria-pressed="true">Everyone</button>
+        <button class="chipbtn" type="button" id="role-sdr" data-role="sdr" aria-pressed="false">SDR or BDR</button>
+        <button class="chipbtn" type="button" id="role-ae" data-role="ae" aria-pressed="false">Account executive</button>
+        <button class="chipbtn" type="button" id="role-am" data-role="am" aria-pressed="false">Account manager</button>
+        <button class="chipbtn" type="button" id="role-lead" data-role="lead" aria-pressed="false">Sales leader</button>
+        <button class="chipbtn" type="button" id="role-founder" data-role="founder" aria-pressed="false">Founder</button>
+      </div>
+      <div class="status"><span><b id="done-count">0</b> of 17 written down</span><span>Ticks are kept in this browser only.</span></div>
+
+      <div class="facts" id="fact-list" data-role="all">
+        <div class="fact" data-roles="sdr founder"><input type="checkbox" id="f01"><div><label for="f01">Ideal customer profile</label><div class="skills"><code>lead-triage</code><code>account-research</code><code>account-tiering</code><code>account-plan</code><code>expansion-whitespace</code></div></div><p class="write">Industries, company size, buyer titles, disqualifiers, how to rank priority.</p></div>
+        <div class="fact" data-roles="sdr founder"><input type="checkbox" id="f02"><div><label for="f02">Product and value proposition</label><div class="skills"><code>draft-outreach</code><code>account-research</code><code>account-plan</code><code>close-plan</code><code>handle-objection</code></div></div><p class="write">What you sell, why it matters, differentiators, proof points cleared for external use.</p></div>
+        <div class="fact" data-roles="ae"><input type="checkbox" id="f03"><div><label for="f03">Qualification method</label><div class="skills"><code>call-prep</code><code>deal-review</code><code>deal-advance-gap</code><code>lead-triage</code><code>stakeholder-map</code></div></div><p class="write">The framework you run and your names for deal roles.</p></div>
+        <div class="fact" data-roles="ae"><input type="checkbox" id="f04"><div><label for="f04">Stage definitions</label><div class="skills"><code>deal-review</code><code>deal-advance-gap</code><code>pipeline-review</code><code>update-opportunity</code><code>deal-signals</code><code>crm-hygiene-check</code></div></div><p class="write">What each stage means and what must be true to leave it.</p></div>
+        <div class="fact" data-roles="ae lead"><input type="checkbox" id="f05"><div><label for="f05">Forecast categories</label><div class="skills"><code>forecast</code><code>deal-slip-scenario</code><code>team-pipeline</code></div></div><p class="write">Which stages count as commit, best case and pipeline.</p></div>
+        <div class="fact" data-roles="lead"><input type="checkbox" id="f06"><div><label for="f06">Quota and coverage</label><div class="skills"><code>deal-slip-scenario</code><code>team-pipeline</code></div></div><p class="write">Where quota is recorded and your coverage target.</p></div>
+        <div class="fact" data-roles=""><input type="checkbox" id="f07"><div><label for="f07">Deal size and cycle length</label><div class="skills"><code>pipeline-review</code><code>deal-signals</code><code>win-loss-review</code><code>expansion-whitespace</code></div></div><p class="write">Typical deal size, size bands, average cycle, any alert thresholds.</p></div>
+        <div class="fact" data-roles="ae"><input type="checkbox" id="f08"><div><label for="f08">Competitors</label><div class="skills"><code>competitive-intelligence</code><code>handle-objection</code><code>account-research</code><code>draft-outreach</code></div></div><p class="write">Who you meet, their pitch, their gaps and your wedge.</p></div>
+        <div class="fact" data-roles="ae"><input type="checkbox" id="f09"><div><label for="f09">Common objections</label><div class="skills"><code>handle-objection</code><code>deal-review</code></div></div><p class="write">The objections you hear and the answers you stand behind.</p></div>
+        <div class="fact" data-roles="founder"><input type="checkbox" id="f10"><div><label for="f10">Voice and signature</label><div class="skills"><code>draft-outreach</code><code>inbox-sweep</code><code>call-summary</code><code>schedule-meeting</code></div></div><p class="write">Tone, greeting and sign-off habits, signature block.</p></div>
+        <div class="fact" data-roles=""><input type="checkbox" id="f11"><div><label for="f11">Brand and templates</label><div class="skills"><code>create-an-asset</code></div></div><p class="write">Deck structure, palette, where approved content lives.</p></div>
+        <div class="fact" data-roles="ae"><input type="checkbox" id="f12"><div><label for="f12">Stakeholders and approvals</label><div class="skills"><code>close-plan</code><code>deal-advance-gap</code><code>stakeholder-map</code></div></div><p class="write">Who must be involved to close, and your internal approval chain with real turnaround times.</p></div>
+        <div class="fact" data-roles="sdr"><input type="checkbox" id="f13"><div><label for="f13">Routing and handoff</label><div class="skills"><code>route-lead</code><code>lead-triage</code></div></div><p class="write">Territory map, size bands, named accounts, who wins ownership, the handoff channel.</p></div>
+        <div class="fact" data-roles="am"><input type="checkbox" id="f14"><div><label for="f14">Renewal and health data</label><div class="skills"><code>renewal-radar</code><code>customer-health</code></div></div><p class="write">Where renewal dates live, health and adoption fields, where success metrics live.</p></div>
+        <div class="fact" data-roles="am"><input type="checkbox" id="f15"><div><label for="f15">Product catalog</label><div class="skills"><code>expansion-whitespace</code></div></div><p class="write">Products or SKUs, typical deal size per product, usage fields.</p></div>
+        <div class="fact" data-roles="lead"><input type="checkbox" id="f16"><div><label for="f16">CRM habits</label><div class="skills"><code>log-activity</code><code>schedule-meeting</code><code>win-loss-review</code><code>competitive-intelligence</code></div></div><p class="write">Required activity fields, how meetings are logged, where competitor and loss reason are recorded.</p></div>
+        <div class="fact" data-roles="lead"><input type="checkbox" id="f17"><div><label for="f17">Team channels</label><div class="skills"><code>rep-context</code><code>weekly-wrap</code></div></div><p class="write">Which chat channels each team uses.</p></div>
+      </div>
+      <p class="fine" style="margin-top:14px">Under each fact are the skills that lean on it. The role buttons follow the starting map in the role section above. Revenue operations owns every row.</p>
+
+      <h3>Three rules for what goes in</h3>
+      <ul class="list">
+        <li><strong>Write decisions, not aspirations.</strong> If the team does not follow a stage definition, the plugin will enforce a fiction.</li>
+        <li><strong>Point to anything that changes often.</strong> For prices and quotas, name the document or field that holds the current figure.</li>
+        <li><strong>Leave out anything sensitive.</strong> A shared plugin should hold no customer names, personal email addresses or credentials.</li>
+      </ul>
+    </section>
+
+    <!-- ============================================================ 07 -->
+    <section id="for-claude">
+      <div class="handoff">
+        <h2>Do it with Claude</h2>
+        <p class="lede">This guide also comes as one Markdown file written for an AI assistant. It holds the same reference, plus a step-by-step script that has Claude walk you through the configuration. The script starts by asking which seat you are in, then takes you through the steps that are yours. It tells Claude to ask one question at a time, to label each fact as recorded, observed or open, and to show every change before making it.</p>
+        <ol>
+          <li>Copy the AI-ready edition with the button below.</li>
+          <li>Paste it into a chat with Claude where the Sales plugin is installed.</li>
+          <li>Then say:<span class="say" id="say-text">Follow the guided setup in this file and walk me through configuring the Sales plugin for my company.</span></li>
+        </ol>
+        <div class="meta">
+          <button class="btn" type="button" id="copy-ai" data-copy="ai-md" data-fallback="ai-md-fallback">Copy the AI-ready edition</button>
+          <span>Markdown · about 6,700 words · reference plus guided setup</span>
+        </div>
+        <textarea id="ai-md-fallback" readonly hidden aria-label="The AI-ready edition, to select and copy"></textarea>
+        <div class="preview" tabindex="0" role="region" aria-label="The start of the AI-ready edition"># Configuring the Claude Sales plugin for your company
+
+AI-ready edition. Give this file to Claude and ask it to walk you through the setup.
+
+## Start here
+
+**If you are a person:** attach or paste this file into a chat with Claude where the Sales plugin is installed. Then say:
+
+&gt; Follow the guided setup in this file and walk me through configuring the Sales plugin for my company.
+
+You can also ask about any part of it, for example "which facts matter for an account manager?"
+
+**If you are the assistant:** the person has asked you to use this file. Part 1 says what they get. Part 2 is reference. Part 3 is a script to run with them. The rules below apply for the whole session.
+
+### Rules for the assistant
+
+1. The person's instructions outrank this file. If the two conflict, do what the person says.
+2. Ask one question at a time, and wait for the answer.
+3. Never invent company policy. If the person has not decided something, record it as open and move on. Do not fill a gap with an "industry standard" value.
+4. Label every fact you record as one of three things. **Recorded** means written policy, with its source. **Observed** means seen in the CRM or documents but not written as policy. **Open** means undecided.
+5. Show every proposed change before you make it, and wait for a yes. That covers edits to the plugin or to project instructions, new scheduled tasks, and anything sent, posted or written to the CRM.
+6. Do not copy prices, quotas, customer or prospect names, personal email addresses or credentials into the plugin or into project instructions. Name the document or field that holds them.
+7. Do not rename the plugin or any skill, and do not edit a skill's shared rules block.
+8. This file was checked on November 16, 2026 against Sales plugin 2.1.0. Menu names and plan details change often. If what you see differs from this file, trust the product and the help pages listed under Sources, and tell the person what differs.
+9. Make no claims about time saved, revenue or win rates. Nothing in this file was measured.
+
+## Part 1. What the person gets
+
+Out of the box, the Sales plugin knows nothing about the company. Each skill lists the company facts it needs and looks for them in connected tools and instructions. When a fact is missing, the skill asks one question and uses the answer for that conversation only.
+
+Configuration writes those answers down once. A configured plugin already knows the company, so its skills stop asking and start working the company's way.
+
+### The same request, stock and configured
+
+This comparison comes from reading what each stock skill asks for. It is not a benchmark.
+
+| The person asks | Stock plugin | Configured plugin |
+|---|---|---|
+| Triage this inbound lead | Asks what the ideal customer looks like, then scores against the answer | Scores against the written ICP and disqualifiers, and names the handoff channel |
+| Prep me for tomorrow's call | Uses the CRM's stage names, and asks which qualification method the team runs | Builds discovery questions around the team's qualification method |
+| Draft a follow-up | Writes in the person's voice if it has learned it, otherwise a neutral one. Knows no company wording rules | Follows the messaging rules, approved proof points and signature |
+| Write my forecast | Infers what it can from the CRM, and asks which stages count as commit | Uses the company's mapping of stages to forecast categories |
+| Which renewals are coming up? | Asks where renewal dates live | Reads the field the company named |
+...</div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 08 -->
+    <section id="tips">
+      <h2>Tips from a real configuration</h2>
+      <p class="lede">These tips come from one real configuration of the stock plugin. The worked example further down gives its numbers.</p>
+      <div class="tipflow">
+          <h3>Before you start</h3>
+          <ul class="tips">
+            <li><b>Point Claude at documents, not memory.</b>Give it the files where decisions already live. It can then quote them and link back to them.</li>
+            <li><b>Name one owner.</b>That person reviews the changes and answers the open questions.</li>
+            <li><b>Say what to ignore.</b>Name the test records, sample data and internal accounts in your CRM. Otherwise they show up in pipeline reviews.</li>
+          </ul>
+          <h3>While configuring</h3>
+          <ul class="tips">
+            <li><b>Give each skill only the facts it uses.</b>In the real build, every skill got a short company section assembled from shared blocks. A call-prep skill does not need routing rules.</li>
+            <li><b>Keep one reference page inside the plugin.</b>It holds every fact, a link to each source document and the list of open decisions.</li>
+            <li><b>Label how sure each fact is.</b>The real build marked facts as recorded, observed or open. Recorded means written policy, observed means seen in the data, and open means undecided.</li>
+            <li><b>Never let the configuration invent policy.</b>The company had no agreed stage exit criteria. The build kept a proposed mapping on the open list, switched off until the owner approves it.</li>
+            <li><b>Encode your wording rules.</b>List banned words, required phrases and claims you cannot make. They then apply to every draft.</li>
+            <li><b>Separate what exists from what is planned.</b>List shipped capabilities apart from the roadmap, so no draft sells the roadmap as built.</li>
+            <li><b>Replace vendor-specific passages.</b>A few stock passages describe one vendor's mechanics, such as a CRM audit query. Swap in your own tool's equivalent.</li>
+            <li><b>Trim the connector list.</b>The stock plugin lists 23 tool servers. The real build kept four and added the meeting recorder in use.</li>
+            <li><b>Keep every name.</b>Do not rename the plugin or its skills. People, saved prompts and schedules call them by name.</li>
+          </ul>
+          <h3>After configuring</h3>
+          <ul class="tips">
+            <li><b>Watch skill length.</b>Every added paragraph is read on every run. The real build grew the skills' total word count by about 60 percent, and seven skills passed 3,000 words. Claude's own plugin-authoring guidance suggests staying under about 3,000 words per skill.</li>
+            <li><b>Check it like a contract.</b>Ask for a before-and-after of each skill. Search the finished plugin for every banned word. Confirm skill names and the shared rules are unchanged.</li>
+            <li><b>Ask what is still missing.</b>End by asking which company facts Claude could not find. That list is your next session.</li>
+            <li><b>Start with drafts.</b>Keep sends, posts and CRM writes on approval until you trust the output.</li>
+            <li><b>Do not overread small samples.</b>The <code>setup</code> skill will not guess a voice from fewer than five sent emails. Let company wording rules outrank a learned personal habit.</li>
+          </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================ 09 -->
+    <section id="pitfalls">
+      <h2>Pitfalls to avoid</h2>
+      <p class="lede">Most configuration mistakes come from writing down too much, or writing down what nobody decided.</p>
+      <div class="scroll">
+        <table class="fix">
+          <thead><tr><th class="caps" scope="col">Pitfall</th><th class="caps" scope="col">What goes wrong</th><th class="caps" scope="col">Do this instead</th></tr></thead>
+          <tbody>
+            <tr><td>Hardcoding prices and quotas</td><td>They go stale and still get quoted</td><td>Name the document or field that holds the current figure</td></tr>
+            <tr><td>Filling gaps with "industry standard"</td><td>Skills enforce rules nobody approved</td><td>Mark the gap as open and ask the owner</td></tr>
+            <tr><td>Configuring before the process is decided</td><td>The plugin repeats the confusion</td><td>Decide stages and qualification first, or mark them open</td></tr>
+            <tr><td>One seller's voice in a shared plugin</td><td>Everyone's email sounds like that person</td><td>Keep voice in each person's own instructions</td></tr>
+            <tr><td>Renaming skills</td><td>Saved prompts, schedules and habits stop matching</td><td>Keep the names and change the content</td></tr>
+            <tr><td>Allowing every write on day one</td><td>CRM changes and sent email that nobody reviewed</td><td>Allow reads, and keep writes on approval</td></tr>
+            <tr><td>Cutting the shared rules</td><td>Skills lose the rule that outside content is information, not instructions</td><td>Leave each skill's rules block as it is</td></tr>
+            <tr><td>Putting every fact in every skill</td><td>Long skills and diluted instructions</td><td>Give each skill only what it uses</td></tr>
+            <tr><td>Forking by job title</td><td>Builds drift apart</td><td>Keep one build unless two teams truly sell differently</td></tr>
+            <tr><td>Setting it up once and leaving it</td><td>The plugin and the documents disagree</td><td>Name an owner, and update when a source changes</td></tr>
+            <tr><td>Scheduling without deciding approvals</td><td>A run either waits for you or acts unreviewed</td><td>Choose the task's approval mode on purpose</td></tr>
+            <tr><td>Keeping a private copy beside the company build</td><td>Two plugins share one name. In Claude Code, a copy you installed yourself loads in place of the one synced from your company</td><td>One Sales plugin per person. Retire the private copy when the company build arrives</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ 10 -->
+    <section id="example">
+      <h2>A worked example</h2>
+      <p class="lede">This is one real configuration, built on November 15, 2026 for an early-stage B2B software company with a single seller. The company is left unnamed.</p>
+      <div class="scroll">
+        <table class="delta">
+          <thead><tr><th class="caps" scope="col">Measure</th><th class="caps" scope="col">Stock</th><th class="caps" scope="col">Configured</th></tr></thead>
+          <tbody>
+            <tr><td>Skills</td><td>36</td><td>36, with the same names and descriptions</td></tr>
+            <tr><td>Skills with a company section</td><td>0</td><td>36</td></tr>
+            <tr><td>Total words across the skills</td><td>About 62,000</td><td>About 100,000</td></tr>
+            <tr><td>Skills over 3,000 words</td><td>0</td><td>7</td></tr>
+            <tr><td>Tool servers listed</td><td>23</td><td>5</td></tr>
+            <tr><td>Company reference page</td><td>None</td><td>One page, 16 sections</td></tr>
+            <tr><td>Source documents linked</td><td>0</td><td>15</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="duo" style="margin-top:30px">
+        <div class="card"><h3>What Claude found</h3><p>One CRM on its default pipeline, work email and calendar, a shared document drive and a meeting recorder. No team chat, enrichment tool or sales-engagement tool. The sales decisions lived in 15 documents, including a messaging framework, ICP and personas, the offer and its terms, and a brand guide.</p></div>
+        <div class="card"><h3>What changed</h3><p>Every skill gained a company section, built from 12 shared blocks plus notes written for that skill. Each skill's tool table now names the tools in use, and its opening step reads company facts instead of asking for them. Six skills had whole passages rewritten for those tools. Five more had smaller edits.</p></div>
+        <div class="card"><h3>What stayed out</h3><p>No prices, prospect names or email addresses were copied into the plugin. No stage exit criteria were invented: a proposed mapping waits on the owner's approval. Skill names, descriptions and the shared rules block are identical to stock.</p></div>
+        <div class="card"><h3>How it was checked</h3><p>Every skill was compared with its original, line by line. The finished package was searched for banned words. Names, descriptions and rules were confirmed unchanged.</p></div>
+      </div>
+
+      <h3>What is still open</h3>
+      <div class="plain">
+        <p>Four decisions went back to the owner: the proposed stage mapping, what amount a deal should carry, where prospect documents are saved, and whether to finish CRM onboarding.</p>
+        <p>The plugin was built and checked the day before this guide was written. It has not been in use long enough to report results.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 11 -->
+    <section id="questions">
+      <h2>Questions people ask</h2>
+      <dl class="faq">
+        <div><dt>Do I have to configure it before using it?</dt><dd>No. Every skill works with nothing connected, from uploaded files or pasted notes. It asks for what it needs.</dd></div>
+        <div><dt>Do I need to be technical?</dt><dd>No. Customizing is a conversation with Claude. A plugin is a folder of plain-text instruction files, and you can open any of them.</dd></div>
+        <div><dt>Which plans include plugins?</dt><dd>Anthropic's help center lists plugins on its paid plans. Sharing a plugin with colleagues and publishing one to an organization need a Team or Enterprise plan.</dd></div>
+        <div><dt>Which CRM does it need?</dt><dd>Any CRM with a connector. The plugin includes HubSpot, Salesforce, Close and Monday, and it reads your CRM's own stages and fields. With no CRM connected, upload a pipeline export.</dd></div>
+        <div><dt>Will it send email or change the CRM by itself?</dt><dd>It acts when you ask, within each connector's permissions. When a skill proposes a change you did not ask for, it shows the change and its evidence first.</dd></div>
+        <div><dt>I am a seller. Should I configure it myself or wait for my company?</dt><dd>Look first for a Sales plugin your organization provides. If there is one, use it and add only your voice, role and schedules. If not, put your own facts in project instructions, and pass what works to whoever owns the sales process.</dd></div>
+        <div><dt>Who has to be involved on a Team or Enterprise plan?</dt><dd>Three seats. The admin enables connectors and sets permissions and availability. The operator writes the company facts. Each seller signs in and keeps their own voice and schedules. The section on who changes what covers each.</dd></div>
+        <div><dt>Can different roles get different setups?</dt><dd>One build serves every role. Personal details stay with each person, and Enterprise admins can set plugin access by group.</dd></div>
+        <div><dt>Can my team edit the shared plugin?</dt><dd>No. Members cannot edit a plugin the organization manages, or one a colleague shared with them. Changes go through its owner.</dd></div>
+        <div><dt>What happens when Anthropic updates the stock plugin?</dt><dd>Do not assume your customized copy picks up the changes. Plan to re-apply your configuration to a new stock version. A single reference page of company facts makes that quick.</dd></div>
+        <div><dt>Does it work in Claude Code?</dt><dd>Yes. The README gives install commands, and plugins saved to your account sync to Claude Code when you sign in.</dd></div>
+        <div><dt>Where do I start if I am short on time?</dt><dd>Connect the CRM and email, then run setup. Next, paste your ICP and stage definitions into your project instructions. Customize the plugin when you want the setup shared.</dd></div>
+      </dl>
+    </section>
+
+    <!-- ============================================================ sources -->
+    <section id="sources">
+      <h2>Sources</h2>
+      <p>Checked on November 16, 2026. Menu names and plan details change often, so treat the linked pages as the authority.</p>
+      <ul class="sources">
+        <li>Sales plugin 2.1.0 by Anthropic: its README, connector notes and 36 skill files, read from the installed plugin. A public copy is in the <a href="https://github.com/anthropics/knowledge-work-plugins">knowledge-work-plugins repository</a>.</li>
+        <li><a href="https://support.claude.com/en/articles/13837440-use-plugins-in-claude">Use plugins in Claude</a>, Claude Help Center: installing, customizing, sharing and publishing plugins.</li>
+        <li><a href="https://academy.claude.com/tutorials/how-to-customize-plugins-in-cowork">How to customize plugins in Claude Cowork</a>, Anthropic tutorial: what Claude reads, asks and changes, and three ways to share.</li>
+        <li><a href="https://support.claude.com/en/articles/13837433-manage-plugins-for-your-organization">Manage plugins for your organization</a>, Claude Help Center: marketplaces, installation preferences and access by group.</li>
+        <li><a href="https://support.claude.com/en/articles/17740565-manage-plugins-skills-and-connectors-from-one-plugins-page">Manage plugins, skills, and connectors from one Plugins page</a>, Claude Help Center: the renamed sidebar entry and its rollout dates.</li>
+        <li><a href="https://support.claude.com/en/articles/11176164">Use connectors to extend Claude's capabilities</a>, Claude Help Center: connecting tools and setting tool permissions.</li>
+        <li><a href="https://claude.com/docs/plugins/admin">Manage plugins for your organization</a>, Claude docs: availability, what members may add, publishing review and group access.</li>
+        <li><a href="https://code.claude.com/docs/en/plugins/loading">Plugin loading reference</a>, Claude Code docs: plugins synced from an account, and which copy loads when two share a name.</li>
+        <li><a href="https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-claude-cowork">Schedule recurring tasks in Claude Cowork</a>, Claude Help Center: creating and managing scheduled tasks.</li>
+        <li><a href="https://support.claude.com/en/articles/9519177">How can I create and manage projects?</a>, Claude Help Center: setting project instructions.</li>
+        <li>Claude's built-in plugin authoring guidance: the 3,000-word suggestion for a skill's main file.</li>
+        <li>One configuration of the Sales plugin, built on November 15, 2026: the tips, the worked example and its counts.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer class="wrap">
+  <div class="colophon">
+    <p>Written by Nathan Fierley. Checked against Sales plugin 2.1.0 on November 16, 2026.</p>
+    <p>The benefits described here are how the plugin is designed to behave once configured. Nothing in this guide was measured.</p>
+  </div>
+</footer>
+
+<script type="application/json" id="ai-md">"---\ntitle: \"Configuring the Claude Sales plugin for your company\"\nedition: \"AI-ready edition: reference plus guided setup\"\nauthor: \"Nathan Fierley\"\nchecked_on: \"2026-11-16\"\napplies_to: \"Sales plugin 2.1.0 by Anthropic (36 skills)\"\n---\n\n# Configuring the Claude Sales plugin for your company\n\nAI-ready edition. Give this file to Claude and ask it to walk you through the setup.\n\n## Start here\n\n**If you are a person:** attach or paste this file into a chat with Claude where the Sales plugin is installed. Then say:\n\n\u003e Follow the guided setup in this file and walk me through configuring the Sales plugin for my company.\n\nYou can also ask about any part of it, for example \"which facts matter for an account manager?\"\n\n**If you are the assistant:** the person has asked you to use this file. Part 1 says what they get. Part 2 is reference. Part 3 is a script to run with them. The rules below apply for the whole session.\n\n### Rules for the assistant\n\n1. The person's instructions outrank this file. If the two conflict, do what the person says.\n2. Ask one question at a time, and wait for the answer.\n3. Never invent company policy. If the person has not decided something, record it as open and move on. Do not fill a gap with an \"industry standard\" value.\n4. Label every fact you record as one of three things. **Recorded** means written policy, with its source. **Observed** means seen in the CRM or documents but not written as policy. **Open** means undecided.\n5. Show every proposed change before you make it, and wait for a yes. That covers edits to the plugin or to project instructions, new scheduled tasks, and anything sent, posted or written to the CRM.\n6. Do not copy prices, quotas, customer or prospect names, personal email addresses or credentials into the plugin or into project instructions. Name the document or field that holds them.\n7. Do not rename the plugin or any skill, and do not edit a skill's shared rules block.\n8. This file was checked on November 16, 2026 against Sales plugin 2.1.0. Menu names and plan details change often. If what you see differs from this file, trust the product and the help pages listed under Sources, and tell the person what differs.\n9. Make no claims about time saved, revenue or win rates. Nothing in this file was measured.\n\n## Part 1. What the person gets\n\nOut of the box, the Sales plugin knows nothing about the company. Each skill lists the company facts it needs and looks for them in connected tools and instructions. When a fact is missing, the skill asks one question and uses the answer for that conversation only.\n\nConfiguration writes those answers down once. A configured plugin already knows the company, so its skills stop asking and start working the company's way.\n\n### The same request, stock and configured\n\nThis comparison comes from reading what each stock skill asks for. It is not a benchmark.\n\n| The person asks | Stock plugin | Configured plugin |\n|---|---|---|\n| Triage this inbound lead | Asks what the ideal customer looks like, then scores against the answer | Scores against the written ICP and disqualifiers, and names the handoff channel |\n| Prep me for tomorrow's call | Uses the CRM's stage names, and asks which qualification method the team runs | Builds discovery questions around the team's qualification method |\n| Draft a follow-up | Writes in the person's voice if it has learned it, otherwise a neutral one. Knows no company wording rules | Follows the messaging rules, approved proof points and signature |\n| Write my forecast | Infers what it can from the CRM, and asks which stages count as commit | Uses the company's mapping of stages to forecast categories |\n| Which renewals are coming up? | Asks where renewal dates live | Reads the field the company named |\n\n### Benefits, by design\n\n- **Fewer repeated questions.** A stock answer lasts one conversation. A configured fact is there every time, for every skill that needs it.\n- **The same rules for everyone.** Every seller's skills use one ICP, one set of stage definitions and one set of wording rules.\n- **Guardrails that travel.** A rule such as \"no pricing by email\" applies to every draft, whoever asks for it.\n- **Honest gaps.** Where the company has not decided something, the configuration can say so. The skill then reports the gap instead of inventing a rule.\n\n### Outcomes by role\n\nOne company configuration serves every role. Roles differ in which skills they use, and so in which facts matter most. Fact IDs refer to section 2.4.\n\n| Role | What changes once the plugin is configured | Facts to get right first |\n|---|---|---|\n| SDR or BDR | Inbound leads are scored against the written ICP and disqualifiers, routed by the company's rules, and handed off in the named channel with the note the company specified | F01, F13, F02 |\n| Account executive | The deal skills check each deal against the company's stage exit criteria and qualification method, and forecasts use one category mapping | F04, F03, F12, F08, F09, F05 |\n| Account manager or CSM | Renewal and health skills read the fields the company named, so upcoming renewals come from data instead of a question | F14, F15 |\n| Sales leader | Every forecast and pipeline review uses one mapping of stages to categories, one coverage target and one loss-reason field | F05, F06, F16, F17 |\n| Revenue operations or enablement | One reference page holds every fact, its source document and the open decisions | All of them, plus connectors, permissions and distribution |\n| Founder or full-cycle seller | The facts they repeat most often are answered once, in every skill that needs them | F01, F02, F10 |\n\n### Seats: who changes what\n\nRoles decide which skills and facts matter. Seats decide who is allowed to change them. On a plan of their own, a person holds all three seats and nothing here conflicts. On a Team or Enterprise plan the seats are usually different people.\n\nIn one line each: admins decide what each tool may do; operators write the company facts down once; sellers use the company build and add their voice.\n\n| Seat | Who it is | Controls | Cannot change |\n|---|---|---|---|\n| Admin | An Owner or Primary Owner of the Claude organization. On Enterprise, also anyone whose custom role manages the organization's libraries. The role labeled Admin in the members list does not open the plugin settings | Which connectors the organization has, tool permissions for everyone, each plugin's availability (not available, available to install, installed by default or required, and by group on Enterprise), and what members may create, share and publish | The sales facts, which belong to the operator |\n| Operator | Whoever owns the sales process and its tools: revenue operations, sales operations, enablement, or a sales leader or founder doing that job | The company facts and skill behavior, the reference page, the open decisions, and each new version of the build | Connectors, tool permissions and who receives the plugin, which belong to the admin |\n| Seller (individual contributor) | A person using Claude on the company's plan | Their own sign-in to each tool, their voice, signature and role, their own project instructions, their scheduled routines, and their own plugins where the organization allows members to add them | A plugin the organization manages or one a colleague shared with them, a plugin marked required, tool permissions set for the organization, and which connectors the organization has (they can ask for one where requests are turned on) |\n\nWhere the seats overlap:\n\n- **Company facts.** A seller can write them in project instructions, and the operator writes them into the plugin. If both exist, a skill can see two answers, and no documented rule says which wins. Once the company build exists, sellers keep only personal facts in their own instructions.\n- **The plugin itself.** Members cannot edit a plugin the organization manages. A seller's own customized copy is a separate plugin with the same name, and the docs give no rule for two same-named plugins in the app. Keep one Sales plugin per person. A good private copy should be offered to the operator and then retired.\n- **Claude Code.** There the rule is documented: when a plugin from any other source has the same name as one synced from the Claude account, the other copy loads and the synced copy is reported as not loaded. A seller who installed the stock plugin from the marketplace will get it in place of the company's synced build until they remove their own copy.\n- **What a tool may do.** The organization's tool permissions win, and members cannot loosen them. If a write tool is blocked, the skill keeps working and hands the person a checklist to apply by hand.\n- **What data a skill sees.** The admin enables a connector, and each person signs in with their own account. Claude acts with that person's access, so the same skill returns different records for different people. Fix access in the CRM, not in the plugin.\n- **Wording.** The operator's wording rules and a seller's learned voice both shape a draft. Say in the build that company wording rules outrank personal habit, and keep voice out of the shared plugin.\n- **Scheduled routines.** Each seller creates their own, and each run acts within the organization's permissions. Keep sends, posts and writes on approval for scheduled runs.\n- **New versions.** A published plugin changes only when it is published again, through review where review is on. Members stay on the approved version until the next one is approved, and pick it up at their next session.\n- **Availability.** \"Installed by default\" can be turned off by a member. \"Required\" cannot. On Enterprise, a group's setting replaces the organization's for that group's members, and the most permissive setting wins across several groups.\n\n### What configuration does not do\n\n- It does not clean a messy CRM or settle a sales process the company has not decided. It makes the plugin repeat the company's decisions, good or bad.\n- It does not come with results. This guide makes no claims about time saved or deals won. The person should measure those on their own team before quoting them.\n\n## Part 2. Reference\n\n### 2.1 Six things to configure, at three levels\n\n| Level | Layer | What it controls | Where it is set | Who usually owns it |\n|---|---|---|---|---|\n| Tools | Connectors | Which tools Claude can read and act in | The plugin's connector list, plus each person's sign-in | An admin, or the person on an individual plan |\n| Tools | Tool permissions | Whether each action is always allowed, needs approval or is blocked | Each connector's tool permissions | Organization owners on Team and Enterprise plans |\n| Company | Company facts | ICP, stages, qualification method, messaging, competitors and CRM habits | Written into the skills | A sales leader, revenue operations or the founder |\n| Company | Skill behavior | How a skill works the company's way: which recorder it reads, how it logs, what it must never do | Edits to individual skills | The same owner |\n| Person | Voice and role | Each person's writing voice, signature, role and book | Learned by the `setup` skill | Each seller |\n| Person | Schedules | Which skills run on a cadence | Scheduled tasks | Each seller or a team lead |\n\nCustomizing the plugin does its work at the company level. The tool and person levels are settings around it.\n\n### 2.2 Two homes for company facts\n\n- **Project instructions** are the light route, and the one the stock plugin suggests. The person pastes the ICP, stages and rules into the instructions of the project where they sell. The stock skills are written to use facts they find there before asking.\n- **The plugin** is the durable route. Claude writes the facts into the skills, and one package is shared with the team.\n\nStart with project instructions when the person sells alone and wants results today. Move to the plugin when a second person needs the same setup.\n\n### 2.3 Limits and what is not configured here\n\n- **Put hard limits in tool permissions, not in skill text.** The stock skills are written to follow each connector's settings and to add no restrictions of their own. A blocked tool is the dependable way to stop an action. Skill text is the place for conventions, such as what a call note must contain.\n- **Stage names, field names and picklists are read live from the CRM.** Change them in the CRM, and the skills follow.\n\n### 2.4 Company facts (F01 to F17)\n\nThe 36 stock skills ask for the facts below. Nobody needs all 17 rows on day one. Start with the rows the person's roles use.\n\n| ID | Fact | What to write down | Skills that lean on it |\n|---|---|---|---|\n| F01 | Ideal customer profile | Industries, company size, buyer titles, disqualifiers, how to rank priority | `lead-triage`, `account-research`, `account-tiering`, `account-plan`, `expansion-whitespace` |\n| F02 | Product and value proposition | What the company sells, why it matters, differentiators, proof points cleared for external use | `draft-outreach`, `account-research`, `account-plan`, `close-plan`, `handle-objection` |\n| F03 | Qualification method | The framework the team runs and its names for deal roles | `call-prep`, `deal-review`, `deal-advance-gap`, `lead-triage`, `stakeholder-map` |\n| F04 | Stage definitions | What each stage means and what must be true to leave it | `deal-review`, `deal-advance-gap`, `pipeline-review`, `update-opportunity`, `deal-signals`, `crm-hygiene-check` |\n| F05 | Forecast categories | Which stages count as commit, best case and pipeline | `forecast`, `deal-slip-scenario`, `team-pipeline` |\n| F06 | Quota and coverage | Where quota is recorded and the coverage target | `deal-slip-scenario`, `team-pipeline` |\n| F07 | Deal size and cycle length | Typical deal size, size bands, average cycle, any alert thresholds | `pipeline-review`, `deal-signals`, `win-loss-review`, `expansion-whitespace` |\n| F08 | Competitors | Who the team meets, their pitch, their gaps and the company's wedge | `competitive-intelligence`, `handle-objection`, `account-research`, `draft-outreach` |\n| F09 | Common objections | The objections the team hears and the answers it stands behind | `handle-objection`, `deal-review` |\n| F10 | Voice and signature | Tone, greeting and sign-off habits, signature block | `draft-outreach`, `inbox-sweep`, `call-summary`, `schedule-meeting` |\n| F11 | Brand and templates | Deck structure, palette, where approved content lives | `create-an-asset` |\n| F12 | Stakeholders and approvals | Who must be involved to close, and the internal approval chain with real turnaround times | `close-plan`, `deal-advance-gap`, `stakeholder-map` |\n| F13 | Routing and handoff | Territory map, size bands, named accounts, who wins ownership, the handoff channel | `route-lead`, `lead-triage` |\n| F14 | Renewal and health data | Where renewal dates live, health and adoption fields, where success metrics live | `renewal-radar`, `customer-health` |\n| F15 | Product catalog | Products or SKUs, typical deal size per product, usage fields | `expansion-whitespace` |\n| F16 | CRM habits | Required activity fields, how meetings are logged, where competitor and loss reason are recorded | `log-activity`, `schedule-meeting`, `win-loss-review`, `competitive-intelligence` |\n| F17 | Team channels | Which chat channels each team uses | `rep-context`, `weekly-wrap` |\n\nThree rules for what goes in:\n\n- **Write decisions, not aspirations.** If the team does not follow a stage definition, the plugin will enforce a fiction.\n- **Point to anything that changes often.** For prices and quotas, name the document or field that holds the current figure.\n- **Leave out anything sensitive.** A shared plugin should hold no customer names, personal email addresses or credentials.\n\n### 2.5 Roles and the skills they use most\n\nThis map is a suggestion drawn from the skill descriptions. The plugin itself assigns nothing, and no skill is locked to a role. Before any configuration, the `setup` skill already infers a role from the CRM (AE, BDR or SDR, leader, or customer success), builds a role-aware dashboard and recommends three skills. Two skills, `team-pipeline` and `rep-context`, are written for leaders.\n\n| Role | Skills they will use most | Configuration tip |\n|---|---|---|\n| SDR or BDR | `lead-triage`, `route-lead`, `account-research`, `draft-outreach`, `schedule-meeting`, `log-activity` | Define a qualified lead, who receives it and what the handoff note must contain |\n| Account executive | `call-prep`, `call-summary`, `stakeholder-map`, `deal-review`, `deal-advance-gap`, `close-plan`, `handle-objection`, `update-opportunity`, `forecast` | Write exit criteria for each stage. Four skills check deals against them |\n| Account manager or CSM | `customer-health`, `renewal-radar`, `expansion-whitespace`, `customer-voice`, `account-plan`, `account-context` | Name the renewal field first. The renewal skill calls that mapping \"the whole game\" |\n| Sales leader | `team-pipeline`, `rep-context`, `pipeline-review`, `forecast`, `win-loss-review`, `deal-slip-scenario` | Fix the category mapping and coverage target once, so every forecast reads the same way |\n| Revenue operations or enablement | `setup`, `crm-hygiene-check`, and spot checks of the rest | Own the reference page: every fact, its source document and the open decisions |\n| Founder or full-cycle seller | The daily skills from every row | Start with the five facts repeated most often |\n\nWhat a fact looks like written down. These lines are invented for a fictional company. They show the level of detail that works: one decision, stated plainly.\n\n- **SDR or BDR:** A lead is qualified when a director or above confirms the problem and agrees to a call. Hand off in the inbound channel with company, contact, trigger and next step.\n- **Account executive:** A deal leaves Discovery only when the economic buyer is named and the next meeting is booked.\n- **Account manager:** Renewal date is the Contract End Date field on the company record. Flag any renewal inside 120 days with no meeting booked.\n- **Sales leader:** Commit means Contract Sent. Best case means Proposal and Negotiation. The coverage target is three times quota.\n\nWhere configuration differs by role:\n\n- **Emphasis.** Every role shares the same facts, but each stresses different ones. Configure first the rows for the roles the company actually has.\n- **Handoffs.** Configuration pays most where work changes hands. Lead to AE needs routing rules and a handoff note. AE to account manager needs renewal dates and products recorded at close.\n- **The personal layer.** Voice, signature, book and territory belong to one person. Let `setup` learn them, and keep them in that person's own instructions, not the shared plugin.\n- **Access.** Owners on Team and Enterprise plans set tool permissions for the whole organization. Claude also acts with each person's own access in the CRM, so CRM roles still apply.\n\nOne build or several: keep one build unless two teams truly sell differently. Separate builds drift apart, and each is another plugin to update. If two segments run different stages or messaging, split by segment, not by job title. Enterprise admins can then set which groups get which plugin.\n\n### 2.6 Tips from one real configuration\n\nBefore starting:\n\n- Point Claude at documents, not memory. It can then quote them and link back to them.\n- Name one owner, who reviews the changes and answers the open questions.\n- Say what to ignore: test records, sample data and internal accounts in the CRM. Otherwise they show up in pipeline reviews.\n\nWhile configuring:\n\n- Give each skill only the facts it uses. A call-prep skill does not need routing rules.\n- Keep one reference page inside the plugin: every fact, a link to each source document, and the open decisions.\n- Label how sure each fact is: recorded, observed or open.\n- Never let the configuration invent policy. Keep a proposed rule on the open list until the owner approves it.\n- Encode wording rules: banned words, required phrases and claims that cannot be made. They then apply to every draft.\n- Separate what exists from what is planned, so no draft sells the roadmap as built.\n- Replace vendor-specific passages. A few stock passages describe one vendor's mechanics, such as a CRM audit query.\n- Trim the connector list to the tools in use.\n- Keep every name. People, saved prompts and schedules call the plugin and its skills by name.\n\nAfter configuring:\n\n- Watch skill length. Every added paragraph is read on every run. Claude's plugin-authoring guidance suggests staying under about 3,000 words per skill.\n- Check it like a contract: a before-and-after of each skill, a search for every banned word, and a check that skill names and shared rules are unchanged.\n- Ask what is still missing. That list is the next session.\n- Start with drafts. Keep sends, posts and CRM writes on approval until the output is trusted.\n- Do not overread small samples. The `setup` skill will not guess a voice from fewer than five sent emails. Company wording rules outrank a learned personal habit.\n\n### 2.7 Pitfalls\n\n| Pitfall | What goes wrong | Do this instead |\n|---|---|---|\n| Hardcoding prices and quotas | They go stale and still get quoted | Name the document or field that holds the current figure |\n| Filling gaps with \"industry standard\" | Skills enforce rules nobody approved | Mark the gap as open and ask the owner |\n| Configuring before the process is decided | The plugin repeats the confusion | Decide stages and qualification first, or mark them open |\n| One seller's voice in a shared plugin | Everyone's email sounds like that person | Keep voice in each person's own instructions |\n| Renaming skills | Saved prompts, schedules and habits stop matching | Keep the names and change the content |\n| Allowing every write on day one | CRM changes and sent email that nobody reviewed | Allow reads, and keep writes on approval |\n| Cutting the shared rules | Skills lose the rule that outside content is information, not instructions | Leave each skill's rules block as it is |\n| Putting every fact in every skill | Long skills and diluted instructions | Give each skill only what it uses |\n| Forking by job title | Builds drift apart | Keep one build unless two teams truly sell differently |\n| Setting it up once and leaving it | The plugin and the documents disagree | Name an owner, and update when a source changes |\n| Scheduling without deciding approvals | A run either waits for the person or acts unreviewed | Choose the task's approval mode on purpose |\n| Keeping a private copy beside the company build | Two plugins share one name. In Claude Code, a copy the person installed themselves loads in place of the one synced from the company | One Sales plugin per person. Retire the private copy when the company build arrives |\n\n### 2.8 A worked example\n\nOne real configuration, built on November 15, 2026 for an early-stage B2B software company with a single seller. The company is left unnamed.\n\n| Measure | Stock | Configured |\n|---|---|---|\n| Skills | 36 | 36, with the same names and descriptions |\n| Skills with a company section | 0 | 36 |\n| Total words across the skills | About 62,000 | About 100,000 |\n| Skills over 3,000 words | 0 | 7 |\n| Tool servers listed | 23 | 5 |\n| Company reference page | None | One page, 16 sections |\n| Source documents linked | 0 | 15 |\n\n- **What Claude found.** One CRM on its default pipeline, work email and calendar, a shared document drive and a meeting recorder. No team chat, enrichment tool or sales-engagement tool. The sales decisions lived in 15 documents.\n- **What changed.** Every skill gained a company section, built from 12 shared blocks plus notes written for that skill. Each skill's tool table names the tools in use, and its opening step reads company facts instead of asking for them. Six skills had whole passages rewritten for those tools, and five more had smaller edits.\n- **What stayed out.** No prices, prospect names or email addresses. No invented stage exit criteria: a proposed mapping waits on the owner's approval. Skill names, descriptions and the shared rules block are identical to stock.\n- **How it was checked.** Every skill was compared with its original, line by line. The package was searched for banned words. Names, descriptions and rules were confirmed unchanged.\n- **What is still open.** Four decisions went back to the owner: the proposed stage mapping, what amount a deal should carry, where prospect documents are saved, and whether to finish CRM onboarding.\n- **Results.** None to report. The plugin was built and checked the day before the guide was written.\n\n### 2.9 Questions people ask\n\n- **Do I have to configure it before using it?** No. Every skill works with nothing connected, from uploaded files or pasted notes. It asks for what it needs.\n- **Do I need to be technical?** No. Customizing is a conversation with Claude. A plugin is a folder of plain-text instruction files, and any of them can be opened.\n- **Which plans include plugins?** Anthropic's help center lists plugins on its paid plans. Sharing a plugin with colleagues and publishing one to an organization need a Team or Enterprise plan.\n- **Which CRM does it need?** Any CRM with a connector. The plugin includes HubSpot, Salesforce, Close and Monday, and it reads the CRM's own stages and fields. With no CRM connected, upload a pipeline export.\n- **Will it send email or change the CRM by itself?** It acts when asked, within each connector's permissions. When a skill proposes a change nobody asked for, it shows the change and its evidence first.\n- **Can different roles get different setups?** One build serves every role. Personal details stay with each person, and Enterprise admins can set plugin access by group.\n- **Can my team edit the shared plugin?** No. Members cannot edit a plugin the organization manages, or one a colleague shared with them. Changes go through its owner.\n- **What happens when Anthropic updates the stock plugin?** Do not assume a customized copy picks up the changes. Plan to re-apply the configuration to a new stock version. A single reference page of company facts makes that quick.\n- **Does it work in Claude Code?** Yes. The README gives two install commands: `claude plugin marketplace add anthropics/knowledge-work-plugins`, then `claude plugin install sales@knowledge-work-plugins`. Plugins saved to a Claude account also sync to Claude Code on sign-in with that account. Do not do both: a copy installed from the marketplace loads in place of a same-named plugin synced from the account.\n- **I am a seller. Should I configure it myself or wait for my company?** Look first for a Sales plugin the organization provides. If there is one, use it and add only your voice, role and schedules. If not, put your own facts in project instructions, and pass what works to whoever owns the sales process.\n- **Who has to be involved on a Team or Enterprise plan?** Three seats. The admin enables connectors and sets permissions and availability. The operator writes the company facts. Each seller signs in and keeps their own voice and schedules.\n\n## Part 3. Guided setup\n\nRun these steps in order with the person. Each step ends with a check. Do not move on until the check passes or the person says to skip it. Keep a running reference page as you go (template in step 5).\n\n### Step 0. Orient\n\nAsk, one at a time:\n\n1. Which seat is the person in: a seller on a company plan, the operator who owns the sales process, the admin of the Claude organization, or all three on a plan of their own? Section \"Seats: who changes what\" in Part 1 defines each.\n2. Which roles will use the plugin: SDR or BDR, account executive, account manager or CSM, sales leader, revenue operations, founder or full-cycle seller?\n3. Is this for one person or a team?\n4. Which tools do they sell with: CRM, email, calendar, meeting recorder, team chat, documents?\n\nThen route by seat:\n\n- **Seller on a company plan.** First have them open Plugins and look for a Sales plugin their organization already provides. If there is one, do steps 1 and 2 with it, then help with their own schedules in step 8. Do not customize a second copy. Collect the questions the skills still ask, and help them send that list to whoever owns the sales process. If there is none, do steps 1 to 4 and write the facts into their project instructions (step 5, route A). Customizing their own copy is fine where the organization lets members add plugins, as a draft to offer the operator.\n- **Operator.** Run every step. Before step 5, ask who the admin is, whether publishing to the organization needs review, and how the build will reach people.\n- **Admin.** Do step 1 for the organization's connectors, then steps 7 and 9. Leave the sales facts to the operator.\n- **All three on one plan.** Run every step in order.\n\nThen tell them the plan in a few lines:\n\n- Which fact rows to cover first, from \"Outcomes by role\" in Part 1.\n- Which home fits: project instructions for one person who wants results today, the plugin once a second person needs the same setup.\n- Who else must be involved: an admin for Salesforce or Microsoft 365 connectors, an owner for organization-wide permissions, the plugin's owner if the organization already distributes a managed copy.\n\n**Check:** the person agrees with the seat, the scope, the home and the owner of the configuration.\n\n### Step 1. Install and connect\n\n1. Confirm the Sales plugin is installed. It is added from \"Plugins\" in the left sidebar. Some organizations still see the older name, \"Customize\".\n2. Connect the tools in this order: CRM, then email, then calendar. That is the order the plugin's `setup` skill follows.\n3. Say what you can and cannot see from this chat. If a tool the person named is not connected, tell them and continue with what is there.\n\n**Check:** the plugin is installed and at least the CRM is connected, or the person has chosen to work from an uploaded pipeline export.\n\n### Step 2. Run setup\n\n1. Have the person say \"set me up\", or run the `setup` skill if they ask you to.\n2. Setup shows what is connected, infers the person's role from the CRM, builds a starter dashboard, learns their writing voice from sent mail and recommends three skills.\n3. Setup saves nothing by itself. Offer the short voice summary for the person to keep in their own project instructions. Voice is personal, so it stays out of the shared plugin.\n\n**Check:** the person has seen their role, their voice summary and the three recommended skills.\n\n### Step 3. Gather the sources of truth\n\n1. Ask where each decision is written down: ICP, messaging, stage definitions, qualification method, brand guide. Ask for a link or an attachment for each.\n2. Ask what to ignore in the CRM: test records, sample data, internal accounts.\n3. Read the sources. List what each one covers and what none of them covers.\n\n**Check:** a list of sources with links, a list of things to ignore, and a first list of gaps.\n\n### Step 4. Collect the facts\n\nFor each fact row in scope, in the order from step 0:\n\n1. Look in the sources and the connected tools first.\n2. Show what you found, with its source, in one or two plain sentences.\n3. Ask the person to confirm, correct or mark it open.\n4. Record the fact with its label: recorded, observed or open. For anything that changes often, record where the current figure lives instead of the figure.\n\nWrite each fact as one decision, stated plainly. The example lines in section 2.5 show the level of detail.\n\n**Check:** every in-scope fact is recorded with a label and a source, or is on the open list with an owner.\n\n### Step 5. Write it down in the chosen home\n\n**Route A, project instructions.** Draft a compact block and show it to the person before they paste it into the project where they sell:\n\n```\nSales facts for [company]. Owner: [name]. Updated: [date].\n\nIdeal customer: [industries, size, buyer titles]\nDisqualifiers: [list]\nStages and exit criteria: [stage: what must be true to leave it]\nQualification method: [name, and our names for deal roles]\nForecast categories: [which stages count as commit, best case, pipeline]\nWording rules: [banned words, required phrases, claims we cannot make]\nWhere current figures live: [prices: document; quota: field]\nIgnore in the CRM: [test records, internal accounts]\nOpen decisions: [decision: owner]\n```\n\n**Route B, the plugin.** The person opens the installed plugin, selects \"Customize\", then \"Let's go\". Or they ask you to customize it in this chat. A prompt to start from:\n\n```\nCustomize the Sales plugin for my company.\nOur sources of truth are the documents in [folder or links].\nUse only what those documents and our connected tools say.\nWhere something is undecided, list it as an open question. Do not fill it in.\nDo not copy prices, customer names or email addresses into the plugin.\nDo not rename the plugin or any skill.\nWhen you finish, show what changed in each skill and what you could not find.\n```\n\nWhile customizing, follow the tips in section 2.6: give each skill only the facts it uses, keep one reference page inside the plugin, and keep every name. One session does not have to cover everything: the person can come back, say what to add, and save again. If the organization already distributes the Sales plugin, members cannot edit that managed copy. Its owner should run the customization.\n\nAfter saving, have the person check that one Sales plugin is turned on. If the stock one is still listed beside the customized copy, they turn the stock one off.\n\nReference page template:\n\n```\nCompany reference page. Owner: [name]. Updated: [date].\n\nFor each fact: ID, the fact as written, label (recorded, observed or open), source link.\nOpen decisions: decision, owner, what is waiting on it.\nIgnore list: records and accounts the skills should skip.\nChange log: date, what changed, which source changed.\n```\n\n**Check:** the person has read the block or the changed skills and said yes.\n\n### Step 6. Review it like a contract\n\n1. Show a before-and-after of each skill the person will use every day.\n2. Search the result for every banned word.\n3. Confirm that the plugin name, the skill names, their descriptions and each shared rules block are unchanged.\n4. Report any skill that now runs past about 3,000 words, and offer to trim it.\n5. List what you could not find. That list is the next session.\n\nThe person then selects \"Save plugin\".\n\n**Check:** the person has saved the plugin, or has pasted the block into project instructions, and has the list of what is still missing.\n\n### Step 7. Set what each tool may do\n\nTool permissions are set by the person, or by an organization owner on Team and Enterprise plans. Walk them through it:\n\n1. Each connector tool can be set to \"Always allow\", \"Needs approval\" or \"Blocked\".\n2. A sound start is reads allowed, with sends, posts and CRM writes on approval.\n3. Anything that must never happen gets \"Blocked\". A blocked tool is a hard limit. A sentence in a skill is not.\n4. Members cannot loosen a permission the organization has set. If the person is a seller, tell them what is blocked for them. When a write tool is blocked, the skill keeps working and hands over a checklist to apply by hand.\n\n**Check:** the person has set permissions, or knows who will.\n\n### Step 8. Schedule the routines\n\n1. The `setup` skill offers four routines: a daily briefing, a CRM hygiene check, an end-of-day close-out and a weekly wrap. They are created from \"Scheduled\", then \"New task\".\n2. Ask which ones the person wants, and at what times.\n3. Keep send, post and write tools on approval for scheduled runs, as the plugin's README advises. By design, a scheduled run takes only the actions it was set up to take. Anything else it finds becomes a proposal in its output.\n4. Have the person choose each task's approval mode on purpose.\n\n**Check:** the chosen routines exist, each with a decided approval mode. Zero routines is a fine answer.\n\n### Step 9. Share and maintain\n\nSkip this step for one person using project instructions.\n\n1. Choose a route to roll it out. Anthropic's tutorial lists three: send the plugin file, host it in a Git repository set up as a marketplace, or have an admin add it for the organization.\n2. Try it with a few sellers first. The operator shares the plugin with specific people, where the organization allows sharing.\n3. Publish it to the organization. The organization's publishing policy is one of three: requires review, open, or off. Under review, nothing reaches other members until a reviewer approves it.\n4. The admin sets its availability: not available, available to install, installed by default or required. \"Installed by default\" can be turned off by a member, and \"required\" cannot. Enterprise admins can vary that by group.\n5. The admin adds the plugin's connectors in organization settings. Making a plugin available does not add its connectors, and each member still signs in with their own account.\n6. Decide whether the stock Sales plugin stays visible beside the configured one. Hiding it avoids two plugins with one name.\n7. Agree how it stays current. When a source document changes, the owner tells Claude what changed and saves the plugin again. A plugin shared directly updates for its recipients. One published to the organization must be published again.\n8. Agree what happens on a new stock version: re-apply the configuration from the reference page.\n9. Ask sellers to retire any private copy, and to remove company facts from their own project instructions.\n\n**Check:** the team has the plugin, and one named person owns updates.\n\n### Step 10. Close out\n\nGive the person a short summary:\n\n- The facts recorded, each with its label and source.\n- The open decisions, each with an owner.\n- What changed: skills edited, permissions set, routines scheduled.\n- What to do in the first week: start with drafts, keep writes on approval, and note every question a skill still asks. Each of those questions is a fact to add next time.\n\n### If the person is short on time\n\n1. Connect the CRM and email.\n2. Run setup.\n3. Paste the ICP and stage definitions into the project instructions.\n4. Customize the plugin later, when the setup needs to be shared.\n\n## Sources\n\nChecked on November 16, 2026. Menu names and plan details change often, so treat the linked pages as the authority.\n\n- Sales plugin 2.1.0 by Anthropic: its README, connector notes and 36 skill files, read from the installed plugin. A public copy is in the knowledge-work-plugins repository: https://github.com/anthropics/knowledge-work-plugins\n- Use plugins in Claude, Claude Help Center: https://support.claude.com/en/articles/13837440-use-plugins-in-claude\n- How to customize plugins in Claude Cowork, Anthropic tutorial: https://academy.claude.com/tutorials/how-to-customize-plugins-in-cowork\n- Manage plugins for your organization, Claude Help Center: https://support.claude.com/en/articles/13837433-manage-plugins-for-your-organization\n- Manage plugins, skills, and connectors from one Plugins page, Claude Help Center: https://support.claude.com/en/articles/17740565-manage-plugins-skills-and-connectors-from-one-plugins-page\n- Use connectors to extend Claude's capabilities, Claude Help Center: https://support.claude.com/en/articles/11176164\n- Manage plugins for your organization, Claude docs (availability, policy, publishing review, group access): https://claude.com/docs/plugins/admin\n- Plugin loading reference, Claude Code docs (synced plugins and name conflicts): https://code.claude.com/docs/en/plugins/loading\n- Schedule recurring tasks in Claude Cowork, Claude Help Center: https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-claude-cowork\n- How can I create and manage projects?, Claude Help Center: https://support.claude.com/en/articles/9519177\n- Claude's built-in plugin authoring guidance: the 3,000-word suggestion for a skill's main file.\n- One configuration of the Sales plugin, built on November 15, 2026: the tips, the worked example and its counts.\n"</script>
+<script>
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  // Copy buttons. If the browser refuses, select the text so the viewer can copy it by hand.
+  function flash(btn, word) {
+    if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+    btn.textContent = word; btn.classList.add('is-done');
+    setTimeout(function () { btn.textContent = btn.dataset.label; btn.classList.remove('is-done'); }, 1900);
+  }
+  function selectNode(node) {
+    try { var r = document.createRange(); r.selectNodeContents(node); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {}
+  }
+  $$('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var src = document.getElementById(btn.dataset.copy), text;
+      try { text = src.tagName === 'SCRIPT' ? JSON.parse(src.textContent) : src.textContent; } catch (e) { text = src.textContent; }
+      text = text.replace(/\s+$/, '') + '\n';
+      var fallback = function () {
+        var box = btn.dataset.fallback && document.getElementById(btn.dataset.fallback);
+        if (box) { box.hidden = false; box.value = text; box.focus(); box.select(); } else { selectNode(src); }
+        flash(btn, 'Selected: now copy');
+      };
+      try { navigator.clipboard.writeText(text).then(function () { flash(btn, 'Copied'); }, fallback); } catch (e) { fallback(); }
+    });
+  });
+
+  // Checklist: ticks are a convenience kept in this browser, and the page works without them.
+  var KEY = 'sales-plugin-guide-facts-v1', saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+  var boxes = $$('#fact-list input[type="checkbox"]'), count = $('#done-count');
+  function tally() { count.textContent = boxes.filter(function (b) { return b.checked; }).length; }
+  boxes.forEach(function (b) {
+    b.checked = !!saved[b.id];
+    b.addEventListener('change', function () {
+      saved[b.id] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+      tally();
+    });
+  });
+  tally();
+
+  // Role buttons dim the rows a role can leave for later. Nothing is hidden.
+  var list = $('#fact-list'), roleBtns = $$('.chipbtn');
+  roleBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      list.dataset.role = btn.dataset.role;
+      roleBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+    });
+  });
+
+  // Contents rail: mark the section being read.
+  var links = $$('.rail a'), byId = {};
+  links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        var a = byId[e.target.id]; if (a) a.setAttribute('aria-current', 'true');
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    $$('main section[id]').forEach(function (s) { io.observe(s); });
+  }
+
+  // If the film cannot load, say so instead of leaving a dead player.
+  var film = $('#film');
+  if (film) film.addEventListener('error', function () { film.classList.add('failed'); }, true);
+
+  // Links that carry #section. The host can show this page narrow at first and then widen it, which leaves the
+  // browser's own jump thousands of pixels off. Go to the section again while the layout settles, unless the
+  // reader has already started to scroll.
+  if (location.hash.length > 1) {
+    var moved = false, until = Date.now() + 3000;
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (ev) {
+      window.addEventListener(ev, function () { moved = true; }, { passive: true });
+    });
+    var settle = function () {
+      if (moved || Date.now() > until) return;
+      var el = null;
+      try { el = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (e) {}
+      if (!el) return;
+      var root = document.documentElement, was = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';                       // jump, do not glide: a glide aims at a stale position
+      window.scrollTo(0, Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - 20));
+      root.style.scrollBehavior = was;
+    };
+    window.addEventListener('load', settle);
+    window.addEventListener('resize', settle);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(settle);
+    [300, 900, 1800, 2600].forEach(function (ms) { setTimeout(settle, ms); });
+  }
+})();
+</script>
+</body>
+</html>

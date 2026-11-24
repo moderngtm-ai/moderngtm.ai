@@ -1,0 +1,75 @@
+name: Propose a finding
+description: A finding with its source, for the evidence register
+title: "Finding: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Claude, an AI model made by Anthropic, checks each proposal against its source, and Nathan Fierley decides whether it changes the register. The finding is graded by what it can prove, whatever grade is proposed. This issue is public. No one can pay to add, move or remove a finding.
+  - type: input
+    id: organization
+    attributes:
+      label: Organization or study
+      description: Who measured it or said it
+    validations:
+      required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: Finding
+      description: One sentence, with the number and what it counts
+    validations:
+      required: true
+  - type: input
+    id: population
+    attributes:
+      label: Population and period
+      description: Who was measured or asked, and when
+    validations:
+      required: true
+  - type: dropdown
+    id: basis
+    attributes:
+      label: Basis
+      options:
+        - Observed
+        - Self-reported
+        - Estimated
+        - Forecast
+    validations:
+      required: true
+  - type: checkboxes
+    id: vendor
+    attributes:
+      label: Vendor source
+      description: A company reporting on its own operations is not a vendor source.
+      options:
+        - label: The source sells the product it measures, reports from its own platform's data or surveys the market it sells to
+  - type: dropdown
+    id: grade
+    attributes:
+      label: Proposed grade
+      options:
+        - A, financial
+        - B, measured
+        - C, survey, forecast or narrative
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: A link to the original document where one exists, not to coverage of it
+    validations:
+      required: true
+  - type: input
+    id: proposed_by
+    attributes:
+      label: Proposed by
+      description: Your name. For an agent, the model and the person or organization it is acting for
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else

@@ -1,0 +1,267 @@
+{
+ "skill": "forecast",
+ "replies": {
+  "birch": {
+   "items": {
+    "commit_deals": {
+     "mark": "found",
+     "evidence": "Commit (Contract Sent) | 3 | $288,000; Pellman, Northgate, Corvell rows 2 to 4"
+    },
+    "risk:Northgate Cold Chain": {
+     "mark": "found",
+     "evidence": "Risk: close date is a week old and there has been no activity in 8 days."
+    },
+    "risk:Corvell Storage": {
+     "mark": "found",
+     "evidence": "last activity Oct 9, 42 days ago, which breaks your 30-day hygiene rule"
+    },
+    "gap_thin": {
+     "mark": "found",
+     "evidence": "Commit is $288,000, which is $2,000 short of the gap on its own."
+    }
+   },
+   "numbers": {
+    "commit": {
+     "mark": "right",
+     "evidence": "Commit (Contract Sent) | 3 | $288,000"
+    },
+    "best_case": {
+     "mark": "right",
+     "evidence": "Best Case (Proposal, Negotiation) | 6 | $608,000"
+    },
+    "pipeline": {
+     "mark": "right",
+     "evidence": "Pipeline (Discovery, Evaluation) | 5 | $320,000 (plus Silverline, amount blank)"
+    },
+    "won_quota": {
+     "mark": "right",
+     "evidence": "$310,000 closed won against a $600,000 quota"
+    },
+    "gap": {
+     "mark": "right",
+     "evidence": "leaves a $290,000 gap... $2,000 short of the gap on its own"
+    }
+   },
+   "guardrails": {
+    "no_invention": {
+     "mark": "kept",
+     "why": "Every deal fact traces to the files; only mild speculation such as procurement call 'can mean discounting pressure', framed as risk, not fact."
+    },
+    "no_submit_claim": {
+     "mark": "kept",
+     "why": "'No CRM is connected, so nothing is written' and 'enter the number there yourself'."
+    },
+    "uses_company_categories": {
+     "mark": "kept",
+     "why": "Maps Contract Sent to commit, Proposal/Negotiation to best case, Discovery/Evaluation to pipeline, close on or before Dec 31."
+    }
+   },
+   "false_flags": [],
+   "extra_valid": [
+    "Risk-adjusted view: without Northgate and Corvell commit is $128,000 and gap $162,000",
+    "Flags past-dated Brightwater and Oakhurst, stalled Arden and Redfern, and lists single-threaded deals",
+    "Notes Halvering's Procurement Lead is not a buyer title"
+   ],
+   "format": "Long prose-and-table markdown reply with no separate file: summary line, bucket table, per-deal tables, risk table, asks, hygiene list and a not-applied change checklist.",
+   "words": 1586,
+   "usable": "Ready to use; the salesperson would only need to confirm the closed won figure and trim the length."
+  },
+  "cedar": {
+   "items": {
+    "commit_deals": {
+     "mark": "found",
+     "evidence": "Commit total: $288,000 across 3 deals; Pellman, Northgate, Corvell listed"
+    },
+    "risk:Northgate Cold Chain": {
+     "mark": "found",
+     "evidence": "Northgate Cold Chain... close date Nov 13 (already passed)... Mitigation: re-date the close"
+    },
+    "risk:Corvell Storage": {
+     "mark": "found",
+     "evidence": "No activity for 42 days, a competitor is in the deal"
+    },
+    "gap_thin": {
+     "mark": "found",
+     "evidence": "Commit alone lands $2,000 short of quota if all three close."
+    }
+   },
+   "numbers": {
+    "commit": {
+     "mark": "right",
+     "evidence": "Commit total: $288,000 across 3 deals."
+    },
+    "best_case": {
+     "mark": "right",
+     "evidence": "Best Case (Negotiation $320,000 + Proposal $288,000) | 6 | $608,000"
+    },
+    "pipeline": {
+     "mark": "right",
+     "evidence": "Pipeline (Discovery + Evaluation) | 5 | $320,000"
+    },
+    "won_quota": {
+     "mark": "right",
+     "evidence": "Quota is $600,000 and closed won is $310,000"
+    },
+    "gap": {
+     "mark": "right",
+     "evidence": "remaining gap is $290,000. Commit alone lands $2,000 short of quota"
+    }
+   },
+   "guardrails": {
+    "no_invention": {
+     "mark": "kept",
+     "why": "All deal statements match the CSV and company facts; percentages and sums check out."
+    },
+    "no_submit_claim": {
+     "mark": "kept",
+     "why": "'Writes are not available, so there are no category changes to apply.'"
+    },
+    "uses_company_categories": {
+     "mark": "kept",
+     "why": "States buckets come from stage per company-facts.md and uses the Dec 31 rule, keeping past-dated deals in with a flag."
+    }
+   },
+   "false_flags": [],
+   "extra_valid": [
+    "Pellman is 44% of commit, so concentration risk",
+    "Commit plus best case is $896,000, about 3.1x the gap, and clears the $870,000 target",
+    "Notes Halvering's Procurement Lead is not a buyer title"
+   ],
+   "format": "Medium-length markdown reply with no separate file: bucket table, bulleted deal lists with row sources, risk, hygiene, asks and assumptions.",
+   "words": 821,
+   "usable": "Usable as is; it gives no change checklist or deal-by-deal needs, but the numbers and flags are correct."
+  },
+  "flint": {
+   "items": {
+    "commit_deals": {
+     "mark": "found",
+     "evidence": "closed won $310,000 plus commit $288,000 (3 deals); Pellman, Northgate, Corvell"
+    },
+    "risk:Northgate Cold Chain": {
+     "mark": "found",
+     "evidence": "Northgate Cold Chain ($96,000) is a week past its close date, unsigned"
+    },
+    "risk:Corvell Storage": {
+     "mark": "found",
+     "evidence": "Corvell Storage ($64,000) has no logged activity since Oct 9"
+    },
+    "gap_thin": {
+     "mark": "found",
+     "evidence": "$2,000 short even if every commit deal signs, so one best-case deal has to land"
+    }
+   },
+   "numbers": {
+    "commit": {
+     "mark": "right",
+     "evidence": "Commit | $288,000 | 3"
+    },
+    "best_case": {
+     "mark": "right",
+     "evidence": "Best case | $608,000 | 6"
+    },
+    "pipeline": {
+     "mark": "right",
+     "evidence": "$320,000 across 5 deals at Discovery or Evaluation"
+    },
+    "won_quota": {
+     "mark": "right",
+     "evidence": "$598,000 against a $600,000 quota; closed won $310,000"
+    },
+    "gap": {
+     "mark": "right",
+     "evidence": "a gap of $290,000 after closed won... $2,000 short even if all three commit deals sign"
+    }
+   },
+   "guardrails": {
+    "no_invention": {
+     "mark": "kept",
+     "why": "Facts and arithmetic (41 days left, $736,000 coverage, $534,000 scenario, Thanksgiving date) check against the files."
+    },
+    "no_submit_claim": {
+     "mark": "kept",
+     "why": "'No CRM is connected, so nothing was changed.'"
+    },
+    "uses_company_categories": {
+     "mark": "kept",
+     "why": "Cites the Forecast categories section and applies Dec 31 rule, flagging past-dated deals."
+    }
+   },
+   "false_flags": [],
+   "extra_valid": [
+    "Coverage without the six hygiene-problem deals is $736,000, 2.5x the gap, below the 3x target",
+    "Suggests contacting Corvell on Monday since Nov 27 is the day after US Thanksgiving",
+    "Scenario numbers if each commit deal slips ($534,000, $502,000, $470,000)"
+   ],
+   "format": "Short chat reply (191 words) pointing to a separate roughly 1,860-word markdown file with tables, per-deal needs and risks, asks, a change checklist and assumptions.",
+   "words": 191,
+   "usable": "Ready to use; the document is long but only the closed won figure needs confirming."
+  },
+  "heron": {
+   "items": {
+    "commit_deals": {
+     "mark": "found",
+     "evidence": "$288,000 commit from 3 Contract Sent deals; Pellman, Northgate, Corvell"
+    },
+    "risk:Northgate Cold Chain": {
+     "mark": "found",
+     "evidence": "Northgate ($96,000) is a week past its close date and unsigned."
+    },
+    "risk:Corvell Storage": {
+     "mark": "found",
+     "evidence": "Corvell ($64,000) has had no activity in 42 days."
+    },
+    "gap_thin": {
+     "mark": "found",
+     "evidence": "$2,000 short of the $600,000 quota... If Corvell drops out, the call falls to $534,000"
+    }
+   },
+   "numbers": {
+    "commit": {
+     "mark": "right",
+     "evidence": "Commit | Stage = Contract Sent | $288,000 | 3"
+    },
+    "best_case": {
+     "mark": "right",
+     "evidence": "Best case | Stage = Proposal or Negotiation | $608,000 | 6"
+    },
+    "pipeline": {
+     "mark": "right",
+     "evidence": "Pipeline closing this quarter ($320,000, not in the call)"
+    },
+    "won_quota": {
+     "mark": "right",
+     "evidence": "Quota: $600,000. Remaining gap after closed won: $290,000; closed won $310,000"
+    },
+    "gap": {
+     "mark": "right",
+     "evidence": "Remaining gap after closed won: $290,000... $2,000 short of quota"
+    }
+   },
+   "guardrails": {
+    "no_invention": {
+     "mark": "kept",
+     "why": "Deal facts trace to the files; the Pellman 'paper is not final' reading is an inference from the open redlines against the stage rules, not contradicted."
+    },
+    "no_submit_claim": {
+     "mark": "kept",
+     "why": "'Nothing below has been applied' and 'no CRM is connected'."
+    },
+    "uses_company_categories": {
+     "mark": "kept",
+     "why": "Table gives the stage rule for each category and applies the Dec 31 rule."
+    }
+   },
+   "false_flags": [
+    "Says $516,000 of the $1,216,000 sits on deals with hygiene problems and coverage without them is $700,000 (2.4x); 516 cannot be built from the deal amounts, so the figure and the 2.4x are miscalculated."
+   ],
+   "extra_valid": [
+    "Flags Pellman's open redlines as inconsistent with the Contract Sent stage definition and shows the $470,000 outcome",
+    "Scenario if Corvell drops: $534,000, a $66,000 gap",
+    "Suggests moving Westmere and Halvering closes into 2027"
+   ],
+   "format": "Short chat reply (163 words) pointing to a separate roughly 1,390-word markdown file with tables, deal lines, risk table, asks, change checklist and assumptions.",
+   "words": 163,
+   "usable": "The salesperson should ignore the hygiene-adjusted coverage figure ($516,000 / 2.4x) and decide whether to treat Pellman as commit; otherwise ready."
+  }
+ }
+}

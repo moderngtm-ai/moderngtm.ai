@@ -1,0 +1,5 @@
+Four of the twelve are priority A and should hear from you today: Castlebrook 3PL (VP Operations, wants carriers booking their own dock slots before peak season), Tidewater Supply (COO, referred by a customer), Greywell Logistics (Head of Fulfillment, UK) and Larchmont Distribution (Director of Operations, 9 sites). Three more are B, one is C and four are disqualified.
+
+Check one disqualification before the no goes out: Elbe Kontrakt Logistik is out only because it is based in Germany. On everything else it is an A, and it is asking to see a demo.
+
+The ranked list, a first touch for each lead and the detail on the top three are in the artifact, `inbound-lead-triage.html`. Two things I assumed because your files do not say: response times (A today, B by Tuesday, November 24, C by Friday, November 27), and that all eight workable leads are yours, since none of the twelve appears in your pipeline, inbox or call notes. It all rests on your files alone, with no CRM, email or web check, and nothing was sent or changed.

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Modern GTM preview image</title>
+<style>
+@font-face{font-family:"Archivo";font-style:normal;font-display:block;font-weight:100 900;font-stretch:62% 125%;src:url(fonts/archivo-latin-wdth-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Serif 4";font-style:normal;font-display:block;font-weight:200 900;src:url(fonts/source-serif-4-latin-opsz-normal.woff2) format("woff2")}
+html,body{margin:0;padding:0}
+body{width:1200px;height:630px;background:#493AC4;color:#fff;position:relative;overflow:hidden;font-family:"Archivo",sans-serif}
+.mark{position:absolute;left:96px;top:92px;width:132px;height:84px}
+.mark i{position:absolute;display:block;height:30px;border-radius:15px}
+.mark .a{left:0;top:0;width:96px;background:#E4F560}
+.mark .b{left:36px;top:54px;width:96px;background:#fff}
+h1{position:absolute;left:92px;top:212px;margin:0;font-size:128px;line-height:1;font-weight:800;font-stretch:112%;letter-spacing:-1px}
+p{position:absolute;left:96px;top:372px;width:960px;margin:0;font-family:"Source Serif 4",serif;font-size:42px;line-height:1.28;font-weight:400;color:rgba(255,255,255,.92)}
+.url{position:absolute;left:96px;bottom:68px;font-size:32px;font-weight:650;font-stretch:108%;color:#E4F560;letter-spacing:.2px}
+</style>
+</head>
+<body>
+<div class="mark"><i class="a"></i><i class="b"></i></div>
+<h1>Modern GTM</h1>
+<p>Evidence, plays and tools for revenue teams of people and agents</p>
+<div class="url">moderngtm.ai</div>
+</body>
+</html>

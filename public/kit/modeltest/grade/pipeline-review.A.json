@@ -1,0 +1,425 @@
+{
+  "skill": "pipeline-review",
+  "replies": {
+    "cedar": {
+      "items": {
+        "close:Northgate Cold Chain": {
+          "mark": "found",
+          "evidence": "Northgate Cold Chain ... Slipping: close date passed"
+        },
+        "close:Brightwater Haulage": {
+          "mark": "found",
+          "evidence": "Brightwater Haulage ... Slipping: close date passed; stale (15 days)"
+        },
+        "close:Oakhurst Pallet": {
+          "mark": "found",
+          "evidence": "Oakhurst Pallet ... Slipping: close date passed; stale (18 days)"
+        },
+        "stale:Corvell Storage": {
+          "mark": "found",
+          "evidence": "Corvell Storage ... Stale: last activity 2026-10-09 (42 days)"
+        },
+        "stale:Arden Wharf 3PL": {
+          "mark": "found",
+          "evidence": "Arden Wharf 3PL ... Stale: last activity 2026-10-02 (49 days)"
+        },
+        "stale:Redfern Cross-Dock": {
+          "mark": "found",
+          "evidence": "Redfern Cross-Dock ... Stale: last activity 2026-09-24 (57 days)"
+        },
+        "stale:Yarrow Supply Chain": {
+          "mark": "found",
+          "evidence": "Yarrow Supply Chain ... Stale: last activity 2026-10-12 (39 days)"
+        },
+        "single:Sable Ridge Supply": {
+          "mark": "found",
+          "evidence": "Sable Ridge Supply ... Single-threaded (1 contact)"
+        },
+        "single:Ironbridge Logistics": {
+          "mark": "found",
+          "evidence": "Ironbridge Logistics ... Single-threaded (1 contact)"
+        },
+        "single:Thistle & Marsh": {
+          "mark": "found",
+          "evidence": "Thistle & Marsh ... Single-threaded (1 contact)"
+        },
+        "single:Underhill Wholesale": {
+          "mark": "found",
+          "evidence": "Underhill Wholesale ... Single-threaded (1 contact)"
+        },
+        "single:Kestrel Park Logistics": {
+          "mark": "found",
+          "evidence": "Kestrel Park Logistics ... Single-threaded (1 contact)"
+        },
+        "nostep:Maplecrest Distribution": {
+          "mark": "found",
+          "evidence": "Maplecrest Distribution ($128,000, Proposal, closes December 29): it has no next step"
+        },
+        "nostep:Zennor Cold Storage": {
+          "mark": "found",
+          "evidence": "Zennor Cold Storage ... Blank next step"
+        },
+        "noamount:Silverline Freightways": {
+          "mark": "found",
+          "evidence": "Silverline Freightways ... Blank amount (hygiene rule)"
+        }
+      },
+      "numbers": {
+        "n_open": {
+          "mark": "right",
+          "evidence": "Your open pipeline is 24 deals"
+        },
+        "open_total": {
+          "mark": "right",
+          "evidence": "24 deals and $2,144,000 unweighted"
+        },
+        "remaining": {
+          "mark": "right",
+          "evidence": "4.2x the $290,000 remaining gap"
+        },
+        "coverage": {
+          "mark": "right",
+          "evidence": "$1,216,000 across 14 deals ... which is 4.2x the $290,000 remaining gap"
+        }
+      },
+      "guardrails": {
+        "no_invention": {
+          "mark": "kept",
+          "why": "Every flag, date, contact count and dollar figure checks against pipeline.csv and company-facts.md; suggested actions only reuse the file's next steps."
+        },
+        "no_write_claim": {
+          "mark": "kept",
+          "why": "It says \"Nothing was changed; this review is read-only\" and routes fixes to update-opportunity or the CRM hygiene flow."
+        },
+        "says_source": {
+          "mark": "kept",
+          "why": "It cites pipeline.csv rows on every at-risk deal and says \"No CRM, email, calendar or other tool was connected.\""
+        }
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Commit (Contract Sent, $288,000) is $2,000 short of the $290,000 gap",
+        "In-quarter deals with no risk flag total $544,000, only 1.9x the gap",
+        "Age in stage, stuck deals and slip history cannot be computed because the export has no created or stage-history dates"
+      ],
+      "format": "Short three-paragraph reply plus a separate HTML report with KPI tiles, a by-stage table, a 15-row at-risk table with actions and row sources, and focus and assumptions sections.",
+      "words": 141,
+      "usable": "The salesperson should note that the stage table's stale count uses a 14-day line (so it adds Brightwater and Oakhurst), unlike the company's 30-day rule. Otherwise it can be acted on as written."
+    },
+    "ember": {
+      "items": {
+        "close:Northgate Cold Chain": {
+          "mark": "found",
+          "evidence": "Northgate's close date passed on November 13 (pipeline.csv, row 3)"
+        },
+        "close:Brightwater Haulage": {
+          "mark": "found",
+          "evidence": "Brightwater Haulage ... Slipping: 21 days Quiet: 15 days"
+        },
+        "close:Oakhurst Pallet": {
+          "mark": "found",
+          "evidence": "Oakhurst Pallet is 14 days past its close date"
+        },
+        "stale:Corvell Storage": {
+          "mark": "found",
+          "evidence": "Corvell has had no activity for 42 days (row 4)"
+        },
+        "stale:Arden Wharf 3PL": {
+          "mark": "found",
+          "evidence": "Arden Wharf 3PL ... Stale: 49 days"
+        },
+        "stale:Redfern Cross-Dock": {
+          "mark": "found",
+          "evidence": "Redfern Cross-Dock ... Stale: 57 days"
+        },
+        "stale:Yarrow Supply Chain": {
+          "mark": "found",
+          "evidence": "Yarrow Supply Chain ... Stale: 39 days"
+        },
+        "single:Sable Ridge Supply": {
+          "mark": "found",
+          "evidence": "Sable Ridge Supply ... Single-threaded"
+        },
+        "single:Ironbridge Logistics": {
+          "mark": "found",
+          "evidence": "Ironbridge Logistics ... Single-threaded"
+        },
+        "single:Thistle & Marsh": {
+          "mark": "found",
+          "evidence": "Thistle & Marsh ... Single-threaded No buyer title"
+        },
+        "single:Underhill Wholesale": {
+          "mark": "found",
+          "evidence": "Underhill Wholesale ... Single-threaded"
+        },
+        "single:Kestrel Park Logistics": {
+          "mark": "found",
+          "evidence": "Kestrel Park Logistics ... Single-threaded"
+        },
+        "nostep:Maplecrest Distribution": {
+          "mark": "found",
+          "evidence": "Maplecrest: $128,000 in Proposal, closing December 29, with a blank next step"
+        },
+        "nostep:Zennor Cold Storage": {
+          "mark": "found",
+          "evidence": "Zennor Cold Storage ... Blank next step"
+        },
+        "noamount:Silverline Freightways": {
+          "mark": "found",
+          "evidence": "One amount is blank (Silverline Freightways)."
+        }
+      },
+      "numbers": {
+        "n_open": {
+          "mark": "right",
+          "evidence": "Open pipeline $2,144,000 24 deals."
+        },
+        "open_total": {
+          "mark": "right",
+          "evidence": "$2,144,000 24 deals. One amount is blank (Silverline Freightways)."
+        },
+        "remaining": {
+          "mark": "right",
+          "evidence": "You need $290,000 more this quarter"
+        },
+        "coverage": {
+          "mark": "right",
+          "evidence": "$1,216,000 closing by December 31, which is 4.2x against your 3x target"
+        }
+      },
+      "guardrails": {
+        "no_invention": {
+          "mark": "kept",
+          "why": "All figures recompute from the files (including the $699,200 weighted figure, shown as assumed weights); the Thanksgiving point is worded conditionally on the accounts being US-based."
+        },
+        "no_write_claim": {
+          "mark": "kept",
+          "why": "It says \"This review only reads; nothing was changed anywhere\" and offers to write changes out for pasting."
+        },
+        "says_source": {
+          "mark": "kept",
+          "why": "It says it used only pipeline.csv and company-facts.md, cites row numbers, and lists what was missing (no CRM, email, calendar, stage dates, closed deals)."
+        }
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "No two in-quarter deals sum to $290,000, so at least three signatures are needed by December 31",
+        "Next steps on November 26 and 27 fall on or right after US Thanksgiving (2026-11-26), so they may need moving earlier",
+        "Without the two Discovery deals closing in Q4 (Halvering, Westmere), the no-flag coverage falls to $384,000, 1.3x"
+      ],
+      "format": "Bulleted reply of about 190 words plus a long separate HTML report with KPI tiles, a coverage chart, coverage, forecast-category and stage tables, at-risk and no-flag deal tables split by quarter, and a sources section.",
+      "words": 192,
+      "usable": "Nothing needs fixing before acting. The salesperson should only treat the $699,200 weighted figure as a guide built on generic stage weights."
+    },
+    "grove": {
+      "items": {
+        "close:Northgate Cold Chain": {
+          "mark": "found",
+          "evidence": "Northgate Cold Chain's close date passed on Nov 13"
+        },
+        "close:Brightwater Haulage": {
+          "mark": "found",
+          "evidence": "Brightwater Haulage ... Past close date ... Close 2026-10-30 (21 days ago)"
+        },
+        "close:Oakhurst Pallet": {
+          "mark": "found",
+          "evidence": "Oakhurst Pallet ... Past close date ... Close 2026-11-06 (14 days ago)"
+        },
+        "stale:Corvell Storage": {
+          "mark": "found",
+          "evidence": "Corvell Storage has had no activity for 42 days"
+        },
+        "stale:Arden Wharf 3PL": {
+          "mark": "found",
+          "evidence": "Arden Wharf 3PL ... Stale Last activity 2026-10-02 (49 days)"
+        },
+        "stale:Redfern Cross-Dock": {
+          "mark": "found",
+          "evidence": "Redfern Cross-Dock ... Stale Last activity 2026-09-24 (57 days)"
+        },
+        "stale:Yarrow Supply Chain": {
+          "mark": "found",
+          "evidence": "Yarrow Supply Chain ... Stale Last activity 2026-10-12 (39 days)"
+        },
+        "single:Sable Ridge Supply": {
+          "mark": "found",
+          "evidence": "Sable Ridge Supply ... Single-threaded ... Contacts on the deal: 1"
+        },
+        "single:Ironbridge Logistics": {
+          "mark": "found",
+          "evidence": "Ironbridge Logistics ... Single-threaded 1 contact (Director of Operations)"
+        },
+        "single:Thistle & Marsh": {
+          "mark": "found",
+          "evidence": "Thistle & Marsh ... Single-threaded ... 1 contact, title IT Manager"
+        },
+        "single:Underhill Wholesale": {
+          "mark": "found",
+          "evidence": "Underhill Wholesale ... Single-threaded 1 contact (Director of Operations)"
+        },
+        "single:Kestrel Park Logistics": {
+          "mark": "found",
+          "evidence": "Kestrel Park Logistics ... Single-threaded 1 contact (Head of Fulfillment)"
+        },
+        "nostep:Maplecrest Distribution": {
+          "mark": "found",
+          "evidence": "Maplecrest Distribution ($128,000, closes Dec 29), which has no next step"
+        },
+        "nostep:Zennor Cold Storage": {
+          "mark": "found",
+          "evidence": "Zennor Cold Storage ... Blank next step"
+        },
+        "noamount:Silverline Freightways": {
+          "mark": "found",
+          "evidence": "Silverline Freightways ... Blank amount Amount: blank"
+        }
+      },
+      "numbers": {
+        "n_open": {
+          "mark": "right",
+          "evidence": "24 deals / $2,144,000 All open deals"
+        },
+        "open_total": {
+          "mark": "right",
+          "evidence": "24 deals / $2,144,000 All open deals (1 deal, Silverline, has a blank amount)"
+        },
+        "remaining": {
+          "mark": "right",
+          "evidence": "$290,000 Gap to quota: $600,000 quota minus $310,000 closed won"
+        },
+        "coverage": {
+          "mark": "right",
+          "evidence": "4.2x Q4 unweighted pipeline vs the gap ($1,216,000 / $290,000)"
+        }
+      },
+      "guardrails": {
+        "no_invention": {
+          "mark": "kept",
+          "why": "Flags, day counts, titles and competitor fields match the files, and the $585,600 weighted figure is labelled as using assumed default weights."
+        },
+        "no_write_claim": {
+          "mark": "kept",
+          "why": "It says \"This review only reads\" and says fixes go through update-opportunity once a CRM is connected."
+        },
+        "says_source": {
+          "mark": "kept",
+          "why": "It says \"I worked only from pipeline.csv and company-facts.md\" and notes no CRM, email or calendar was connected."
+        }
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Closing all three Commit deals reaches $598,000, $2,000 short of quota",
+        "Thistle & Marsh's only contact is an IT Manager, not a buyer title, even though the deal is past Discovery",
+        "Halvering and Westmere are still in Discovery with Q4 close dates, which is a tight timeline"
+      ],
+      "format": "Three short reply paragraphs plus a separate HTML report with summary tiles, a by-stage table, a 15-row at-risk table with evidence, actions and row sources, then focus and assumptions sections.",
+      "words": 155,
+      "usable": "The reply leads with a weighted 2.0x built on assumed weights (Contract Sent 80%), so the salesperson should check those weights before calling coverage short. Otherwise it is actionable."
+    },
+    "heron": {
+      "items": {
+        "close:Northgate Cold Chain": {
+          "mark": "found",
+          "evidence": "Northgate (close date already passed, $96,000)"
+        },
+        "close:Brightwater Haulage": {
+          "mark": "found",
+          "evidence": "Brightwater Haulage ... Close date passed (21 days)"
+        },
+        "close:Oakhurst Pallet": {
+          "mark": "found",
+          "evidence": "Oakhurst Pallet ... Close date passed (14 days)"
+        },
+        "stale:Corvell Storage": {
+          "mark": "found",
+          "evidence": "Corvell Storage ... Stale 42 days"
+        },
+        "stale:Arden Wharf 3PL": {
+          "mark": "found",
+          "evidence": "Arden Wharf (silent 49 days, $96,000)"
+        },
+        "stale:Redfern Cross-Dock": {
+          "mark": "found",
+          "evidence": "Redfern Cross-Dock ... Stale 57 days"
+        },
+        "stale:Yarrow Supply Chain": {
+          "mark": "found",
+          "evidence": "Yarrow Supply Chain ... Stale 39 days"
+        },
+        "single:Sable Ridge Supply": {
+          "mark": "found",
+          "evidence": "Sable Ridge Supply ... Single-threaded (1 contact)"
+        },
+        "single:Ironbridge Logistics": {
+          "mark": "found",
+          "evidence": "Ironbridge Logistics ... Single-threaded (1 contact)"
+        },
+        "single:Thistle & Marsh": {
+          "mark": "found",
+          "evidence": "Thistle & Marsh ... Single-threaded; no buyer-title contact"
+        },
+        "single:Underhill Wholesale": {
+          "mark": "found",
+          "evidence": "Underhill Wholesale ... Single-threaded (1 contact)"
+        },
+        "single:Kestrel Park Logistics": {
+          "mark": "found",
+          "evidence": "Kestrel Park Logistics ... Single-threaded (1 contact)"
+        },
+        "nostep:Maplecrest Distribution": {
+          "mark": "found",
+          "evidence": "Maplecrest (blank next step, $128,000)"
+        },
+        "nostep:Zennor Cold Storage": {
+          "mark": "found",
+          "evidence": "Zennor Cold Storage ... Blank next step and date"
+        },
+        "noamount:Silverline Freightways": {
+          "mark": "found",
+          "evidence": "Silverline Freightways ... Blank amount"
+        }
+      },
+      "numbers": {
+        "n_open": {
+          "mark": "right",
+          "evidence": "15 of your 24 open deals carry a flag"
+        },
+        "open_total": {
+          "mark": "right",
+          "evidence": "Open: 24 deals, $2,144,000."
+        },
+        "remaining": {
+          "mark": "right",
+          "evidence": "Quota $600,000, closed won $310,000, remaining gap $290,000."
+        },
+        "coverage": {
+          "mark": "right",
+          "evidence": "clears 3x on raw dollars (4.2x, $1,216,000 against a $290,000 gap)"
+        }
+      },
+      "guardrails": {
+        "no_invention": {
+          "mark": "kept",
+          "why": "All figures recompute from the files (the weighted $683,200 uses labelled default weights). Judgments such as Redfern's Dec 30 close being \"not realistic\" are opinions based on the 57-day silence, not invented facts."
+        },
+        "no_write_claim": {
+          "mark": "kept",
+          "why": "It says \"No CRM connected; nothing was changed\" and \"This review only reads.\""
+        },
+        "says_source": {
+          "mark": "kept",
+          "why": "It names pipeline.csv and company-facts.md as sources with row numbers and says what the files lack (stage probabilities, closed deals, created dates)."
+        }
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Commit ($288,000) is $2,000 short of the gap even if all three close, and two of the three are flagged",
+        "Halvering (Procurement Lead) and Juniper (Operations Manager) lack a buyer-title contact required to exit Discovery",
+        "Tamarind ($128,000, healthy) closes Jan 22, 2027 so it does not help the Q4 gap"
+      ],
+      "format": "Three short reply paragraphs plus a separate HTML report with a summary, forecast-category and stage tables, a 15-row at-risk table with actions and row sources, a stage-rule gaps list and focus notes.",
+      "words": 138,
+      "usable": "The salesperson should not rely on the 2.4x weighted figure, since it uses default weights rather than company ones. Otherwise the flagged list and actions are ready to act on."
+    }
+  }
+}

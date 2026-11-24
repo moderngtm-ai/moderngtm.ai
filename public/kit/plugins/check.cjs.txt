@@ -1,0 +1,569 @@
+// Scripted checks on the built page: behavior, layout and accessibility. Exit code 1 on any failure.
+//   python3 build.py && python3 mk_test.py && (cd test && python3 -m http.server 8766 &)
+//   NODE_PATH=/opt/npm-tools/node_modules node check.cjs
+const { chromium } = require('playwright');
+const fs = require('fs');
+const AXE = fs.readFileSync('/home/claude/work/axe/node_modules/axe-core/axe.min.js', 'utf8');
+const URL = 'http://localhost:8766/index.html';
+const VIEWS = ['plugins', 'overview', 'skills', 'fit', 'rollout', 'configure', 'marketing', 'customer-support', 'small-business', 'chatgpt-sales', 'method'];
+const SALES = ['overview', 'skills', 'fit', 'rollout', 'configure'];
+let pass = 0, fail = 0;
+const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console.log('FAIL', name, extra === undefined ? '' : JSON.stringify(extra)); } };
+
+(async () => {
+  const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+  const errors = [];
+  const open = async (w, h, opt = {}) => {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, javaScriptEnabled: opt.js !== false, reducedMotion: 'reduce', colorScheme: opt.dark ? 'dark' : 'light', hasTouch: !!opt.touch });
+    const p = await ctx.newPage();
+    p.on('pageerror', e => errors.push(e.message));
+    p.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+    await p.goto(URL + (opt.hash ? '#' + opt.hash : ''), { waitUntil: 'load' });
+    await p.waitForTimeout(450);
+    return p;
+  };
+  const go = async (p, hash) => { await p.evaluate(h => { location.hash = h; }, hash); await p.waitForTimeout(200); };
+  const onView = p => p.evaluate(() => Array.from(document.querySelectorAll('[data-view].on')).map(v => v.dataset.view).join(','));
+  const shown = p => p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).filter(e => !e.hidden).length);
+  const overflow = p => p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+
+  const p = await open(1440, 900);
+  const D = await p.evaluate(() => JSON.parse(document.getElementById('data').textContent));
+  const count = sel => p.locator(sel).count();
+
+  // ------------------------------------------------------------------ structure
+  ok('eleven views', (await p.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).map(v => v.dataset.view))).join() === VIEWS.join());
+  ok('the list of plugins shows first', await onView(p) === 'plugins');
+  ok('36 skills', await count('details.sk') === 36);
+  ok('5 groups, 9 9 9 6 3', (await p.evaluate(() => Array.from(document.querySelectorAll('.grp')).map(g => g.querySelectorAll('details.sk').length))).join() === '9,9,9,6,3');
+  ok('map has 36 links', await count('.map a.chip') === 36);
+  ok('key counts', (await p.locator('[data-view="overview"] .key .chip').allTextContents()).join('|') === '13 skills|6 skills|3 skills|13 skills|1 skill');
+  ok('markings in the map', (await p.evaluate(() => ['k-R', 'k-P', 'k-C', 'k-W', 'k-S'].map(k => document.querySelectorAll('.map a.chip.' + k).length))).join() === '13,6,3,13,1');
+  ok('every in-page link has a target', await p.evaluate(() => Array.from(document.querySelectorAll('a[href^="#"]')).every(a => { const h = a.getAttribute('href').slice(1); return document.getElementById(h) || document.querySelector('[data-view="' + h + '"]'); })));
+  ok('unique ids', await p.evaluate(() => { const ids = Array.from(document.querySelectorAll('[id]')).map(e => e.id); return ids.length === new Set(ids).size; }));
+  ok('nine findings', await count('.finds li') === 9);
+  ok('twelve template fields', await count('[data-view="overview"] .glance > div') === 12);
+  ok('ten connector rows', await count('.glance table tbody tr') === 10);
+  ok('vendor flagged in the opener', (await p.locator('[data-view="overview"] .open .lede').textContent()).includes('is the vendor'));
+  ok('preview is stated', (await p.locator('[data-view="overview"] .open .who').textContent()).includes('Preview'));
+  ok('one h1 in each view', (await p.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).map(v => v.querySelectorAll('h1').length))).join() === '1,1,1,1,1,1,1,1,1,1,1');
+  const skips = await p.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).map(v => {
+    let last = 0, bad = [];
+    v.querySelectorAll('h1,h2,h3,h4').forEach(h => { const n = +h.tagName[1]; if (n > last + 1) bad.push(h.textContent.trim().slice(0, 30)); last = n; });
+    return bad;
+  }).flat());
+  ok('no skipped heading level', skips.length === 0, skips);
+  ok('title', await p.title() === 'Plugins for GTM teams on Modern GTM');
+
+  // ------------------------------------------------------------------ views and addresses
+  for (const v of VIEWS) {
+    await go(p, v);
+    ok('view ' + v, await onView(p) === v);
+    const cur = await p.evaluate(() => { const a = document.querySelector('.tabs a[aria-current]'); return a ? a.getAttribute('href') : ''; });
+    ok('tab marks ' + v, cur === (SALES.includes(v) ? '#' + v : ''), cur);
+    ok('top of ' + v, await p.evaluate(() => window.scrollY) === 0);
+    ok('focus moves to the heading in ' + v, await p.evaluate(() => document.activeElement && document.activeElement.tagName) === 'H1');
+  }
+  await go(p, 'skill-forecast');
+  ok('skill address opens the skill', await onView(p) === 'skills' && await p.evaluate(() => document.getElementById('skill-forecast').open));
+  ok('skill address focuses its row', await p.evaluate(() => document.activeElement === document.querySelector('#skill-forecast summary')));
+  ok('skill is in view', await p.evaluate(() => { const r = document.getElementById('skill-forecast').getBoundingClientRect(); return r.top >= 40 && r.top < 200; }));
+  await go(p, 'facts');
+  ok('facts address shows the guide', await onView(p) === 'configure');
+  ok('facts heading in view', await p.evaluate(() => { const r = document.getElementById('facts').getBoundingClientRect(); return r.top >= 40 && r.top < 200; }));
+  await go(p, 'fact-05');
+  ok('one fact can be addressed', await p.evaluate(() => { const r = document.getElementById('fact-05').getBoundingClientRect(); return r.top >= 40 && r.top < 200; }));
+  await go(p, 'sources');
+  ok('sources live under method', await onView(p) === 'method');
+  await go(p, 'readiness');
+  ok('readiness lives under rollout', await onView(p) === 'rollout');
+  await go(p, 'no-such-place');
+  ok('unknown address falls back to the list of plugins', await onView(p) === 'plugins');
+  await go(p, 'skills');
+  await p.click('#skill-call-prep summary');
+  await p.click('#skill-call-prep .ourread ~ .skfoot [data-shut]');
+  ok('close from the foot', await p.evaluate(() => !document.getElementById('skill-call-prep').open));
+  ok('focus returns to the closed row', await p.evaluate(() => document.activeElement === document.querySelector('#skill-call-prep summary')));
+  // a chip in another view leads to the skill and back
+  await go(p, 'overview');
+  await p.click('.map a[href="#skill-renewal-radar"]');
+  await p.waitForTimeout(200);
+  ok('chip opens its skill from another view', await onView(p) === 'skills' && await p.evaluate(() => document.getElementById('skill-renewal-radar').open));
+  await p.goBack(); await p.waitForTimeout(200);
+  ok('back returns to the overview', await onView(p) === 'overview');
+
+  // ------------------------------------------------------------------ the front door and the one navigation row
+  await go(p, 'plugins');
+  ok('five plugins on the front door', await count('.plist a.pl') === 5);
+  ok('each plugin row leads to a page', await p.evaluate(() => Array.from(document.querySelectorAll('.plist a.pl')).map(a => a.getAttribute('href')).join()) === '#overview,#marketing,#customer-support,#small-business,#chatgpt-sales');
+  ok('each row says how deep its page goes', (await p.locator('.plist .pgo').allTextContents()).join('|') === 'Full entry|Skill list|Skill list|Skill list|Reported by ChatGPT');
+  ok('three depths are explained', await count('.depth > div') === 3);
+  ok('eight other plugins hold 32 leader skills', await count('.lsk details') === 8 && await count('.lsk tbody tr') === 32);
+  ok('Microsoft is named under what is not listed, with what was read and when', await p.evaluate(() => { const li = Array.from(document.querySelectorAll('#not-listed + ul.lim li')); const m = li.filter(x => x.querySelector('strong').textContent === 'Microsoft.'); return li.length === 4 && m.length === 1 && m[0].textContent.includes('Its documentation, last updated on November 3, 2026, describes two sales plugins for Copilot Cowork') && m[0].textContent.includes('Both also need a license for Microsoft Copilot, and Microsoft says Cowork is billed on usage.') && m[0].textContent.includes('lists 18 skills by name: by our count of its table, 17 are in Sales and 6 in Sales for Cowork, with 5 in both') && m[0].textContent.includes('neither plugin has been installed here') && m[0].textContent.includes('read on November 23, 2026'); }));
+  ok('Method says the split between the two Microsoft plugins is our count', (await p.locator('[data-view="method"]').textContent()).includes('How the 18 skills divide between its two plugins is our count from the table in that documentation.'));
+  ok('Method links the two Microsoft pages the note rests on', await p.evaluate(() => { const a = Array.from(document.querySelectorAll('[data-view="method"] a')).map(x => x.getAttribute('href')); return a.some(h => h.startsWith('https://learn.microsoft.com/en-us/dynamics365/sales/')) && a.some(h => h.startsWith('https://www.microsoft.com/en-us/dynamics-365/blog/')); }));
+  const bar = () => p.evaluate(() => { const n = document.getElementById('nav'); const vis = el => !!el && getComputedStyle(el).display !== 'none'; return { group: n.dataset.group, back: vis(n.querySelector('.back')), here: vis(n.querySelector('#here')) ? n.querySelector('#here').textContent : '', lists: Array.from(n.querySelectorAll('.tl')).filter(vis).map(l => l.dataset.nav).join() }; });
+  let b = await bar();
+  ok('on the front door the bar lists the page parts', b.group === 'home' && !b.back && b.here === '' && b.lists === 'home', b);
+  ok('the front door bar says its links stay on the page', (await p.locator('#nav [data-nav="home"] .onp').textContent()) === 'On this page');
+  ok('one navigation row only', await count('.mast nav') === 0 && await count('nav.tabs') === 1);
+  await p.click('.plist a.pl[href="#overview"]'); await p.waitForTimeout(200);
+  b = await bar();
+  ok('inside the sales plugin the bar names it and shows its sections', await onView(p) === 'overview' && b.group === 'sales' && b.back && b.here === 'Claude Sales plugin' && b.lists === 'sales', b);
+  await go(p, 'fit');
+  b = await bar();
+  ok('the bar stays the same across the plugin sections', b.group === 'sales' && b.here === 'Claude Sales plugin' && b.lists === 'sales', b);
+  await p.click('#nav .back'); await p.waitForTimeout(200);
+  ok('the way back returns to the list of plugins', await onView(p) === 'plugins' && await p.evaluate(() => window.scrollY) === 0);
+  await p.click('.plist a.pl[href="#marketing"]'); await p.waitForTimeout(200);
+  b = await bar();
+  ok('a short plugin page has the way back and no sections', await onView(p) === 'marketing' && b.group === 'page' && b.back && b.here === 'Claude Marketing plugin' && b.lists === '', b);
+  ok('marketing lists 8 skills', await count('[data-view="marketing"] tbody tr') === 8);
+  await go(p, 'customer-support');
+  ok('customer support lists 5 skills', await count('[data-view="customer-support"] tbody tr') === 5);
+  await go(p, 'small-business');
+  ok('small business lists 18 workflows', await count('[data-view="small-business"] tbody tr') === 18);
+  // ------------------------------------------------------------------ ChatGPT for Sales: 18 skills as ChatGPT reported them
+  await go(p, 'chatgpt-sales');
+  b = await bar();
+  ok('the ChatGPT entry has the way back, its name and five jumps down the page', b.group === 'gpt' && b.back && b.here === 'ChatGPT for Sales' && b.lists === 'gpt' && await count('#nav [data-nav="gpt"] a') === 5, b);
+  ok('every jump in that row lands inside the entry', await p.evaluate(() => Array.from(document.querySelectorAll('#nav [data-nav="gpt"] a')).every(a => { const t = document.getElementById(a.getAttribute('href').slice(1)); return !!t && !!t.closest('[data-view="chatgpt-sales"]'); })));
+  ok('the ChatGPT entry carries the twelve template fields', await count('[data-view="chatgpt-sales"] .glance > div') === 12);
+  ok('it says at the top that its facts are reported', (await p.locator('[data-view="chatgpt-sales"] .lede').textContent()).includes('is reported to do') && (await p.locator('[data-view="chatgpt-sales"] .who').textContent()).includes('Reported by ChatGPT and checked by Claude'));
+  ok('it says who read the plugin, how that was checked and what it does not show', await count('#gpt-source ~ .g3 .def') === 3 && (await p.locator('#gpt-source ~ .g3').textContent()).includes('We did not read the files'));
+  ok('18 skills in six groups', await count('details.gsk') === 18 && await count('.ggrp') === 6 && await p.evaluate(() => Array.from(document.querySelectorAll('.ggrp')).map(g => g.querySelectorAll('details.gsk').length).join()) === '2,4,3,4,3,2');
+  ok('every ChatGPT skill has four lines on using it and ten facts', await p.evaluate(() => Array.from(document.querySelectorAll('details.gsk')).every(d => d.querySelectorAll('.gcard .runkv > div').length === 4 && d.querySelectorAll('dl.kv > div').length === 10 && d.querySelector('.does').textContent.trim().length > 40)));
+  ok('every example request calls @Sales and is marked as ours', await p.evaluate(() => Array.from(document.querySelectorAll('details.gsk')).every(d => d.querySelector('.sayt').textContent.indexOf('@Sales ') === 0 && d.querySelector('.runhead p').textContent.indexOf('The example request is ours and was not run') > 0)));
+  ok('the GTM job on each card is marked as our read', await p.evaluate(() => Array.from(document.querySelectorAll('details.gsk')).every(d => { const dts = Array.from(d.querySelectorAll('dl.kv dt')); return dts[dts.length - 1].textContent === 'GTM job Our read'; })));
+  ok('the tallies match the cards', await p.evaluate(() => { const tags = Array.from(document.querySelectorAll('details.gsk .fitm .t')).map(t => t.textContent); const n = w => tags.filter(t => t === w).length; const tally = Array.from(document.querySelectorAll('.gtally b')).map(x => x.textContent).join('|'); return n('Can be scheduled') === 7 && n('For a named seller') === 5 && tally === '7 of 18|5 of 18|18 of 18|None'; }));
+  ok('16 skills are placed in a GTM job and two are named as outside', await count('[data-view="chatgpt-sales"] .glance .jobs .chip') === 16 && await count('[data-view="chatgpt-sales"] .glance .jobs + .note .chip') === 2);
+  ok('35 Claude skills are placed in a GTM job and one is named as outside', await count('[data-view="overview"] .glance .jobs .chip') === 35 && await count('[data-view="overview"] .glance .jobs li[id^="cjob-"]') === 11 && await count('[data-view="overview"] .glance .jobs + .note .chip') === 1);
+  ok('every skill link in the entry has its card', await p.evaluate(() => Array.from(document.querySelectorAll('[data-view="chatgpt-sales"] a[href^="#gpt-"]')).every(a => !!document.getElementById(a.getAttribute('href').slice(1)))));
+  ok('46 integrations in 10 categories, with one in two categories', await p.evaluate(() => { const rows = Array.from(document.querySelectorAll('#gpt-apps ~ .scroll tbody tr')); return rows.length === 10 && rows.reduce((n, r) => n + Number(r.children[1].textContent), 0) === 47; }) && (await p.locator('#gpt-apps ~ .lead2').textContent()).includes('46 optional integrations'));
+  ok('33 integrations are named and 13 are counted as codes', await p.evaluate(() => { const rows = Array.from(document.querySelectorAll('#gpt-apps ~ .scroll tbody tr')); let named = 0, codes = 0; rows.forEach(r => { const c = r.children[2]; const m = c.querySelector('.more-n'); const mm = m ? Number(m.textContent.replace(/\D+/g, '')) : 0; codes += mm; named += c.textContent.replace(m ? m.textContent : '', '').split(',').filter(x => x.trim()).length; }); return named === 33 && codes === 14; }));
+  ok('the three counts of apps are set out and not reconciled', (await p.locator('[data-view="chatgpt-sales"]').textContent()).includes('Three counts do not agree') );
+  ok('the plugin is quoted once', await p.evaluate(() => (document.querySelector('[data-view="chatgpt-sales"]').textContent.match(/@Sales Help me get started/g) || []).length) === 1);
+  ok('setup has six parts and rollout keeps the report and our read apart', await count('#gpt-setup ~ .g2 .def') === 6 && await count('#gpt-rollout ~ .g2 .gsplit') === 2 && (await p.locator('#gpt-rollout ~ .g2 .ourread h3').textContent()).includes('Not from the plugin'));
+  ok('the two plugins sit side by side on 13 facts and 13 jobs', await count('#side-by-side ~ .scroll:nth-of-type(1) tbody tr') === 13 && await count('#gpt-by-job ~ .scroll tbody tr') === 13 && await count('#gpt-by-job ~ .scroll tbody tr[id^="job-"]') === 13);
+  ok('the job table links to both entries', await p.evaluate(() => { const t = document.querySelector('#gpt-by-job ~ .scroll'); const a = Array.from(t.querySelectorAll('a.chip')); return a.filter(x => x.getAttribute('href').indexOf('#skill-') === 0).length === 35 && a.filter(x => x.getAttribute('href').indexOf('#gpt-') === 0).length === 16 && a.every(x => !!document.getElementById(x.getAttribute('href').slice(1))); }));
+  ok('nothing on the entry is rated', await p.evaluate(() => !/\b(Core|Daily driver|Poor fit|Know the overlap)\b/.test(document.querySelector('[data-view="chatgpt-sales"]').textContent)));
+  await go(p, 'gpt-review-forecast');
+  ok('a ChatGPT skill opens by its address', await onView(p) === 'chatgpt-sales' && await p.evaluate(() => document.getElementById('gpt-review-forecast').open && document.activeElement === document.querySelector('#gpt-review-forecast summary')));
+  await p.click('#gpt-review-forecast [data-gstep]:nth-of-type(2)'); await p.waitForTimeout(200);
+  ok('Next opens the following skill and closes this one', await p.evaluate(() => !document.getElementById('gpt-review-forecast').open && document.getElementById('gpt-get-rep-call-feedback').open && location.hash === '#gpt-get-rep-call-feedback'));
+  await p.click('#gpt-get-rep-call-feedback [data-gstep]:nth-of-type(1)'); await p.waitForTimeout(200);
+  ok('Previous goes back', await p.evaluate(() => document.getElementById('gpt-review-forecast').open && !document.getElementById('gpt-get-rep-call-feedback').open));
+  await p.click('#gpt-review-forecast [data-gshut]'); await p.waitForTimeout(200);
+  ok('Close at the foot shuts the skill and keeps the place', await p.evaluate(() => { const d = document.getElementById('gpt-review-forecast'); const r = d.querySelector('summary').getBoundingClientRect(); return !d.open && document.activeElement === d.querySelector('summary') && r.top > 0 && r.bottom < innerHeight; }));
+  ok('the first and last skills have no neighbour on one side', await p.evaluate(() => document.querySelector('#gpt-index .skfoot button').disabled && Array.from(document.querySelectorAll('#gpt-review-rep-call-trends .skfoot button'))[1].disabled));
+  await p.click('#gpt-index summary'); await p.waitForTimeout(100);
+  await p.click('#gpt-index [data-copy]'); await p.waitForTimeout(200);
+  ok('the example request can be copied', /Copied|Selected/.test(await p.locator('#gpt-index [data-copy]').textContent()));
+  await p.click('#nav .back'); await p.waitForTimeout(200);
+  ok('the way back from the ChatGPT entry returns to the list of plugins', await onView(p) === 'plugins');
+  await go(p, 'chatgpt-sales');
+  ok('both vendors are flagged', (await p.locator('[data-view="chatgpt-sales"] .lede').textContent()).includes('is the vendor') && (await p.locator('[data-view="plugins"] .lede').textContent()).includes('both AI labs and vendors'));
+  await go(p, 'leader-skills');
+  ok('leader skills sit on the front door', await onView(p) === 'plugins' && await p.evaluate(() => { const r = document.getElementById('leader-skills').getBoundingClientRect(); return r.top >= 40 && r.top < 220; }));
+  await go(p, 'method');
+  b = await bar();
+  ok('method has the way back', b.back && b.here === 'Method and sources' && b.lists === '', b);
+  ok('no link points at the two pages this one replaced', await p.evaluate(() => Array.from(document.querySelectorAll('a[href]')).filter(a => /9PZxMZSoUBcLnsCJXgpiKG|AxiEd8sKnLcxSCXhRKCUuJ|7FpEVwvJEsa2B1qmuPUnn8/.test(a.getAttribute('href'))).length) === 0);
+
+  // ------------------------------------------------------------------ the skills list
+  await go(p, 'skills');
+  ok('all shown at start', await shown(p) === 36);
+  ok('five marking filters, one of them for setup alone', await count('.kinds button') === 5 && await count('.kinds button[data-kind="k-S"]') === 1);
+  await p.selectOption('#role-s', 'ae');
+  const aeN = D.skills.filter(s => s.roles.ae > 0).length;
+  ok('role filter', await shown(p) === aeN, [await shown(p), aeN]);
+  ok('count text names the role', (await p.locator('#sk-count').textContent()).includes('Showing ' + aeN + ' of 36 skills for Account executive'));
+  ok('row says built for this role', (await p.locator('#skill-forecast .fitm').textContent()).startsWith('Built for this role. '));
+  ok('role choice reaches the other menus', await p.evaluate(() => Array.from(document.querySelectorAll('[data-pick="role"]')).every(s => s.value === 'ae')));
+  await p.click('.kinds [data-kind="k-W"]');
+  const aeW = D.skills.filter(s => s.roles.ae > 0 && s.cls === 'W').length;
+  ok('marking filter with role', await shown(p) === aeW, [await shown(p), aeW]);
+  await p.click('.kinds [data-kind="k-C"]');
+  const aeWC = D.skills.filter(s => s.roles.ae > 0 && (s.cls === 'W' || s.cls === 'C')).length;
+  ok('two markings add up', await shown(p) === aeWC);
+  ok('clear appears', await p.locator('#sk-clear').isVisible());
+  await p.click('#sk-clear');
+  ok('clear resets', await shown(p) === 36 && await p.locator('#role-s').inputValue() === 'all');
+  ok('pressed states reset', await count('.kinds [aria-pressed="true"]') === 0);
+  await p.fill('#q', 'renewal');
+  const nRen = await shown(p);
+  ok('search narrows', nRen > 0 && nRen < 36, nRen);
+  ok('empty groups hide', await p.evaluate(() => Array.from(document.querySelectorAll('.grp')).some(g => g.hidden)));
+  await p.fill('#q', 'zzzz');
+  ok('empty state', await shown(p) === 0 && await p.locator('#sk-empty').isVisible());
+  await p.click('#sk-empty-clear');
+  ok('empty state clears', await shown(p) === 36);
+  await p.selectOption('#motion-s', 'fin');
+  const fc = D.skills.find(s => s.id === 'forecast').seg.fin;
+  const want = fc[0] === 0 ? D.value['0'] : D.value[String(fc[0])] + ', ' + D.freq[String(fc[1])].toLowerCase();
+  ok('row carries the rating for the chosen motion', await p.locator('#skill-forecast .fitm').textContent() === want, want);
+  ok('setup is marked as a first run that can be repeated', await p.locator('#skill-setup .fitm').textContent() === 'First run, and again as needed');
+  await p.selectOption('#motion-s', 'ent');
+  // previous and next
+  await p.click('#skill-setup summary');
+  ok('first skill has no previous', await p.locator('#skill-setup [data-step="-1"]').isDisabled());
+  ok('next is named', await p.locator('#skill-setup [data-step="1"]').textContent() === 'Next: daily-briefing');
+  await p.click('#skill-setup [data-step="1"]');
+  ok('next opens the following skill and closes this one', await p.evaluate(() => document.getElementById('skill-daily-briefing').open && !document.getElementById('skill-setup').open));
+  ok('focus lands on the next row', await p.evaluate(() => document.activeElement === document.querySelector('#skill-daily-briefing summary')));
+  ok('next row sits under the bar', await p.evaluate(() => { const r = document.querySelector('#skill-daily-briefing summary').getBoundingClientRect(); return r.top >= 40 && r.top < 160; }));
+  ok('address follows', await p.evaluate(() => location.hash) === '#skill-daily-briefing');
+  await p.click('#skill-daily-briefing [data-step="-1"]');
+  ok('previous goes back', await p.evaluate(() => document.getElementById('skill-setup').open && !document.getElementById('skill-daily-briefing').open));
+  await p.selectOption('#role-s', 'lead');
+  await p.click('#sk-close');
+  const leadIds = D.skills.filter(s => s.roles.lead > 0).map(s => s.id);
+  await p.click('#skill-' + leadIds[0] + ' summary');
+  ok('next respects the filter', await p.locator('#skill-' + leadIds[0] + ' [data-step="1"]').textContent() === 'Next: ' + leadIds[1]);
+  await p.click('#sk-open');
+  ok('open all opens what is shown', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).every(e => e.hidden || e.open)));
+  await p.click('#sk-close');
+  ok('close all', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).every(e => !e.open)));
+  await go(p, 'skill-lead-triage');
+  ok('a hidden skill clears the filters when addressed', await shown(p) === 36 && await p.evaluate(() => document.getElementById('skill-lead-triage').open));
+  ok('every skill states fact before our read', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).every(e => { const k = e.querySelector('.body > .kv'), r = e.querySelector('.body > .ourread'); return k && r && (k.compareDocumentPosition(r) & 4); })));
+  // the card after the cross-lab checks: four facts, a marking that follows them, and tools split by direction
+  ok('every card gives the four facts in order', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).every(e => Array.from(e.querySelectorAll('.acts4 .l')).map(x => x.textContent).join() === 'Records,Customer email,Its own output,On a schedule')));
+  ok('the marking in a card is the marking on its name', await p.evaluate(() => { const W = { 'k-R': 'Reads and proposes.', 'k-P': 'Shares its output.', 'k-C': 'Writes for customers.', 'k-W': 'Changes records.', 'k-S': 'First run.' }; return Array.from(document.querySelectorAll('details.sk')).every(e => { const c = e.querySelector('summary .chip'); const k = Object.keys(W).find(x => c.classList.contains(x)); const dt = Array.from(e.querySelectorAll('.body > .kv dt')).find(x => x.textContent === 'What it can do when you ask'); return k && dt && dt.nextElementSibling.querySelector('strong').textContent === W[k]; }); }));
+  ok('a card marked Reads and proposes gives no customer email', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).filter(e => e.querySelector('summary .chip.k-R')).every(e => e.querySelector('.acts4 > div:nth-child(2) .nope'))));
+  ok('a card that shares its output says so and gives no customer email', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).filter(e => e.querySelector('summary .chip.k-P')).every(e => e.querySelector('.acts4 > div:nth-child(2) .nope') && e.querySelector('.acts4 > div:nth-child(3) .yes'))));
+  ok('a card that writes for customers says how', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).filter(e => e.querySelector('summary .chip.k-C')).every(e => e.querySelector('.acts4 > div:nth-child(2) .yes'))));
+  ok('a card that changes records says which', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).filter(e => e.querySelector('summary .chip.k-W')).every(e => e.querySelector('.acts4 > div:nth-child(1) .yes'))));
+  ok('the card labels are the corrected ones', await p.evaluate(() => { const all = Array.from(document.querySelectorAll('details.sk .body > .kv > div > dt')).map(d => d.textContent); return !all.includes('What it can change') && !all.includes('Company facts it asks for') && all.filter(x => x === 'Company facts it uses').length === 36 && all.filter(x => x === 'Reads from').length === 36 && all.filter(x => x === 'Hands work to').length === 36; }));
+  ok('a tool a skill delivers to says what goes there', await p.evaluate(() => { const dts = Array.from(document.querySelectorAll('details.sk .body > .kv > div > dt')).filter(d => d.textContent === 'Delivers to'); return dts.length > 15 && dts.every(d => Array.from(d.nextElementSibling.querySelectorAll('.t')).every(t => t.querySelector('.tw') && t.querySelector('.tw').textContent.length > 6)); }));
+  ok('handle-objection is marked as writing for customers', await p.evaluate(() => !!document.querySelector('#skill-handle-objection summary .chip.k-C')));
+  ok('the key explains five markings and says a marking is not a permission', await count('[data-view="overview"] .key li') === 5 && (await p.locator('[data-view="overview"]').textContent()).includes('not a permission'));
+  ok('company facts link into the guide', await p.evaluate(() => document.querySelector('#skill-lead-triage .kv a[href^="#fact-"]') !== null));
+  // the card after the second round of cross-lab checks
+  const rowOf = `(e, label) => { const dt = Array.from(e.querySelectorAll('.body > .kv > div > dt')).find(x => x.textContent === label); return dt ? dt.nextElementSibling.textContent : ''; }`;
+  ok('the key says what Reads and proposes leaves open', await p.evaluate(() => { const t = document.querySelector('[data-view="overview"] .key').textContent; return t.includes('can be a page that others read') && t.includes('where a schedule was set up to make it') && !t.includes('or email it'); }));
+  ok('the note on a name covers scheduled runs', (await p.locator('[data-view="overview"] .howread').first().textContent()).includes('On a schedule, any skill takes the actions the schedule was set up to take, within what its connectors allow. An action that outside content dictates or asks for stays a proposal.'));
+  ok('of the skills that share their output, only daily-briefing delivers by email', await p.evaluate((rowOf) => { const f = eval(rowOf); return Array.from(document.querySelectorAll('details.sk')).filter(e => e.querySelector('summary .chip.k-P')).every(e => f(e, 'Delivers to').includes('Email') === (e.id === 'skill-daily-briefing')); }, rowOf));
+  ok('documents are a destination on two cards only', await p.evaluate((rowOf) => { const f = eval(rowOf); const ids = Array.from(document.querySelectorAll('details.sk')).filter(e => f(e, 'Delivers to').includes('Documents')).map(e => e.id).sort().join(); return ids === 'skill-account-plan,skill-close-plan'; }, rowOf));
+  ok('every card that changes records names a record system it delivers to', await p.evaluate((rowOf) => { const f = eval(rowOf); return Array.from(document.querySelectorAll('details.sk')).filter(e => e.querySelector('summary .chip.k-W')).every(e => /CRM|Calendar|Sales engagement tool/.test(f(e, 'Delivers to'))); }, rowOf));
+  ok('eight cards say a scheduled run never writes a value, a record or a contact from outside', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk .acts4 > div:nth-child(4)')).filter(d => d.textContent.includes('A value, a record or a contact taken from a transcript, an email, a chat or enrichment is never written on a schedule')).length === 8));
+  ok('no card leaves its own output as a bare line where it also sends or writes', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).filter(e => e.querySelector('summary .chip.k-W, summary .chip.k-C')).every(e => e.querySelector('.acts4 > div:nth-child(3)').textContent.replace('Its own output', '').trim() !== 'Stays in Claude, for you to read.')));
+  ok('a handoff, a drawn-on skill and a read can each carry the file\'s condition', await p.evaluate((rowOf) => { const f = eval(rowOf); const g = id => document.getElementById('skill-' + id); return f(g('lead-triage'), 'Hands work to').includes('as one suggested first touch') && f(g('close-plan'), 'Draws on').includes('when it ran in the same conversation') && f(g('rep-context'), 'Reads from').includes('shared inbox') && f(g('setup'), 'Hands work to').includes('once CRM, email and calendar are connected'); }, rowOf));
+  ok('the three overlap ratings moved on November 23 show on their cards', await p.evaluate(() => { const lvl = id => { const dt = Array.from(document.querySelectorAll('#skill-' + id + ' .ourread dt')).find(x => x.textContent === 'Before you rely on it'); return dt.nextElementSibling.querySelector('strong').textContent; }; return ['crm-hygiene-check', 'deal-advance-gap', 'end-of-day'].every(id => lvl(id) === 'Know the overlap.'); }));
+  ok('the role marks moved on November 23 show on their cards', await p.evaluate(() => { const d = JSON.parse(document.getElementById('data').textContent); const r = id => d.skills.find(s => s.id === id).roles; return r('deal-slip-scenario').ae === 2 && r('competitive-intelligence').ae === 2 && r('crm-hygiene-check').ae === 2 && r('crm-hygiene-check').mgr === 1 && r('crm-hygiene-check').ops === 1 && Object.values(r('setup')).every(v => v === 2); }));
+  ok('the four motion ratings moved on November 23 are in the data', await p.evaluate(() => { const d = JSON.parse(document.getElementById('data').textContent); const g = (id, k) => d.skills.find(s => s.id === id).seg[k].join(); return g('account-context', 'ent') === '2,3' && g('expansion-whitespace', 'ent') === '1,1' && g('deal-signals', 'vel') === '2,4' && g('log-activity', 'fin') === '2,4'; }));
+  ok('the three moved overlap ratings show on their cards', await p.evaluate(() => { const lvl = id => { const dt = Array.from(document.querySelectorAll('#skill-' + id + ' .ourread dt')).find(x => x.textContent === 'Before you rely on it'); return dt.nextElementSibling.querySelector('strong').textContent; }; return lvl('handle-objection') === 'Agree the rule first.' && lvl('daily-briefing') === 'Know the overlap.' && lvl('weekly-wrap') === 'Know the overlap.'; }));
+  ok('the Overview says all 36 files carry the rule on scheduled runs and 20 add their own', (await p.locator('[data-view="overview"] .finds').textContent()).includes('All 36 files carry one rule on scheduled runs, and 20 add instructions for a run of their own skill.'));
+
+  // ------------------------------------------------------------------ the run card
+  await go(p, 'skills');
+  await p.click('#sk-close');
+  ok('every skill has a run card ahead of its details', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).every(e => { const r = e.querySelector('.body > .run'), k = e.querySelector('.body > .kv'); return r && k && !!(r.compareDocumentPosition(k) & 4); })));
+  ok('every card has when, say, give it and you get', await p.evaluate(() => Array.from(document.querySelectorAll('.run')).every(r => Array.from(r.querySelectorAll('.runkv dt')).map(d => d.textContent).join() === 'When,Say,Give it,You get')));
+  ok('every request ends as a sentence', await p.evaluate(() => Array.from(document.querySelectorAll('.run .sayt[id]')).every(s => /[.?]$/.test(s.textContent))));
+  ok('a copy button on every request', await count('.run [data-copy]') === 36);
+  const TEAMN = await p.evaluate(() => document.querySelectorAll('.run .sayt[data-team]').length);
+  const SCHEDN = await p.evaluate(() => document.querySelectorAll('.run .sayt[data-sched]').length);
+  ok('eight cards offer a team scope', TEAMN === 8 && await count('.run [data-set="scope"][data-v="team"]') === 8, TEAMN);
+  ok('seven cards offer a schedule', SCHEDN === 7 && await count('.run [data-set="time"][data-v="sched"]') === 7, SCHEDN);
+  await p.click('#skill-weekly-wrap summary');
+  const say = () => p.locator('#say-weekly-wrap').textContent();
+  ok('card starts on the plain request', await say() === 'Give me my weekly wrap.', await say());
+  await p.click('#skill-weekly-wrap [data-set="scope"][data-v="team"]');
+  ok('team scope changes the request', await say() === 'Give me the weekly wrap for my team.', await say());
+  await p.click('#skill-weekly-wrap [data-set="time"][data-v="sched"]');
+  ok('team and schedule combine', await say() === 'Every [Friday afternoon], write the weekly wrap for my team.', await say());
+  ok('the part to fill in is marked', await count('#say-weekly-wrap .slot') === 1);
+  ok('schedule advice shows for a schedule', await p.locator('#skill-weekly-wrap [data-when="sched"]').isVisible());
+  await p.click('#skill-weekly-wrap [data-set="time"][data-v="now"]');
+  ok('schedule advice hides on request', !(await p.locator('#skill-weekly-wrap [data-when="sched"]').isVisible()));
+  ok('one choice pressed in each group', await p.evaluate(() => Array.from(document.querySelectorAll('#skill-weekly-wrap .seg')).every(s => s.querySelectorAll('[aria-pressed="true"]').length === 1)));
+  ok('choice groups are named', await p.evaluate(() => Array.from(document.querySelectorAll('.run .vg')).every(g => g.getAttribute('role') === 'group' && g.getAttribute('aria-label'))));
+  ok('connected shows one give-it line', await p.locator('#skill-weekly-wrap [data-when="conn"]').isVisible() && !(await p.locator('#skill-weekly-wrap [data-when="files"]').isVisible()));
+  await p.click('#skill-weekly-wrap [data-set="src"][data-v="files"]');
+  ok('files shows what to upload', (await p.locator('#skill-weekly-wrap [data-when="files"]').textContent()).includes('pipeline exports') && !(await p.locator('#skill-weekly-wrap [data-when="conn"]').isVisible()));
+  ok('model line names a model and is marked as our read', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).every(e => { const dts = Array.from(e.querySelectorAll('.ourread dt')).map(d => d.textContent); return dts.includes('Model to start with') && dts.includes('At your readiness settings'); })));
+  ok('every skill that can write or share, and setup with its tiles, starts with ask first', await p.evaluate(() => { const d = JSON.parse(document.getElementById('data').textContent); return d.skills.every(s => { const dd = Array.from(document.querySelectorAll('#skill-' + s.id + ' .ourread dt')).find(x => x.textContent === 'Model to start with').nextElementSibling.textContent; return (s.cls === 'R') !== dd.includes('ask first'); }); }));
+  ok('readiness line is filled in', (await p.locator('#skill-weekly-wrap [data-at]').textContent()).length > 20);
+  // the card follows the readiness settings until the reader chooses for themselves
+  await go(p, 'readiness');
+  await p.click('[data-preset="none"]');
+  await go(p, 'skill-call-prep');
+  ok('with nothing connected a card starts on files', await p.locator('#skill-call-prep [data-set="src"][data-v="files"]').getAttribute('aria-pressed') === 'true' && await p.locator('#skill-call-prep [data-when="files"]').isVisible());
+  ok('the readiness line says from files', (await p.locator('#skill-call-prep [data-at]').textContent()).startsWith('From files.'));
+  ok('a card the reader set keeps its choice', await p.locator('#skill-weekly-wrap [data-set="src"][data-v="files"]').getAttribute('aria-pressed') === 'true');
+  await go(p, 'readiness');
+  await p.click('[data-preset="ent"]');
+  await go(p, 'skill-call-prep');
+  ok('with tools connected the card returns to connected', await p.locator('#skill-call-prep [data-set="src"][data-v="conn"]').getAttribute('aria-pressed') === 'true');
+  ok('the readiness line names the sketch', (await p.locator('#skill-call-prep [data-at]').textContent()).includes('Complex new business'));
+  await p.click('#sk-close');
+
+  // ------------------------------------------------------------------ fit
+  await go(p, 'fit');
+  ok('seven role rows', await count('.rolerow') === 7);
+  await p.selectOption('#role-f', 'am');
+  ok('choosing a role opens its row only', (await p.evaluate(() => Array.from(document.querySelectorAll('.rolerow[open]')).map(r => r.dataset.role))).join() === 'am');
+  ok('grid holds 35 skills', await count('.mx .cell a.chip') === 35);
+  const dimWant = D.skills.filter(s => s.seg && s.roles.am === 0).length;
+  ok('skills outside the role are muted', await count('.mx a.chip.dim') === dimWant, [await count('.mx a.chip.dim'), dimWant]);
+  for (const m of D.motions) {
+    await p.selectOption('#motion-f', m.k);
+    ok('grid for ' + m.k, await count('.mx .cell a.chip') === 35 && await p.locator('#mo-name').textContent() === m.name);
+    const placed = await p.evaluate(k => { const d = JSON.parse(document.getElementById('data').textContent); return d.skills.filter(s => s.seg).every(s => { const c = document.querySelector('.mx .cell[data-v="' + s.seg[k][0] + '"][data-f="' + s.seg[k][1] + '"]'); return c && c.querySelector('a[href="#skill-' + s.id + '"]'); }); }, m.k);
+    ok('placement for ' + m.k, placed);
+    ok('pilot lists for ' + m.k, await count('#pilot-start a.chip') > 0 && await count('#pilot-rule a.chip') > 0);
+  }
+  ok('motion choice reaches the skills menu', await p.locator('#motion-s').inputValue() === D.motions[D.motions.length - 1].k);
+  ok('four named corners', (await p.locator('.mx .ql b').allTextContents()).join('|') === 'Daily drivers|Big moments|Habits|Skip for now');
+  ok('the grid is headed as our reading and the frequencies as a first guess', await p.evaluate(() => { const t = document.querySelector('[data-view="fit"]').textContent; return t.includes('The grid is our reading, for a team that keeps its deals as records') && t.includes('a first guess at how often') && !t.includes('Worth a lot'); }));
+  ok('a poor fit has one cell and no frequency', await p.evaluate(() => { const c = Array.from(document.querySelectorAll('.mx .cell[data-v="0"]')); const d = JSON.parse(document.getElementById('data').textContent); return c.length === 1 && c[0].querySelector('.lab').textContent === 'Poor fit' && d.skills.every(s => !s.seg || Object.values(s.seg).every(x => x[0] > 0 || x[1] === 1)) && Array.from(document.querySelectorAll('.rt td.z')).every(td => td.textContent === 'Poor fit'); }));
+  ok('five skills carry an occasion in place of a frequency', await p.evaluate(() => { const d = JSON.parse(document.getElementById('data').textContent); const ev = d.skills.filter(s => s.ev).map(s => s.id); const rows = Array.from(document.querySelectorAll('.rt:not(.lt) tbody tr')); const cellsOf = id => Array.from(rows.find(r => r.querySelector('th').textContent === id).querySelectorAll('td:not(.z)')).map(td => td.textContent); return ev.join() === 'stakeholder-map,deal-slip-scenario,close-plan,create-an-asset,customer-health' && ev.every(id => cellsOf(id).every(t => t.endsWith('when called for'))) && cellsOf('forecast').every(t => !t.includes('called for')) && ev.every(id => { const l = Array.from(document.querySelectorAll('#skill-' + id + ' .rows span.l')).find(x => x.textContent === 'How often'); return !!l && /^(When|Before) .* As a rough cadence: /.test(l.nextElementSibling.textContent); }); }));
+  for (const mk of ['ent', 'am']) {
+    await p.selectOption('#motion-f', mk);
+    ok('the week view lists occasion skills apart, for ' + mk, await p.evaluate(k => { const d = JSON.parse(document.getElementById('data').textContent); const role = document.getElementById('role-f').value; const want = d.skills.filter(s => s.seg && s.seg[k][0] >= 2 && s.ev && (role === 'all' || s.roles[role] !== 0)).map(s => s.id).join(); const got = Array.from(document.querySelectorAll('[data-cad="ev"] a.chip')).map(a => a.getAttribute('href').replace('#skill-', '')).join(); const others = Array.from(document.querySelectorAll('[data-cad]:not([data-cad="ev"]) a.chip')).map(a => a.getAttribute('href').replace('#skill-', '')); return want === got && want.length > 0 && others.every(id => !d.skills.find(s => s.id === id).ev) && document.querySelectorAll('[data-cad]').length === 5; }, mk));
+  }
+  await p.selectOption('#motion-f', D.motions[D.motions.length - 1].k);
+  ok('the role rows leave setup out and say why', await p.evaluate(() => document.querySelectorAll('.rolerow a[href="#skill-setup"]').length === 0 && document.querySelector('[data-view="fit"]').textContent.includes("is each person's own run, leaders included: first on opening the plugin, and again to check what is connected or to relearn a voice. So no row lists it.")));
+  ok('route-lead carries no mark for a founder and an also for an SDR', await p.evaluate(() => { const d = JSON.parse(document.getElementById('data').textContent); const r = d.skills.find(s => s.id === 'route-lead').roles; const row = k => Array.from(document.querySelectorAll('.rolerow[data-role="' + k + '"] .rbody > div')).map(x => !!x.querySelector('a[href="#skill-route-lead"]')); return r.founder === 0 && r.sdr === 1 && row('founder').join() === 'false,false' && row('sdr').join() === 'false,true'; }));
+  ok('summary line', (await p.locator('#mx-sum').textContent()).includes('are muted'));
+  await p.selectOption('#role-f', 'all');
+  ok('no mute for all roles', await count('.mx a.chip.dim') === 0);
+  await p.click('.rolerow[data-role="sdr"] summary');
+  await p.click('.rolerow[data-role="sdr"] .go a');
+  await p.waitForTimeout(250);
+  ok('configure-first link carries the role', await onView(p) === 'configure' && await p.locator('#role-c').inputValue() === 'sdr');
+  ok('the matching role block is marked', (await p.evaluate(() => Array.from(document.querySelectorAll('.rolecard.on')).map(c => c.dataset.grole))).join() === 'sdr');
+
+  // ------------------------------------------------------------------ configure
+  ok('17 facts', await count('.fact') === 17);
+  const sdrHits = await p.evaluate(() => Array.from(document.querySelectorAll('.fact')).filter(f => f.dataset.roles.split(' ').includes('sdr')).length);
+  ok('facts marked for the role', await count('.fact.hit') === sdrHits && sdrHits > 0, sdrHits);
+  ok('fact note', (await p.locator('#fact-note').textContent()).includes('of the 17 facts come first'));
+  await p.selectOption('#role-c', 'mgr');
+  const leadHits = await p.evaluate(() => Array.from(document.querySelectorAll('.fact')).filter(f => f.dataset.roles.split(' ').includes('lead')).length);
+  ok('a frontline manager reads the sales leader rows', await count('.fact.hit') === leadHits && leadHits > 0);
+  await p.selectOption('#role-c', 'ops');
+  ok('revenue operations owns every row', await count('.fact.hit') === 0 && (await p.locator('#fact-note').textContent()).includes('owns every row'));
+  await p.selectOption('#role-c', 'all');
+  ok('no marks for all roles', await count('.fact.hit') === 0 && await p.locator('#fact-note').textContent() === '');
+  await p.check('#f03'); await p.check('#f09');
+  ok('ticks count', await p.locator('#done-count').textContent() === '2');
+  ok('fact chips link to skills', await count('.fact a.chip[href^="#skill-"]') === 58);
+  ok('eleven contents links plus sources', await count('.toc a') === 12);
+  ok('AI-ready edition travels with the page', await p.evaluate(() => { const t = JSON.parse(document.getElementById('ai-md').textContent); return t.length > 30000 && t.startsWith('---'); }));
+  ok('the guide counts three leader skills', (await p.locator('[data-view="configure"]').textContent()).includes('Three skills, team-pipeline, rep-context and win-loss-review, are written for leaders.'));
+  ok('the AI-ready edition carries the same corrections', await p.evaluate(() => { const t = JSON.parse(document.getElementById('ai-md').textContent); return t.includes('Three skills, `team-pipeline`, `rep-context` and `win-loss-review`, are written for leaders.') && !t.includes('Two skills, `team-pipeline`') && !t.includes('to add no restrictions of their own') && t.includes('They add two safeguards of their own'); }));
+  ok('no corrected sentence is left in its old form', await p.evaluate(() => { const t = document.querySelector('[data-view="configure"]').textContent; return ['so its skills have to ask', 'then scores against the answer', 'Every forecast and pipeline review uses', 'to add no restrictions of their own', 'Two skills, team-pipeline and rep-context'].every(x => !t.includes(x)); }));
+  ok('the guide\'s answer on sending by itself covers scheduled runs, on the page and in the edition', await p.evaluate(() => { const t = document.querySelector('[data-view="configure"]').textContent; const m = JSON.parse(document.getElementById('ai-md').textContent); return t.includes('A scheduled run is different') && m.includes('A scheduled run is different') && !t.includes('stops asking and starts working your way') && !m.includes('so its skills stop asking') && t.includes('It cannot check what an email says'); }));
+  ok('three copy buttons in the guide', await count('[data-view="configure"] [data-copy]') === 3);
+  ok('film is present', await count('#film video source[src="explainer.mp4"]') === 1);
+  ok('six role blocks', await count('.rolecard') === 6);
+  ok('three seats', await count('.seat') === 3);
+  ok('four phases', await count('.cphase') === 4);
+  ok('twelve questions', await count('.faq > div') === 12);
+  ok('tables stack with labels', await p.evaluate(() => Array.from(document.querySelectorAll('[data-view="configure"] table.stack tbody td')).every(td => td.dataset.l)));
+  await go(p, 'steps'); await p.waitForTimeout(150);
+  ok('contents mark the section being read', await p.evaluate(() => { const a = document.querySelector('.toc a[aria-current]'); return a && a.getAttribute('href'); }) === '#steps');
+
+  // ------------------------------------------------------------------ fit: through the week
+  await go(p, 'fit-week');
+  ok('week lives under fit', await onView(p) === 'fit');
+  ok('week heading in view', await p.evaluate(() => { const r = document.getElementById('fit-week').getBoundingClientRect(); return r.top >= 40 && r.top < 200; }));
+  ok('eight routines', await count('.routine') === 8);
+  ok('routine steps link to skills', await count('.routine .chain a.chip[href^="#skill-"]') === 34, await count('.routine .chain a.chip[href^="#skill-"]'));
+  ok('every routine step after the first says which file links it', await p.evaluate(() => Array.from(document.querySelectorAll('.routine ol.chain')).every(ol => Array.from(ol.children).every((li, i) => { const lk = li.querySelector('.lk'); return i === 0 ? !lk : lk && /^(Handed on by|Suggested by|Takes|Draws on) [a-z-]+/.test(lk.textContent); }))));
+  ok('routine links come in the kinds the files give', await p.evaluate(() => { const t = Array.from(document.querySelectorAll('.routine .lk')).map(x => x.textContent); return t.some(x => x.startsWith('Suggested by lead-triage')) && t.some(x => x.startsWith('Draws on renewal-radar')) && t.some(x => x.startsWith('Takes ')) && t.some(x => x.startsWith('Handed on by ')); }));
+  ok('the lead routine says where its two files differ', (await p.locator('.routine[data-routine="lead"] .rnote').textContent()).includes('Write your own rule down'));
+  ok('every routine step carries a request', await p.evaluate(() => Array.from(document.querySelectorAll('.chain li')).every(li => li.querySelector('.sayt') && li.querySelector('.sayt').textContent.length > 8)));
+  await p.selectOption('#motion-f', 'ent');
+  await p.selectOption('#role-f', 'all');
+  const cadWant = D.skills.filter(s => s.seg && s.seg.ent[0] >= 2).length;
+  ok('cadence lists hold the core and useful skills', await count('#cad a.chip') === cadWant, [await count('#cad a.chip'), cadWant]);
+  ok('cadence columns', (await p.locator('#cad h3').allTextContents()).join('|') === 'Daily|Weekly|Monthly|Quarterly or less|When something calls for it');
+  await p.selectOption('#role-f', 'mgr');
+  const cadMgr = D.skills.filter(s => s.seg && s.seg.ent[0] >= 2 && s.roles.mgr > 0).length;
+  ok('cadence follows the role', await count('#cad a.chip') === cadMgr, [await count('#cad a.chip'), cadMgr]);
+  ok('routines follow the role', await p.evaluate(() => Array.from(document.querySelectorAll('.routine')).filter(r => !r.hidden).map(r => r.dataset.routine).join()) === 'forecast,team');
+  ok('routine count is said', (await p.locator('#rt-sum').textContent()).startsWith('Showing 2 of 8 routines'));
+  await p.selectOption('#motion-f', 'fin');
+  const cadFin = D.skills.filter(s => s.seg && s.seg.fin[0] >= 2 && s.roles.mgr > 0).length;
+  ok('cadence follows the motion', await count('#cad a.chip') === cadFin, [await count('#cad a.chip'), cadFin]);
+  await p.selectOption('#role-f', 'all');
+  await p.selectOption('#motion-f', 'ent');
+  ok('all roles show every routine', await p.evaluate(() => Array.from(document.querySelectorAll('.routine')).every(r => !r.hidden)) && await p.locator('#rt-sum').textContent() === '');
+
+  // ------------------------------------------------------------------ before rollout: which model
+  await go(p, 'models');
+  ok('models live under rollout', await onView(p) === 'rollout');
+  ok('four model tiers hold all 36 skills', await count('.mtiers > li') === 4 && await count('.mtiers a.chip') === 36);
+  ok('skills that write start on Opus 5.5 and the rest on Sonnet 5.5', (await p.locator('.mtiers .n').allTextContents()).join('|') === 'Opus 5.5 to start, 16 skills|Sonnet 5.5 to start, 7 skills|Sonnet 5.5 to start, 11 skills|Sonnet 5.5 to start, 2 skills');
+  ok('the rule for skills that write is called unmeasured', (await p.locator('.mtiers > li').first().textContent()).includes('it is unmeasured'));
+  ok('summary has a row for each of four models', await count('#models ~ .scroll .pt tbody tr, .pt.sum tbody tr') >= 4);
+  ok('detail has 24 results', await count('.more .pt tbody tr:not(.tgrp)') === 24, await count('.more .pt tbody tr:not(.tgrp)'));
+  ok('test is called a pilot', (await p.evaluate(() => document.querySelector('[data-view="rollout"]').textContent)).includes('It is a pilot'));
+  ok('the test files are linked', await count('a[href="kit/modeltest/README.md"]') >= 1);
+  ok('six tested skills link to the test', await count('details.sk a[href="#models-test"]') === 6);
+
+  // ------------------------------------------------------------------ before rollout: readiness
+  await go(p, 'rollout');
+  const tally = () => p.evaluate(() => [3, 2, 1, 0].map(l => +document.getElementById('t' + l).textContent));
+  const sum = a => a.reduce((x, y) => x + y, 0);
+  const expect = on => { const out = [0, 0, 0, 0]; D.skills.forEach(s => { const mc = s.core.some(k => !on[k]); const tool = s.tool.length === 0 || s.tool.some(k => on[k]); const gaps = s.adds.some(k => !on[k]); out[mc ? 3 : (!tool ? 2 : (gaps ? 1 : 0))] += 1; }); return out; };
+  ok('three tiers', await count('.tiers li') === 3);
+  ok('tier counts', (await p.locator('.tiers .n').allTextContents()).join('|') === '16 skills|16 skills|4 skills');
+  ok('eight tool rows', await count('.ovt tbody tr') === 8);
+  ok('twenty-three switches, with stage rules apart from a qualification method', await count('.sw input') === 23 && await count('#sw-exit') === 1 && await count('#sw-qual') === 1);
+  ok('the sample plan for a first pilot keeps to what the file says', await p.evaluate(() => { const d = document.querySelector('details.plan'); const t = d.textContent; return d.querySelectorAll('dl > div').length === 8 && t.includes('neither retries nor reaches for another tool') && t.includes('The file does not say what happens when you ask a second time') && t.includes('are our read'); }));
+  ok('starts from the complex new business sketch', await p.locator('[data-preset="ent"]').getAttribute('aria-pressed') === 'true');
+  for (const pr of D.presets) {
+    await p.click('[data-preset="' + pr.k + '"]');
+    const t = await tally();
+    ok('readiness for ' + pr.k, t.join() === expect(pr.on).join() && sum(t) === 36, [t, expect(pr.on)]);
+  }
+  await p.click('[data-preset="all"]');
+  ok('everything in place means 36 ready', (await tally()).join() === '36,0,0,0');
+  await p.uncheck('#sw-exit');
+  ok('a skill gives its own words for a switch it leans on in part', await p.evaluate(() => { const li = s => Array.from(document.querySelectorAll('#rd-results li')).find(x => x.querySelector('a[href="#skill-' + s + '"]')); const a = li('call-prep').textContent, b = li('update-opportunity').textContent; return a.includes('Without stage names, it reads what it can') && !a.includes('exit criteria') && b.includes('Would also use stage names and exit criteria.'); }));
+  await p.check('#sw-exit');
+  await p.uncheck('#sw-opps');
+  ok('no deal records leaves 13 with little to read', (await tally())[3] === 13);
+  ok('reasons are given', (await p.locator('#lv0 li > span').first().textContent()).includes('which you do not keep'));
+  ok('no sketch matches a custom setting', await count('[data-preset][aria-pressed="true"]') === 0);
+  ok('status is announced', (await p.locator('#rd-say').textContent()).includes('with little to read'));
+  ok('results sit beside the switches', await p.evaluate(() => { const a = document.getElementById('switches').getBoundingClientRect(), b = document.getElementById('rd-results').getBoundingClientRect(); return b.left > a.right; }));
+  ok('pinned bar is off on a wide screen', await p.evaluate(() => getComputedStyle(document.getElementById('rdpin')).display) === 'none');
+  ok('eight setups', await count('#setups + dl.setups > div') === 8);
+  ok('the sample plan has eight rows of its own', await count('details.plan dl.setups > div') === 8);
+
+  // ------------------------------------------------------------------ after the third cross-lab check (November 23, 2026)
+  const card3 = `(id, label) => { const e = document.getElementById('skill-' + id); const dt = Array.from(e.querySelectorAll('.kv > div > dt')).find(x => x.textContent === label); return dt ? dt.nextElementSibling.textContent : ''; }`;
+  ok('no card says that an output stays in Claude', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk .acts4')).every(e => !/stays in Claude/i.test(e.textContent))));
+  ok('every card says its rows are what its own file sets up, and where any other action goes', await p.evaluate(() => Array.from(document.querySelectorAll('details.sk')).every(e => { const dt = Array.from(e.querySelectorAll('.body > .kv dt')).find(x => x.textContent === 'What it can do when you ask'); const t = dt.nextElementSibling.textContent; return t.includes("What its own file sets up, within the setting on each connector's tool.") && t.includes('Any other action you ask for goes through a connected tool, as in every skill:'); })));
+  ok('a skill with no send or post of its own says so', await p.evaluate(() => { const rows = Array.from(document.querySelectorAll('details.sk .acts4 > div:nth-child(3) .nope')); return rows.length > 15 && rows.every(r => /sets up no send or post for it\./.test(r.textContent) && /shown in Claude/i.test(r.textContent)); }));
+  ok('setup is marked apart as First run, and 13 skills read and propose', await p.evaluate(() => !!document.querySelector('#skill-setup summary .chip.k-S') && document.querySelectorAll('details.sk summary .chip.k-R').length === 13 && document.querySelectorAll('details.sk summary .chip.k-S').length === 1));
+  ok('the note on a name says a marking is not the most a skill can do', (await p.locator('[data-view="overview"] .howread').first().textContent()).includes("It is not a permission, and not the most a skill can do: every skill's file carries the rule that an action you ask for"));
+  ok('the Overview says what each of the six sharing skills posts', await p.evaluate(() => { const t = document.querySelector('[data-view="overview"] .finds').textContent; return t.includes('22 go further by their own steps.') && t.includes('The other four post a message drawn from it:') && t.includes('is counted apart: with write tools on') && !t.includes('go no further than'); }));
+  ok('three links that the files give as offers are marked as suggestions', await p.evaluate(() => { const t = Array.from(document.querySelectorAll('.routine .lk')).map(x => x.textContent); return ['call-prep', 'end-of-day', 'competitive-intelligence'].every(k => t.some(x => x.startsWith('Suggested by ' + k))) && !t.some(x => x.startsWith('Handed on by call-prep')) && !t.some(x => x.startsWith('Handed on by competitive-intelligence')); }));
+  ok('cards mark an offered skill as offered', await p.evaluate((card3) => { const f = eval(card3); return f('call-prep', 'Hands work to').includes('offered when a live calendar shows the meeting has already ended') && f('end-of-day', 'Hands work to').includes("offered for tomorrow's first meeting") && f('competitive-intelligence', 'Hands work to').includes('offered for a specific pushback'); }, card3));
+  ok('call-prep may ask about stage names, and its card does not name exit criteria', await p.evaluate(() => { const t = document.querySelector('#skill-call-prep .ourread').textContent; return t.includes('May ask about') && t.includes('Stage names') && !t.includes('exit criteria'); }));
+  ok('two skills take stage rules from the setup of the CRM and are not said to ask', await p.evaluate(() => ['update-opportunity', 'crm-hygiene-check'].every(id => { const t = document.querySelector('#skill-' + id + ' .ourread').textContent; return t.includes("Takes from your CRM's setup") && !t.includes('May ask about'); })));
+  ok('13 skills are built around a deal record, close-plan among them', await p.evaluate(() => { const t = document.querySelector('[data-view="overview"] .finds').textContent; return t.includes('13 are built around a deal record.') && !t.includes('is left out of the count') && document.querySelector('#skill-close-plan .ourread').textContent.includes('Built around'); }));
+  ok('voice and signature are given apart on three cards', await p.evaluate((card3) => { const f = eval(card3); return ['call-summary', 'inbox-sweep', 'draft-outreach'].every(id => f(id, 'Company facts it uses').includes('Signature: from setup or from sent emails you paste')) && f('inbox-sweep', 'Company facts it uses').includes('from 30 to 40 of your recent sent emails'); }, card3));
+  ok('the sample plan says what each kind of case should give', await p.evaluate(() => { const t = document.querySelector('details.plan').textContent; return t.includes('After a direct booking, the calendar:') && t.includes('an address you picked from a thread') && t.includes('A blocked write: the invite details as text to paste, and nothing created in the calendar, the inbox or the CRM.') && t.includes('since the file sets no check for duplicates'); }));
+  ok('Method says a third check was run, by one model, on what had changed', await p.evaluate(() => { const t = document.querySelector('[data-view="method"]').textContent; return t.includes('checked the 170 statements that had changed since, with five false ones planted among them, and caught all five') && t.includes('all three rounds of outside checks') && t.includes('The text as it now stands has had no check from outside.'); }));
+
+  // ------------------------------------------------------------------ remembered in this browser
+  await go(p, 'fit');
+  await p.selectOption('#role-f', 'ae');
+  await p.selectOption('#motion-f', 'svc');
+  await go(p, 'rollout');
+  await p.reload(); await p.waitForTimeout(400);
+  ok('role and motion are remembered', await p.locator('#role-s').inputValue() === 'ae' && await p.locator('#motion-f').inputValue() === 'svc');
+  ok('switches are remembered', !(await p.locator('#sw-opps').isChecked()));
+  ok('ticks are remembered', await p.locator('#done-count').textContent() === '2');
+  ok('reload keeps the view', await onView(p) === 'rollout');
+
+  // ------------------------------------------------------------------ method
+  await go(p, 'method');
+  ok('sources listed', await count('.srcs li') >= 14, await count('.srcs li'));
+  ok('credits name no editor yet', (await p.locator('.credits').textContent()).includes('is still to come'));
+  ok('credits say what the editor accepted on November 23', await p.evaluate(() => { const t = document.querySelector('.credits').textContent; return t.includes('On November 23, 2026 he accepted 18 more findings') && t.includes('started the seven skills that weigh several sources on Sonnet 5.5') && t.includes("The wording of each change is Claude's."); }));
+  ok('the status lines say the editor has begun', await p.evaluate(() => document.querySelector('[data-view="overview"] .open .who').textContent.includes('The editor has changed some ratings') && document.querySelector('[data-view="fit"] .open .sub').textContent.includes('his review of the rest is still to come') && document.querySelector('[data-view="rollout"] .open .sub').textContent.includes('The editor has changed some of both')));
+  ok('the conflict is stated', (await p.locator('[data-view="method"]').textContent()).includes('models from two other labs checked it against the plugin\'s files in two rounds'));
+  ok('Method says the latest corrections are still to be checked', (await p.locator('[data-view="method"]').textContent()).includes('the latest corrections have had no check from outside'));
+  ok('the source link is pinned to the commit that was read', await count('[data-view="method"] .srcs a[href*="/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/sales"]') === 1);
+  ok('Method says what the build checks and what it does not', (await p.locator('[data-view="method"]').textContent()).includes('It checks no number, no condition and no scope.'));
+  ok('Before rollout opens with the disclosure', (await p.locator('[data-view="rollout"] .open .sub').textContent()).includes('Compiled with Claude, an Anthropic model, about an Anthropic plugin.'));
+  ok('the readiness check says what inputs in place does not show', await p.evaluate(() => document.querySelector('#rd-results').textContent.includes('That is not a check of your records, your permissions or the skill.')));
+  ok('Method lists the Configure corrections', await count('[data-view="method"] a[href="kit/CONFIGURE-EDITS.md"]') === 1);
+  ok('Method links to what the checks changed', await count('[data-view="method"] a[href="kit/CROSSLAB.md"]') === 1);
+
+  // ------------------------------------------------------------------ widths
+  for (const [w, h] of [[360, 780], [390, 844], [768, 1024], [1024, 768], [1440, 900]]) {
+    const q = await open(w, h);
+    for (const v of VIEWS) {
+      await go(q, v);
+      ok('no sideways scroll ' + v + ' at ' + w, await overflow(q) <= 0, await overflow(q));
+    }
+    await go(q, 'skills');
+    await q.evaluate(() => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+    for (const v of ['skills', 'fit', 'rollout', 'configure']) {
+      await go(q, v);
+      ok('no sideways scroll with everything open ' + v + ' at ' + w, await overflow(q) <= 0, await overflow(q));
+    }
+    const wide = await q.evaluate(() => Array.from(document.querySelectorAll('[data-view].on *')).filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > innerWidth + 1 && !el.closest('.scroll,.tl,.preview,.vh,.rdres') && getComputedStyle(el).position !== 'fixed'; }).slice(0, 3).map(el => el.tagName + '.' + el.className));
+    ok('nothing runs past the edge at ' + w, wide.length === 0, wide);
+    await q.context().close();
+  }
+
+  // ------------------------------------------------------------------ phone
+  const ph = await open(390, 844, { touch: true });
+  ok('tabs stay in view on a phone', await ph.evaluate(() => { window.scrollTo(0, 1200); return new Promise(r => setTimeout(() => { const b = document.querySelector('.tabs').getBoundingClientRect(); r(Math.abs(b.top) < 1 && b.height < 60); }, 120)); }));
+  await go(ph, 'overview');
+  ok('all five tabs fit a phone beside the way back', await ph.evaluate(() => { const t = document.querySelector('.tabs [data-nav="sales"]'); return t.clientWidth > 100 && t.scrollWidth <= t.clientWidth + 1; }));
+  await ph.evaluate(() => window.scrollTo(0, 1200)); await ph.waitForTimeout(150);
+  ok('masthead scrolls away', await ph.evaluate(() => document.querySelector('.mast').getBoundingClientRect().bottom < 0));
+  await go(ph, 'skills');
+  ok('filters take less than one screen on a phone', await ph.evaluate(() => { const a = document.querySelector('[data-view="skills"] .bar').getBoundingClientRect(), b = document.querySelector('[data-view="skills"] .grp').getBoundingClientRect(); return b.top - a.top; }) < 560);
+  const small = await ph.evaluate(() => Array.from(document.querySelectorAll('[data-view].on a.chip, [data-view].on button, .tabs a')).filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height < 35.5; }).slice(0, 4).map(el => el.className + ':' + Math.round(el.getBoundingClientRect().height)));
+  ok('tap targets on a phone', small.length === 0, small);
+  await go(ph, 'fit');
+  ok('grid reads by corner on a phone', await ph.evaluate(() => getComputedStyle(document.getElementById('mx')).display) === 'block');
+  ok('cell labels show on a phone', await ph.evaluate(() => { const l = document.querySelector('.mx .cell:not(.e) .lab'); return l && l.getBoundingClientRect().width > 20; }));
+  ok('empty cells fold away on a phone', await ph.evaluate(() => Array.from(document.querySelectorAll('.mx .cell.e')).every(c => getComputedStyle(c).display === 'none')));
+  await go(ph, 'rollout');
+  await ph.evaluate(() => { document.getElementById('switches').scrollIntoView({ block: 'start' }); });
+  await ph.waitForTimeout(350);
+  ok('pinned bar shows with the switches', await ph.evaluate(() => { const b = document.getElementById('rdpin'); const r = b.getBoundingClientRect(); return b.classList.contains('on') && r.bottom <= innerHeight + 1 && r.top > innerHeight - 110; }));
+  ok('pinned bar counts add up', await ph.evaluate(() => [0, 1, 2, 3].reduce((n, l) => n + (+document.getElementById('p' + l).textContent), 0)) === 36);
+  await ph.evaluate(() => { document.getElementById('rd-results').scrollIntoView({ block: 'start' }); });
+  await ph.waitForTimeout(350);
+  ok('pinned bar leaves when the results arrive', await ph.evaluate(() => !document.getElementById('rdpin').classList.contains('on')));
+  await go(ph, 'configure');
+  ok('guide contents fold into a list on a phone', await ph.evaluate(() => getComputedStyle(document.querySelector('.tocm')).display !== 'none' && getComputedStyle(document.querySelector('.toc')).display === 'none'));
+  ok('tables stack on a phone', await ph.evaluate(() => getComputedStyle(document.querySelector('[data-view="configure"] table.stack thead')).display === 'none'));
+  await ph.context().close();
+
+  // ------------------------------------------------------------------ an address on first load
+  const deep = await open(1440, 900, { hash: 'skill-deal-review' });
+  ok('first load at a skill address', await onView(deep) === 'skills' && await deep.evaluate(() => document.getElementById('skill-deal-review').open));
+  await deep.context().close();
+
+  // ------------------------------------------------------------------ dark theme
+  const dk = await open(1440, 900, { dark: true });
+  ok('dark ground', await dk.evaluate(() => getComputedStyle(document.body).backgroundColor) === 'rgb(18, 17, 36)');
+  await dk.context().close();
+
+  // ------------------------------------------------------------------ without scripts
+  const ns = await open(1280, 900, { js: false });
+  ok('without scripts the bar lists every page', await ns.evaluate(() => { const vis = el => getComputedStyle(el).display !== 'none'; const n = document.getElementById('nav'); return Array.from(n.querySelectorAll('.tl')).filter(vis).map(l => l.dataset.nav).join() === 'all' && n.querySelectorAll('[data-nav="all"] a').length === 6 && !vis(n.querySelector('.back')); }));
+  ok('without scripts every view shows', await ns.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).every(v => getComputedStyle(v).display !== 'none')));
+  ok('without scripts the controls are gone', await ns.evaluate(() => Array.from(document.querySelectorAll('.jsonly')).every(e => getComputedStyle(e).display === 'none')));
+  ok('without scripts the notes show', await ns.evaluate(() => Array.from(document.querySelectorAll('.nojs')).every(e => getComputedStyle(e).display !== 'none')));
+  ok('without scripts the grid is filled', await ns.locator('.mx .cell a.chip').count() === 35);
+  ok('without scripts the tables remain', await ns.locator('.rt:not(.pt):not(.dt) tbody tr').count() === 35 + 36 && await ns.locator('.pt.sum tbody tr').count() === 4);
+  ok('without scripts the skills open', await ns.evaluate(() => { const d = document.getElementById('skill-forecast'); d.open = true; return d.querySelector('.kv').getBoundingClientRect().height > 50; }));
+  await ns.context().close();
+
+  // ------------------------------------------------------------------ accessibility (axe-core), light and dark, wide and narrow
+  for (const [w, h, dark] of [[1440, 900, false], [1440, 900, true], [390, 844, false], [390, 844, true]]) {
+    const a = await open(w, h, { dark });
+    const before = errors.length;
+    for (const v of VIEWS) {
+      await go(a, v);
+      await a.evaluate(() => document.querySelectorAll('[data-view].on details').forEach(d => { d.open = true; }));
+      await a.waitForTimeout(120);
+      await a.evaluate(AXE);
+      const res = await a.evaluate(() => window.axe.run(document, { resultTypes: ['violations'] }).then(r => r.violations.map(x => x.id + ' x' + x.nodes.length + ' e.g. ' + x.nodes[0].target.join(' '))));
+      ok('axe ' + v + ' ' + w + (dark ? ' dark' : ' light'), res.length === 0, res);
+    }
+    errors.length = before;   // axe probes the font host; those requests are not the page's own errors
+    await a.context().close();
+  }
+
+  ok('no script errors', errors.length === 0, errors.slice(0, 5));
+  console.log(pass + ' passed, ' + fail + ' failed');
+  await browser.close();
+  process.exit(fail ? 1 : 0);
+})();

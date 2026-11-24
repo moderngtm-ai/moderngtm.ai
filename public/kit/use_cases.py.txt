@@ -1,0 +1,107 @@
+# -*- coding: utf-8 -*-
+"""The use-case index on the home page, as data.
+
+    python3 use_cases.py      -> use_cases.json, which merge.py turns into the table (--use-cases use_cases.json)
+
+One row for each of the site's 13 GTM jobs:
+  - the register's records that bear on the job, counted by grade (job_tags.json: the tags the owner accepted)
+  - the play or tool whose own worked example is that job, where there is one (EXAMPLES below, written once by hand)
+  - how many skills each lab's plugins hold for the job (the placements in the plugin area's data)
+
+It counts and links. It rates nothing and names no company. Which job a record or a skill belongs to is our read."""
+import collections
+import json
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, "/home/claude/provider")
+import chatgpt_data as G    # noqa: E402
+import data as D            # noqa: E402
+import plugins_data as PD   # noqa: E402
+
+ORG, BEYOND, MKT = "The revenue organization as a whole", "Beyond the revenue organization", "Marketing (jobs to come)"
+GRADES = ["A", "B", "C", "Context", "Not used"]
+
+# A play or a tool counts for a job only when its own worked example is that job. Checked against the page's text
+# by merge.py (each address has to exist) and by check_site.cjs (each one opens the section it names).
+EXAMPLES = {
+    "Lead qualification": {"label": "Agent charter", "href": "#charter", "where": "Tools",
+                           "why": "Its example is a charter for an inbound lead agent."},
+    "Outreach and follow-up": {"label": "Scorecard", "href": "#scorecard", "where": "Playbooks",
+                               "why": "One of its measures is positive replies per eligible account."},
+    "Renewals": {"label": "A worked handoff", "href": "#worked-handoff", "where": "Playbooks",
+                 "why": "It walks through preparing a renewal."},
+    "Support": {"label": "Unit cost", "href": "#unit-cost", "where": "Tools",
+                "why": "Its example values are for a support workflow."},
+}
+# The text each example leans on, as the site's own page has it. merge.py refuses to build if one is missing.
+EXAMPLE_PROOF = {
+    "#charter": "The example is an inbound lead agent",
+    "#scorecard": "Positive replies per eligible account",
+    "#worked-handoff": "A worked handoff: preparing a renewal",
+    "#unit-cost": "Example values for a support workflow",
+}
+
+
+def main():
+    tags = json.load(open(os.path.join(HERE, "job_tags.json"), encoding="utf-8"))
+    ev = json.load(open(os.path.join(HERE, "src", "evidence.json"), encoding="utf-8"))["findings"]
+    assert len(tags) == len(ev) and all(t["grade"] == e["grade"] and t["finding"] == e["finding"] for t, e in zip(tags, ev))
+    # A tag is one the owner accepted or set. A record merged before he has answered carries Claude's proposal,
+    # marked Proposed in job_tags_by_key.json: the staging copy may count it, and the change list put to him names it.
+    assert all(t["status"] in ("Accept", "Change", "Proposed") for t in tags), "a tag has a status this script does not know"
+    proposed = [t for t in tags if t["status"] == "Proposed"]
+    if proposed:
+        print(f"NOTE: {len(proposed)} tags are proposals the owner has not answered:", ", ".join(f"{t['organization']} ({t['job']})" for t in proposed))
+    names = PD.JOB_NAMES
+    assert len(names) == 13 and all(t["job"] in names + [ORG, BEYOND, MKT] for t in tags)
+    claude, gpt = dict(D.JOBS), dict(G.JOBS)
+    support = [n for n, _what in PD.LISTED["customer-support"]]
+    assert len(support) == 5
+    jobs = []
+    for name, what in PD.GTM_JOBS:
+        recs = [t for t in tags if t["job"] == name]
+        by = collections.Counter(t["grade"] for t in recs)
+        slug = PD.job_slug(name)
+        anth = None
+        if name in claude:
+            anth = {"plugin": "Sales", "skills": len(claude[name]), "href": "#cjob-" + slug}
+        elif name == "Support":
+            anth = {"plugin": "Customer support", "skills": len(support), "href": "#customer-support"}
+        oai = {"plugin": "Sales", "skills": len(gpt[name]), "href": "#gjob-" + slug} if name in gpt else None
+        jobs.append({
+            "job": name, "slug": slug, "what": what,
+            "records": {"count": len(recs), "by_grade": {g: by[g] for g in GRADES if by[g]}, "numbers": [t["n"] for t in recs]},
+            "example": EXAMPLES.get(name),
+            "anthropic": anth,
+            "openai": oai,
+        })
+    assert set(EXAMPLES) <= set(names)
+    in_jobs = sum(j["records"]["count"] for j in jobs)
+    other = {k: sum(1 for t in tags if t["job"] == k) for k in (ORG, BEYOND, MKT)}
+    assert in_jobs + sum(other.values()) == len(ev)
+    assert sum(j["anthropic"]["skills"] for j in jobs if j["anthropic"] and j["anthropic"]["plugin"] == "Sales") + len(D.OUTSIDE_JOBS) == len(D.SKILLS) == 36
+    assert sum(j["openai"]["skills"] for j in jobs if j["openai"]) + len(G.OUTSIDE_JOBS) == len(G.SKILLS) == 18
+    out = {
+        "what": "The use-case index on Modern GTM's home page, as data: for each go-to-market job, the evidence register's records by grade, "
+                "a play or tool whose worked example is that job, and the number of skills in the labs' plugins.",
+        "our_read": "Which job a record or a skill belongs to is this site's read. Nathan Fierley accepted the tags and placements on November 22, 2026.",
+        "as_of": "November 22, 2026",
+        "register": {"records": len(ev), "on_one_job": in_jobs,
+                     "the_revenue_organization_as_a_whole": other[ORG], "beyond_the_revenue_organization": other[BEYOND], "marketing": other[MKT]},
+        "plugins": {"anthropic": {"Sales": D.PLUGIN_VERSION, "Customer support": "1.3.0", "outside_the_jobs": D.OUTSIDE_JOBS},
+                    "openai": {"Sales": G.VERSION, "outside_the_jobs": G.OUTSIDE_JOBS, "as": "reported by ChatGPT from an installed copy"}},
+        "example_proof": EXAMPLE_PROOF,
+        "jobs": jobs,
+    }
+    json.dump(out, open(os.path.join(HERE, "use_cases.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print("use_cases.json:", len(jobs), "jobs;", in_jobs, "records on one job;", other)
+    for j in jobs:
+        r = j["records"]
+        print(f'  {j["job"]:<40} records {r["count"]:>2} {r["by_grade"] or ""!s:<28} example {(j["example"] or {}).get("label", "-"):<16} '
+              f'anthropic {(j["anthropic"] or {}).get("skills", "-")!s:>2} openai {(j["openai"] or {}).get("skills", "-")!s:>2}')
+
+
+if __name__ == "__main__":
+    main()

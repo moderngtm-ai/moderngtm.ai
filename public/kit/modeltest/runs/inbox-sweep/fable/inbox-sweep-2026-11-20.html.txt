@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inbox sweep: Friday, November 20, 2026</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f6f3;
+    --card: #ffffff;
+    --text: #1b1c1f;
+    --muted: #5a5e66;
+    --line: #dddcd6;
+    --accent: #1d4ed8;
+    --accent-ink: #ffffff;
+    --flag-bg: #fff5d9;
+    --flag-line: #dcbc5e;
+    --flag-ink: #6b4200;
+    --draft-bg: #f3f5fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141518;
+      --card: #1d1f23;
+      --text: #e9e9ec;
+      --muted: #a3a7b0;
+      --line: #32353b;
+      --accent: #93b4ff;
+      --accent-ink: #0d1530;
+      --flag-bg: #2e2610;
+      --flag-line: #6f5a1c;
+      --flag-ink: #f2cf7a;
+      --draft-bg: #23262d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 50rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  h1 { font-size: 1.75rem; line-height: 1.2; margin: 0.2rem 0 0.6rem; letter-spacing: -0.01em; }
+  h2 { font-size: 1.25rem; line-height: 1.3; margin: 2.75rem 0 0.5rem; }
+  h3 { font-size: 1.08rem; line-height: 1.35; margin: 0 0 0.3rem; }
+  h4 {
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); margin: 1.3rem 0 0.4rem;
+  }
+  p { margin: 0.5rem 0; }
+  a { color: var(--accent); }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em; overflow-wrap: anywhere;
+  }
+  .eyebrow { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  .lede { color: var(--muted); max-width: 42rem; }
+  .intro { max-width: 44rem; }
+  .src { font-size: 0.85rem; color: var(--muted); }
+
+  .totals {
+    list-style: none; margin: 1.5rem 0 0.4rem; padding: 0;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+  }
+  .totals li {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.85rem 1rem;
+  }
+  .totals strong { display: block; font-size: 1.8rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .totals span { color: var(--muted); font-size: 0.92rem; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1.25rem; margin: 1rem 0;
+  }
+  .card.flag { border-left: 4px solid var(--flag-line); }
+  .tag {
+    display: inline-block; margin: 0 0 0.45rem; font-size: 0.74rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 0.1rem 0.6rem;
+  }
+  .tag.warn { color: var(--flag-ink); background: var(--flag-bg); border-color: var(--flag-line); }
+  .meta { color: var(--muted); font-size: 0.92rem; margin: 0.15rem 0; overflow-wrap: anywhere; }
+  blockquote { margin: 0.8rem 0; padding: 0.1rem 0 0.1rem 0.9rem; border-left: 3px solid var(--line); }
+  blockquote p { margin: 0.25rem 0; overflow-wrap: anywhere; }
+  .facts { margin: 0.9rem 0 0; }
+  .facts dt { font-weight: 600; margin-top: 0.85rem; }
+  .facts dd { margin: 0.15rem 0 0; }
+  ul.notes { padding-left: 1.15rem; margin: 0.4rem 0; }
+  ul.notes li { margin: 0.5rem 0; }
+
+  .scroll { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin: 1rem 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 42rem; font-size: 0.92rem; }
+  th, td { text-align: left; vertical-align: top; padding: 0.65rem 0.8rem; border-bottom: 1px solid var(--line); }
+  thead th {
+    font-size: 0.74rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted);
+  }
+  tbody th { font-weight: 600; white-space: nowrap; }
+  td.nowrap { white-space: nowrap; }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+  td .src { display: block; margin-top: 0.2rem; }
+
+  .draft { background: var(--draft-bg); border: 1px solid var(--line); border-radius: 8px; margin: 0.9rem 0; }
+  .draft-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.5rem 0.7rem 0.5rem 1rem; border-bottom: 1px solid var(--line);
+    font-size: 0.74rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  }
+  .draft dl {
+    margin: 0; padding: 0.7rem 1rem; border-bottom: 1px solid var(--line);
+    display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.8rem; font-size: 0.92rem;
+  }
+  .draft dt { color: var(--muted); }
+  .draft dd { margin: 0; overflow-wrap: anywhere; }
+  .draft pre { margin: 0; padding: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+  button {
+    font: inherit; font-size: 0.85rem; font-weight: 600; letter-spacing: 0; text-transform: none;
+    color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px;
+    padding: 0.3rem 0.85rem; cursor: pointer;
+  }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .asks { background: var(--flag-bg); border: 1px solid var(--flag-line); border-radius: 8px; padding: 0.9rem 1rem; margin: 1rem 0; }
+  .asks h4 { color: var(--flag-ink); margin-top: 0; }
+  .asks ol { margin: 0.4rem 0 0; padding-left: 1.25rem; }
+  .asks li { margin: 0.55rem 0; }
+
+  @media (max-width: 30rem) {
+    main { padding: 1.25rem 0.9rem 3rem; }
+    .card { padding: 1rem; }
+    .totals strong { font-size: 1.5rem; }
+  }
+  @media print {
+    body { background: #fff; }
+    button { display: none; }
+    .card, .totals li, .draft { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <p class="eyebrow">Dana Okafor · Larkspur Systems</p>
+  <h1>Inbox sweep: Friday, November 20, 2026</h1>
+  <p class="lede">Ten unread messages from inbox.md, exported at 8:10 this morning, matched against the open deals in pipeline.csv. No email, CRM or calendar is connected, so nothing was sent, logged or changed.</p>
+</header>
+
+<ul class="totals" aria-label="Totals">
+  <li><strong>3</strong> <span>replies drafted</span></li>
+  <li><strong>1</strong> <span>flagged, no draft</span></li>
+  <li><strong>6</strong> <span>need no reply</span></li>
+</ul>
+<p class="src">From inbox.md, all ten messages.</p>
+
+<section id="flagged">
+  <h2>Flagged, no draft</h2>
+
+  <article class="card flag">
+    <p class="tag warn">Legal · response due Monday</p>
+    <h3>Pellman Distribution: redlines on the order form</h3>
+    <p class="meta">Renee Walcott, Legal &lt;renee.walcott@pellmandistribution.example&gt; · Thursday, November 19, 16:20</p>
+    <p class="meta">Subject: Pellman redlines on the order form (response needed by Monday)</p>
+    <p class="src">From inbox.md, message 4.</p>
+
+    <dl class="facts">
+      <dt>What it says</dt>
+      <dd>Pellman's redlines to sections 4 and 9 of the order form are attached. Pellman needs Larkspur's response by end of day Monday, November 23, to keep the December 4 signature date.</dd>
+
+      <dt>The deal</dt>
+      <dd>Pellman Distribution - dock scheduling. Stage: Contract Sent. Amount (USD per year): 128,000. Close date: December 4, 2026. Next step: Legal returns redlines, November 23, 2026. It is the largest of your three Contract Sent deals. <span class="src">From pipeline.csv, row 2.</span></dd>
+
+      <dt>Why there is no draft</dt>
+      <dd>The reply is Larkspur's legal position on contract terms. That is for you and whoever reviews your contracts to give. The attachment was not in the export either, so I have not seen the redlines.</dd>
+
+      <dt>What it needs</dt>
+      <dd>Get the redlines to your contract reviewer today. Monday is the next working day, and the December 4 signature date depends on it. Your company facts name no legal contact, so I cannot say who that is. If you want a short acknowledgment to Renee that confirms receipt and takes no position, ask and I will draft it.</dd>
+    </dl>
+  </article>
+</section>
+
+<section id="drafts">
+  <h2>Drafted replies</h2>
+  <p class="intro">Paste-ready text, in priority order. All three deals close within 30 days of November 20, so the order comes from deadline (Marcus is waiting on something due today; Ines's call is on Tuesday) and then deal amount. To keep a reply in its thread, open the original message, choose Reply and paste the body.</p>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Priority</th>
+          <th scope="col">From</th>
+          <th scope="col">Account</th>
+          <th scope="col">Subject</th>
+          <th scope="col">Related deal</th>
+          <th scope="col">Draft</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <th scope="row">Marcus Bell</th>
+          <td>Harbor &amp; Vane Logistics</td>
+          <td>Re: pricing for three sites <span class="src">From inbox.md, message 1. Fri Nov 20, 7:42.</span></td>
+          <td>Proposal · $96,000 a year · closes December 18 <span class="src">From pipeline.csv, row 9.</span></td>
+          <td class="nowrap"><a href="#draft-1">Draft 1</a></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <th scope="row">Ines Ferreira</th>
+          <td>Quillon Freight</td>
+          <td>Can we move Tuesday's pricing call? <span class="src">From inbox.md, message 7. Thu Nov 19, 11:47.</span></td>
+          <td>Negotiation · $160,000 a year · closes December 18 <span class="src">From pipeline.csv, row 5.</span></td>
+          <td class="nowrap"><a href="#draft-2">Draft 2</a></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <th scope="row">Tom Ashby</th>
+          <td>Corvell Storage</td>
+          <td>Contract changes <span class="src">From inbox.md, message 3. Thu Nov 19, 17:55.</span></td>
+          <td>Contract Sent · $64,000 a year · closes December 11 <span class="src">From pipeline.csv, row 4.</span></td>
+          <td class="nowrap"><a href="#draft-3">Draft 3</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <article class="card" id="draft-1">
+    <p class="tag">Priority 1 · he expects it today</p>
+    <h3>Marcus Bell, Harbor &amp; Vane Logistics</h3>
+    <blockquote>
+      <p>Dana, you said we would have the revised three-site pricing with the multi-year option by today. Can you confirm it is coming? I am meeting Priya on Monday morning.</p>
+      <p class="src">From inbox.md, message 1. Friday, November 20, 7:42.</p>
+    </blockquote>
+    <p><strong>The deal.</strong> Harbor &amp; Vane Logistics - dock scheduling. Stage: Proposal. Amount (USD per year): 96,000. Close date: December 18, 2026. Last activity date: November 18, 2026. Next step: On-site workshop, December 2, 2026. <span class="src">From pipeline.csv, row 9.</span></p>
+
+    <div class="draft">
+      <div class="draft-head"><span>Paste-ready reply</span> <button type="button" data-copy="body-1" aria-label="Copy the reply to Marcus Bell">Copy</button></div>
+      <dl>
+        <dt>To</dt><dd>Marcus Bell &lt;marcus.bell@harborvane.example&gt;</dd>
+        <dt>Subject</dt><dd>Re: pricing for three sites</dd>
+      </dl>
+      <pre id="body-1">Marcus,
+
+Yes, here it is. The revised three-site pricing, including the multi-year option, is attached, so you have it ahead of your meeting with Priya on Monday morning.
+
+[ATTACH: revised three-site pricing with multi-year option]
+
+If you'd like to go through it before then, tell me a time that suits and I'll call you. If questions come up on Monday, send them my way.
+
+Dana</pre>
+    </div>
+
+    <h4>Check before sending</h4>
+    <ul class="notes">
+      <li><strong>I assumed you are sending the pricing today.</strong> The promise is Marcus's account. The export holds only his latest message, so I could not read what you wrote earlier in the thread.</li>
+      <li><strong>The pricing has to come from you.</strong> Your company facts give the list price, $32,000 per site per year, and three sites at list is $96,000, the amount on the deal. They give no multi-year option or revised figure, so the body carries no numbers and the attachment is a placeholder. <span class="src">From company-facts.md, "What we sell".</span></li>
+      <li><strong>If the document is not ready when you reply,</strong> send this now and the pricing later today: "Marcus, yes, it's coming today. You'll have it before the end of the day, ahead of your meeting with Priya on Monday morning."</li>
+      <li><strong>Priya is not identified in your files.</strong> The pipeline shows three contacts on the deal but no names, so the draft only repeats Marcus's wording.</li>
+    </ul>
+  </article>
+
+  <article class="card" id="draft-2">
+    <p class="tag">Priority 2 · the call is on Tuesday</p>
+    <h3>Ines Ferreira, Quillon Freight</h3>
+    <blockquote>
+      <p>Hi Dana, procurement has a conflict on Tuesday the 24th. Could we move the pricing call to Wednesday the 25th or Monday the 30th, same time?</p>
+      <p class="src">From inbox.md, message 7. Thursday, November 19, 11:47.</p>
+    </blockquote>
+    <p><strong>The deal.</strong> Quillon Freight - dock scheduling. Stage: Negotiation. Amount (USD per year): 160,000. Close date: December 18, 2026. Last activity date: November 19, 2026. Next step: Pricing call with procurement, November 24, 2026. <span class="src">From pipeline.csv, row 5.</span></p>
+
+    <div class="draft">
+      <div class="draft-head"><span>Paste-ready reply</span> <button type="button" data-copy="body-2" aria-label="Copy the reply to Ines Ferreira">Copy</button></div>
+      <dl>
+        <dt>To</dt><dd>Ines Ferreira &lt;ines.ferreira@quillonfreight.example&gt;</dd>
+        <dt>Subject</dt><dd>Re: Can we move Tuesday's pricing call?</dd>
+      </dl>
+      <pre id="body-2">Hi Ines,
+
+No problem. Let's move the pricing call to Wednesday the 25th, same time. I'll send an updated invite today so everyone has the new slot.
+
+Dana</pre>
+    </div>
+
+    <h4>Check before sending</h4>
+    <ul class="notes">
+      <li><strong>I could not check your calendar.</strong> I picked Wednesday the 25th because it is the earlier of her two options and the deal closes December 18. If it does not work, change the date to Monday the 30th.</li>
+      <li><strong>Both days already carry next steps in your pipeline that look like meetings, with no times given.</strong> Wednesday the 25th: the second demo at Oakhurst Pallet and the discovery call at Westmere Depot. Monday the 30th: the security review at Sable Ridge Supply and the intro call at Juniper Dockside. <span class="src">From pipeline.csv, rows 14, 20, 7 and 24.</span></li>
+      <li><strong>Sam Pryce needs the new time too.</strong> Sam accepted Tuesday's invitation on Thursday at 15:02, after Ines asked to move it. Your files do not say who Sam is, so check that Sam is free before you confirm. <span class="src">From inbox.md, message 5.</span></li>
+      <li><strong>The invite is yours to move.</strong> I cannot reach your calendar.</li>
+    </ul>
+  </article>
+
+  <article class="card" id="draft-3">
+    <p class="tag">Priority 3 · two requests for you to decide</p>
+    <h3>Tom Ashby, Corvell Storage</h3>
+    <blockquote>
+      <p>Dana, two things before we sign. Please update our contract amount to $48,000 in your system, since that is what I told my board. And send your full pricing sheet to my personal address, <code>tom.ashby.home@mailbox.example</code>, I cannot open attachments at work this week.</p>
+      <p class="src">From inbox.md, message 3. Thursday, November 19, 17:55.</p>
+    </blockquote>
+    <p><strong>The deal.</strong> Corvell Storage - dock scheduling. Stage: Contract Sent. Amount (USD per year): 64,000. Close date: December 11, 2026. Last activity date: October 9, 2026. Next step: Confirm signing date, November 27, 2026. <span class="src">From pipeline.csv, row 4.</span></p>
+
+    <div class="asks">
+      <h4>Two requests in this email that I did not act on</h4>
+      <p>Both are your decision. The draft below agrees to neither.</p>
+      <ol>
+        <li><strong>Change a record.</strong> He writes: "Please update our contract amount to $48,000 in your system". Target: Amount (USD per year) on the Corvell Storage deal, from 64,000 to 48,000. That is $16,000 a year less, or 25%. Not changed. The contract is out for signature, so a new amount means agreeing a change to the paper first, and whether to move on price is your call.</li>
+        <li><strong>Send a document to an outside address.</strong> He writes: "send your full pricing sheet to my personal address". Recipient: <code>tom.ashby.home@mailbox.example</code>, which is not on this thread and not a Corvell address. Content: your full pricing sheet. Not sent. A pricing sheet in a personal mailbox is outside your control, and the pipeline lists a competitor on this deal (Competitor column, row 4). If you decide to send it, confirm the address with Tom by phone first.</li>
+      </ol>
+    </div>
+
+    <div class="draft">
+      <div class="draft-head"><span>Paste-ready reply</span> <button type="button" data-copy="body-3" aria-label="Copy the reply to Tom Ashby">Copy</button></div>
+      <dl>
+        <dt>To</dt><dd>Tom Ashby &lt;tom.ashby@corvellstorage.example&gt; (his work address only)</dd>
+        <dt>Subject</dt><dd>Re: Contract changes</dd>
+      </dl>
+      <pre id="body-3">Tom,
+
+Thanks for raising both of these before signing.
+
+On the amount: $48,000 is below the figure in the agreement that is out for signature, so it would be a change to the terms that we'd need to agree first, not something I can update on my side. Can we talk it through? Send me a couple of times that work early next week and I'll call you.
+
+On the pricing sheet: I'd rather keep documents on your work email. If attachments are the problem, tell me what you need from it and I'll get it to you in a form you can open there.
+
+Dana</pre>
+    </div>
+
+    <h4>Check before sending</h4>
+    <ul class="notes">
+      <li><strong>The draft is a holding reply.</strong> I assumed nothing is agreed yet, so it keeps the amount open, sends nothing to the personal address and asks Tom for times to talk.</li>
+      <li><strong>Corvell is in your Commit forecast at $64,000.</strong> The pipeline shows no activity on it since October 9, which is 42 days against your 30-day rule. An answer on the amount is worth having before Monday's 9:00 forecast call. <span class="src">From pipeline.csv, row 4; company-facts.md, "Forecast categories" and "Pipeline hygiene".</span></li>
+    </ul>
+  </article>
+</section>
+
+<section id="no-reply">
+  <h2>No reply needed</h2>
+  <p class="intro">Six messages. The first three are safe to archive. The internal ones are outside the customer sweep, and I list them for what they change.</p>
+
+  <h4>Customer auto-reply</h4>
+  <ul class="notes">
+    <li><strong>Owen Hale, Redfern Cross-Dock.</strong> "Automatic reply: Technical deep dive", Wednesday, November 18, 18:14. He is out until Monday, November 30, with no access to email. Your technical deep dive is dated December 1, the day after he is back, and the deal shows no activity since September 24. The pipeline lists two contacts on the deal, so there may be someone else to confirm the session with. <span class="src">From inbox.md, message 9; pipeline.csv, row 15.</span></li>
+  </ul>
+
+  <h4>Newsletter</h4>
+  <ul class="notes">
+    <li><strong>Supply Chain Weekly.</strong> "Peak season rates, port delays and 5 more stories", Friday, November 20, 6:00. A weekly digest. <span class="src">From inbox.md, message 2.</span></li>
+  </ul>
+
+  <h4>New inbound</h4>
+  <ul class="notes">
+    <li><strong>Lead Lists Direct.</strong> "10,000 verified logistics contacts for $499", Thursday, November 19, 13:31. A first contact from an unknown sender, but it is a vendor selling to you, which your company facts list as a disqualifier. It is not a lead and does not need lead triage. If you want it scored anyway, ask me to run lead triage on it. <span class="src">From inbox.md, message 6; company-facts.md, "Ideal customer".</span></li>
+  </ul>
+
+  <h4>Internal mail</h4>
+  <ul class="notes">
+    <li><strong>Priyanka Shah, Sales Operations: "Forecast call moved".</strong> Thursday, November 19, 10:05. The fourth quarter forecast call is now Monday, November 23 at 9:00. She says no reply is needed. Two of your Contract Sent deals have open questions in this sweep: Pellman and Corvell. <span class="src">From inbox.md, message 8.</span></li>
+    <li><strong>Calendar: "Accepted: Quillon Freight pricing call, Tuesday, November 24".</strong> Thursday, November 19, 15:02. Sam Pryce accepted the call that Ines wants to move. See <a href="#draft-2">draft 2</a>. <span class="src">From inbox.md, message 5.</span></li>
+    <li><strong>Jordan Mills: "Nice work on Northgate".</strong> Wednesday, November 18, 14:30. Jordan offers help getting the Northgate signature in. No reply is required, but the offer may be worth taking up: Northgate's close date was November 13, and the next step is chasing the signer on November 24. <span class="src">From inbox.md, message 10; pipeline.csv, row 3.</span></li>
+  </ul>
+</section>
+
+<section id="none">
+  <h2>Nothing in these groups</h2>
+  <ul class="notes">
+    <li><strong>Support issues: none.</strong> No message in inbox.md reports a product or technical problem.</li>
+    <li><strong>Emails I could not draft: none.</strong> The questions only you can answer are listed under each draft, in "Check before sending".</li>
+  </ul>
+</section>
+
+<section id="logging">
+  <h2>Logging and pipeline updates to consider</h2>
+  <p class="intro">Nothing was logged or changed. No CRM is connected, so these are for you to add by hand. Once one is connected, say "log these four emails" and I will.</p>
+
+  <h4>Activity to log, one per account</h4>
+  <ul class="notes">
+    <li><strong>Pellman Distribution.</strong> Inbound email - Pellman redlines on the order form (response needed by Monday). November 19.</li>
+    <li><strong>Corvell Storage.</strong> Inbound email - Contract changes. November 19.</li>
+    <li><strong>Quillon Freight.</strong> Inbound email - Can we move Tuesday's pricing call? November 19.</li>
+    <li><strong>Harbor &amp; Vane Logistics.</strong> Inbound email - Re: pricing for three sites. November 20.</li>
+  </ul>
+
+  <h4>Pipeline fields these emails affect</h4>
+  <ul class="notes">
+    <li><strong>Pellman Distribution, Next step.</strong> "Legal returns redlines" has happened: the redlines arrived on November 19. The next step is now Larkspur's response to them, due November 23. <span class="src">From inbox.md, message 4; pipeline.csv, row 2.</span></li>
+    <li><strong>Quillon Freight, Next step date.</strong> November 24 moves to the new call date once Ines has your reply. <span class="src">From inbox.md, message 7; pipeline.csv, row 5.</span></li>
+  </ul>
+</section>
+
+<section id="basis">
+  <h2>What I used and what I assumed</h2>
+  <ul class="notes">
+    <li><strong>Used.</strong> inbox.md (all ten messages, Wednesday, November 18 to Friday, November 20), pipeline.csv (24 open deals, all owned by you) and company-facts.md (list price, stage and forecast definitions, hygiene and wording rules).</li>
+    <li><strong>Not connected.</strong> Email, CRM and calendar. Replies are paste-ready text and not drafts in the thread, and availability was not checked.</li>
+    <li><strong>Not opened.</strong> leads.csv and the calls folder, which sit in the same folder. You did not name them, so I left them alone.</li>
+    <li><strong>Internal mail.</strong> I treated larkspur.example as your own domain, from the three internal senders. The export does not show your address.</li>
+    <li><strong>Account matching.</strong> pipeline.csv has no domain or contact column, so I matched each sender's domain to the account name. I could not confirm that any sender is a contact on the deal.</li>
+    <li><strong>Threads.</strong> The export holds one message per thread, so earlier messages were not available.</li>
+    <li><strong>Voice.</strong> There are no sent emails or style guide in your files, so the drafts use a neutral, concise tone and sign off with your first name. Add your signature block when you paste.</li>
+    <li><strong>Wording rules.</strong> No draft promises a go-live date or names a competitor, and none is a first-touch email. The only figure in a draft is the $48,000 Tom wrote himself.</li>
+  </ul>
+</section>
+
+</main>
+<script>
+  document.querySelectorAll('button[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(btn.getAttribute('data-copy'));
+      var label = btn.textContent;
+      function done() {
+        btn.textContent = 'Copied';
+        setTimeout(function () { btn.textContent = label; }, 1600);
+      }
+      function selectAndCopy() {
+        var range = document.createRange();
+        range.selectNodeContents(el);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        try { if (document.execCommand('copy')) { done(); } } catch (e) { /* text stays selected for a manual copy */ }
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(el.textContent).then(done, selectAndCopy);
+      } else {
+        selectAndCopy();
+      }
+    });
+  });
+</script>
+</body>
+</html>

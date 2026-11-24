@@ -1,0 +1,315 @@
+"""Build the Modern GTM site: one self-contained index.html, plus preview.html with local fonts."""
+import json, os, re, shutil, sys
+from pathlib import Path
+import markdown
+from bs4 import BeautifulSoup
+
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / 'src' if (ROOT / 'src').exists() else ROOT
+DIST = ROOT / 'dist'
+REPORT_MD = next(p for p in (ROOT / 'report.md', Path('/home/claude/export/ai-gtm-work-redefinition-report.md')) if p.exists())
+FONTS = Path(os.environ.get('MGTM_FONTS', '/home/claude/fonts/node_modules/@fontsource-variable'))
+CREDITS = json.loads((ROOT / 'credits.json').read_text(encoding='utf-8'))
+
+md = REPORT_MD.read_text(encoding='utf-8').replace('P\\&L', 'P&L')
+a0, b0, c0 = md.index('## Appendix A'), md.index('## Appendix B'), md.index('## Appendix C')
+
+# ---------- evidence register, from Appendix A
+rows = []
+for line in md[a0:b0].splitlines():
+    if line.startswith('|') and not line.startswith('| ---') and not line.startswith('| Organization or study'):
+        cells = [c.strip() for c in line.strip().strip('|').split('|')]
+        assert len(cells) == 5, line
+        cells[0] = cells[0].replace('*', '')
+        cells = [c.replace("'", '’') for c in cells]
+        if cells[4] == 'Context only':
+            cells[4] = 'Context'
+        rows.append(cells)
+assert len(rows) == 94, len(rows)
+
+links = re.findall(r'\[([^\]]+)\]\((https?://[^)\s]+)\)', md[b0:c0])
+def url(sub):
+    hits = sorted({u for _, u in links if sub in u})
+    assert len(hits) == 1, (sub, hits)
+    return hits[0]
+
+SMAP = json.loads((ROOT / 'sources_map.json').read_text(encoding='utf-8'))
+reg = []
+for r in rows:
+    k = r[0] + '|' + r[1][:40]
+    assert k in SMAP, k
+    added = CREDITS['added'].get(k, '')
+    fixed = CREDITS['corrected'].get(k, '')
+    rechecked = CREDITS['rechecked']['by'] if (not added or added < CREDITS['rechecked']['on']) and not fixed > CREDITS['rechecked']['on'] else ''
+    spot = CREDITS['spotted'].get(k) or CREDITS['spotted'].get(r[0]) or ''
+    who = CREDITS.get('people', {}).get(spot)   # the title, organization and website a credited person asked to be shown with
+    reg.append(r + [SMAP[k], spot, CREDITS['corrected'].get(k, ''), rechecked, added, [who['title'], who['organization'], who['url']] if who else None])
+for name in ('spotted', 'added', 'corrected'):
+    stale = [k for k in CREDITS[name] if '|' in k and k not in {r[0] + '|' + r[1][:40] for r in rows}]
+    assert not stale, (name, stale)
+for n, w in CREDITS.get('people', {}).items():
+    assert n in {r[6] for r in reg}, ('a person under people spotted nothing', n)
+    assert set(w) == {'title', 'organization', 'url'} and all(w.values()) and w['url'].startswith('https://'), (n, w)
+if '--list' in sys.argv:
+    for i, r in enumerate(reg):
+        print(i, r[0], '|', r[1][:60], '|', r[4], '|', ', '.join(s[0] for s in r[5]))
+
+# ---------- the report as HTML
+body_md = md
+html = markdown.markdown(body_md, extensions=['tables', 'smarty'])
+soup = BeautifulSoup(html, 'html.parser')
+soup.find('h1').decompose()
+for p in soup.find_all('p'):
+    t = p.get_text()
+    if '@Nathan' in t or t.startswith('Project copy of the live doc'):
+        p.decompose()
+first = soup.find('p')
+assert first.get_text().startswith('Data coverage and range'), first.get_text()[:40]
+first['class'] = 'cover'
+
+FIGS = [
+ ('usevs', 'Two 2026 vendor surveys; compare within each survey, not across them. Sources: Salesloft, 2026 Revenue Benchmark Report, U.S. (500 leaders at companies with 200+ employees, May 28–June 10, 2026); LeanData, The 2026 State of AI Go-to-Market Readiness Report (157 practitioners in its customer survey, May 2026), p. 7. LeanData’s summary pages describe readiness differently; the chart uses its question-level result.'),
+ ('workforce', 'Share of 275 service and support leaders reporting each workforce action. Gartner’s release ties only the reduction in headcount to AI and does not say whether leaders could report several actions. Source: <a href="https://www.gartner.com/en/newsroom/press-releases/2026-11-05-gartner-survey-finds-21-percent-of-service-and-support-leaders-have-reduced-human-agent-headcount-because-of-ai">Gartner survey of 275 customer service and support leaders</a>, fielded July and August 2026, published November 5, 2026.'),
+ ('leaders', 'Leaders grew market share by more than 10% in a year; laggards lost more than 5%. Source: <a href="https://www.mckinsey.com/capabilities/growth-marketing-and-sales/our-insights/the-surprising-economics-of-b2b-growth-the-new-survival-threshold-and-what-it-takes-to-thrive">McKinsey, The surprising economics of B2B growth</a> (2026 Global B2B Pulse Survey, nearly 4,000 B2B decision-makers in 13 countries), published May 28, 2026.'),
+ ('barriers', 'Share of respondents naming each barrier, grouped by survey. No survey asked respondents to rank these together, so compare within a survey. Sources: Gartner (210 CSOs and senior sales leaders, fielded January to February 2026); LeanData, The 2026 State of AI Go-to-Market Readiness Report (157 GTM practitioners); Seismic (353 senior leaders, March–April 2026); Salesforce, State of Sales 2026.'),
+ ('phases', 'Analyst synthesis of the practices in sections 4 to 7. A phase starts only when the gate before it is passed, and a hold at day 90 is a valid result.'),
+]
+fi = 0
+for p in soup.find_all('p'):
+    t = p.get_text()
+    if t.startswith('Chart, in the live doc:') or t.startswith('Diagram, in the live doc:'):
+        kind, cap = FIGS[fi]; fi += 1
+        fig = soup.new_tag('figure')
+        d = soup.new_tag('div'); d['data-chart'] = kind
+        fc = soup.new_tag('figcaption'); fc.append(BeautifulSoup(cap, 'html.parser'))
+        fig.append(d); fig.append(fc)
+        p.replace_with(fig)
+assert fi == 5, fi
+
+toc = []
+for h in soup.find_all('h2'):
+    t = h.get_text()
+    m = re.match(r'(\d+)\.', t)
+    if t.startswith('Executive'):
+        hid = 'report-summary'
+    elif m:
+        hid = 'report-' + m.group(1)
+    elif t.startswith('Appendix'):
+        hid = 'report-' + t[9].lower()
+    else:
+        raise SystemExit('unmapped heading ' + t)
+    h['id'] = hid
+    toc.append((hid, t))
+
+# Appendix A: point to the live register in place of a second copy of the table
+ha = soup.find('h2', id='report-a')
+tbl = ha.find_next('table')
+note = BeautifulSoup('<p>The register has its own page on this site, where every finding can be searched and filtered and links to its source. <a href="#evidence">Open the evidence register</a>.</p>', 'html.parser')
+tbl.replace_with(note)
+
+for t in soup.find_all('table'):
+    n = len(t.find('tr').find_all(['th', 'td']))
+    t['class'] = 'stack wide' if n >= 4 else 'stack'
+    w = soup.new_tag('div'); w['class'] = 'scroll'
+    t.wrap(w)
+
+report_html = str(soup)
+toc_html = ''.join(f'<li><a href="#{i}">{t}</a></li>' for i, t in toc)
+
+# ---------- assemble
+css = (SRC / 'style.css').read_text(encoding='utf-8')
+body = (SRC / 'body.html').read_text(encoding='utf-8')
+js = (SRC / 'app.js').read_text(encoding='utf-8')
+assert body.count('<!--TOC-->') == 2 and body.count('<!--REPORT-->') == 1
+
+# ---------- what the register holds, said once here so that the page reads the same with and without scripts
+def basis_of(r):
+    b = r[3].lower()
+    return 'observed' if b.startswith('observed') else 'forecast' if b.startswith('forecast') else 'estimated' if b.startswith('estimated') else 'self'
+NW = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+word = lambda n: NW[n] if n < 10 else str(n)
+pl = lambda n, one, many: f'{n} {one if n == 1 else many}'
+cnt = {k: sum(1 for r in reg if basis_of(r) == k) for k in ('self', 'observed', 'forecast', 'estimated')}
+aside = sum(1 for r in reg if r[4] in ('Context', 'Not used'))
+causal = [r for r in reg if 'causal' in r[3].lower()]
+pre = sum(1 for r in causal if 'preprint' in r[3].lower())
+evsum = (f"Of the {len(reg)} records in the register, {cnt['self']} are self-reported, {cnt['observed']} are observed in records, "
+         f"{pl(cnt['forecast'], 'is a forecast', 'are forecasts')} and {pl(cnt['estimated'], 'is an estimate', 'are estimates')}. "
+         + (f"{word(aside).capitalize()} are context rows or a methods example and are not used as evidence. " if aside else '')
+         + ('Only one is a causal study' if len(causal) == 1 else f"{word(len(causal)).capitalize()} are causal studies")
+         + (', one of them a preprint' if pre == 1 else f', {word(pre)} of them preprints' if pre else '')
+         + '. Each square is one record, marked with its grade.')
+evabout = f"Of the {len(reg)} records collected here, {cnt['self']} are self-reported: a company or a survey respondent describing its own results."
+assert body.count('<!--EVSUM-->') == 2 and body.count('<!--EVABOUT-->') == 1
+body = body.replace('<!--EVSUM-->', evsum).replace('<!--EVABOUT-->', evabout)
+body = body.replace('<!--TOC-->', toc_html).replace('<!--REPORT-->', report_html)
+reg_json = json.dumps(reg, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
+ledger_json = json.dumps({'rechecked': CREDITS['rechecked'], 'proposals': CREDITS['proposals']}, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
+
+DESC = 'Evidence, plays and tools for revenue teams of people and agents: graded research on AI in go-to-market, with playbooks for agent enablement and orchestration.'
+GOOGLE = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&amp;display=swap">'
+LOCAL = '''<style>
+@font-face{font-family:"Archivo";src:url("_fonts/archivo.woff2") format("woff2");font-weight:100 900;font-stretch:62% 125%}
+@font-face{font-family:"Source Serif 4";src:url("_fonts/ss4.woff2") format("woff2");font-weight:200 900}
+@font-face{font-family:"Source Serif 4";font-style:italic;src:url("_fonts/ss4i.woff2") format("woff2");font-weight:200 900}
+</style>'''
+STACK = "<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}const R={TABLE:'table',THEAD:'rowgroup',TBODY:'rowgroup',TR:'row',TH:'columnheader',TD:'cell'};for(const e of document.querySelectorAll('table.stack:not([role]),table.regt:not([role]),.stack :not([role]),.regt :not([role])')){const r=R[e.tagName];if(r)e.setAttribute('role',r)}}).observe(document,{childList:true,subtree:true})</script>"
+
+def page(fonts):
+    return f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modern GTM</title>
+<meta name="description" content="{DESC}">
+<meta name="theme-color" content="#493AC4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23493AC4'/%3E%3Crect x='6' y='9' width='14' height='5' rx='2.5' fill='%23E4F560'/%3E%3Crect x='12' y='18' width='14' height='5' rx='2.5' fill='%23fff'/%3E%3C/svg%3E">
+<meta property="og:title" content="Modern GTM">
+<meta property="og:description" content="{DESC}">
+<meta property="og:type" content="website">
+<link rel="alternate" type="application/json" href="evidence.json" title="Modern GTM evidence register">
+<script type="application/ld+json">{ld}</script>
+{fonts}
+<script>document.documentElement.classList.add('js')</script>
+<style>
+{css}</style>
+{STACK}
+</head>
+<body>
+{body}
+<script type="application/json" id="regData">{reg_json}</script>
+<script type="application/json" id="ledgerData">{ledger_json}</script>
+<script>
+{js}</script>
+</body>
+</html>
+'''
+
+LD_OBJ = {"@context": "https://schema.org", "@graph": [
+ {"@type": "WebSite", "name": "Modern GTM", "description": DESC, "inLanguage": "en", "dateModified": "2026-11-23"},
+ {"@type": "Report", "name": "AI and the Redefinition of GTM Work: Leaders, Laggards and the Evidence", "author": {"@type": "Person", "name": "Nathan Fierley"}, "dateModified": "2026-11-23", "about": ["AI in go-to-market", "AI agents in sales, marketing, customer success and support"]},
+ {"@type": "Dataset", "name": "Modern GTM evidence register", "description": f"{len(reg)} graded records on AI in go-to-market work, each with its population, period, basis, grade and source. Most are self-reported, and vendor sources are flagged. Compiled and checked against sources by Claude, an AI model made by Anthropic, rechecked by a second AI model, GPT-6.2 Astra, made by OpenAI, and edited by Nathan Fierley. Not peer reviewed.", "dateModified": "2026-11-23", "editor": {"@type": "Person", "name": "Nathan Fierley"}, "distribution": {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "evidence.json"}}]}
+ld = json.dumps(LD_OBJ, ensure_ascii=False).replace('</', '<\\/')
+
+def prerender(path):
+    from playwright.sync_api import sync_playwright
+    js = """() => {
+      const q = s => [...document.querySelectorAll(s)].map(e => e.innerHTML);
+      const out = {chart: q('[data-chart]'), strip: q('[data-strip]'), tbody: document.querySelector('#reg tbody').innerHTML, ids: {}, vals: {}, checks: []};
+      for (const i of ['gradeSeg','regCount','uOut','cText','kCount','mLevel','mWhy','mNext','mProf','rubric','ledger']) out.ids[i] = document.getElementById(i).innerHTML;
+      for (const e of document.querySelectorAll('#cForm input, #cForm textarea')) { if (e.tagName === 'TEXTAREA') e.textContent = e.value; else e.setAttribute('value', e.value); }
+      out.ids.cForm = document.getElementById('cForm').innerHTML;
+      for (const e of document.querySelectorAll('#uForm input')) out.vals[e.id] = e.value;
+      out.checks = [...document.querySelectorAll('#kList input')].filter(e => e.checked).map(e => e.id);
+      return out; }"""
+    with sync_playwright() as pw:
+        br = pw.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
+        pg = br.new_page(viewport={'width': 1280, 'height': 900})
+        pg.goto('file://' + str(path)); pg.wait_for_timeout(700)
+        out = pg.evaluate(js); br.close()
+    return out
+
+def inject(html, pre):
+    s = BeautifulSoup(html, 'html.parser')
+    def fill(el, inner):
+        el.clear(); el.append(BeautifulSoup(inner, 'html.parser'))
+    charts, strips = s.select('[data-chart]'), s.select('[data-strip]')
+    assert len(charts) == len(pre['chart']) and len(strips) == len(pre['strip'])
+    for el, inner in zip(charts, pre['chart']): fill(el, inner)
+    for el, inner in zip(strips, pre['strip']): fill(el, inner)
+    fill(s.select_one('#reg tbody'), pre['tbody'])
+    for i, inner in pre['ids'].items(): fill(s.find(id=i), inner)
+    for i, v in pre['vals'].items(): s.find(id=i)['value'] = v
+    for i in pre['checks']: s.find(id=i)['checked'] = ''
+    return str(s)
+
+DIST.mkdir(exist_ok=True)
+fd = DIST / '_fonts'; fd.mkdir(exist_ok=True)
+if FONTS.exists():
+    shutil.copy(FONTS / 'archivo/files/archivo-latin-standard-normal.woff2', fd / 'archivo.woff2')
+    shutil.copy(FONTS / 'source-serif-4/files/source-serif-4-latin-standard-normal.woff2', fd / 'ss4.woff2')
+    shutil.copy(FONTS / 'source-serif-4/files/source-serif-4-latin-standard-italic.woff2', fd / 'ss4i.woff2')
+(DIST / '_pass1.html').write_text(page(LOCAL), encoding='utf-8')
+body = inject(body, prerender(DIST / '_pass1.html'))
+(DIST / 'index.html').write_text(page(GOOGLE), encoding='utf-8')
+(DIST / 'preview.html').write_text(page(LOCAL), encoding='utf-8')
+(DIST / 'all.html').write_text(page(LOCAL).replace('</head>', '<style>.js [data-view]{display:block!important}</style></head>', 1), encoding='utf-8')
+
+CLAUDE = "Claude (AI model, Anthropic)"
+def spotted(r):
+    if not r[6]: return {"spotted_by": CLAUDE}
+    if r[10]: return {"spotted_by": f"{r[6]}, {r[10][0]}, {r[10][1]}", "spotted_by_website": r[10][2]}
+    return {"spotted_by": r[6]}
+ev = {"name": "Modern GTM evidence register", "as_of": "2026-11-23",
+      "note": "Grade says what a finding can prove; basis says how it was produced. Neither means a figure was independently verified, and nothing here has been peer reviewed. A forecast or a target is graded C whatever its units. Vendor sources are flagged in the basis. Each finding credits who spotted it, who compiled it, who checked it against the source it links to, who rechecked it and who edited it. A row added or corrected after the recheck of November 20, 2026 does not carry it. Rows marked Context or Not used are not evidence.",
+      "grades": {"A": "The effect is stated in financial terms and has been reported, not forecast", "B": "A quantified operating or labor-market result", "C": "A survey, forecast, target or narrative", "Context": "Context, not used as evidence", "Not used": "Listed as a methods example only"},
+      "findings": [{"organization": r[0], "finding": r[1], "population_and_period": r[2], "basis": r[3], "grade": r[4], "sources": [{"label": l, "url": u} for l, u in r[5]], **({"added_on": r[9]} if r[9] else {}), **({"corrected_on": r[7]} if r[7] else {}), "credit": {**spotted(r), "compiled_by": CLAUDE, "source_checked_by": CLAUDE, **({"rechecked_by": r[8]} if r[8] else {}), "edited_by": "Nathan Fierley"}} for r in reg]}
+(DIST / 'evidence.json').write_text(json.dumps(ev, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+(DIST / 'robots.txt').write_text("# Modern GTM is open to search engines and to AI crawlers and assistants.\nUser-agent: *\nAllow: /\n", encoding='utf-8')
+(DIST / 'llms.txt').write_text(f"""# Modern GTM
+
+> Evidence, plays and tools for revenue teams of people and agents: graded research on AI in go-to-market work, with playbooks for agent enablement and orchestration. Evidence through November 23, 2026.
+
+Every finding in the register carries a grade (A financial, B measured, C survey, forecast or narrative) and a basis (observed, self-reported, estimated or forecast). Neither means a figure was independently verified. A forecast or a target is graded C whatever its units. Most findings are self-reported, and vendor sources are flagged. Claude, an AI model made by Anthropic, compiles each finding and checks it against the source it links to. A second AI model, GPT-6.2 Astra, made by OpenAI, rechecked the register on November 20, 2026. Nathan Fierley decides what goes in and edits what is published. Nothing here has been peer reviewed. Each finding credits who spotted it, who compiled it, who checked its source and who edited it. No one pays to appear on the site.
+
+## Research
+
+- [AI and the Redefinition of GTM Work](/#report): the full report, with eight findings, five cases and a 90-day plan
+- [Research overview](/#research): summaries and four figures
+
+## Evidence
+
+- [Evidence register](/#evidence): {len(reg)} records, each with its population, period, basis, grade and source
+- [Register as JSON](/evidence.json)
+
+## Playbooks and tools
+
+- [Playbooks](/#playbooks): agent enablement, orchestration and a 90-day path to a scale, hold or stop decision
+- [Tools](/#tools): unit cost calculator, agent charter, launch checklist and maturity check
+
+## Contributing
+
+- [Contribute](/#contribute): what a proposed finding needs and how proposals are reviewed
+- [About and method](/#about)
+""", encoding='utf-8')
+kit = DIST / 'kit'; kit.mkdir(exist_ok=True)
+for f in ('style.css', 'body.html', 'app.js'): shutil.copy(SRC / f, kit / f)
+for f in ('sources_map.json', 'credits.json'): shutil.copy(ROOT / f, kit / f)
+shutil.copy(ROOT / 'build.py', kit / 'build.py.txt')
+shutil.copy(ROOT / 'house_rules.py', kit / 'house_rules.py.txt')
+shutil.copy(REPORT_MD, kit / 'report.md')
+(kit / 'README.md').write_text("""# Modern GTM build kit
+
+The site is one self-contained page. `build.py` (stored here as `build.py.txt`) builds it from the files beside it: `style.css`, `body.html`, `app.js`, `sources_map.json`, `credits.json` and `report.md` (the curated copy of the GTM report).
+
+To rebuild in a fresh workspace:
+
+1. Put every file in this folder into one empty folder and rename `build.py.txt` to `build.py` and `house_rules.py.txt` to `house_rules.py`.
+2. Run `python3 build.py` there. It needs python-markdown, beautifulsoup4, Playwright for Python and Chrome at /usr/bin/google-chrome, because the charts and the register are drawn once at build time so the page reads without scripts.
+3. Publish `dist/index.html`, `dist/evidence.json`, `dist/llms.txt`, `dist/robots.txt` and the `dist/kit` files (as `kit/...`) to the artifact in patch mode.
+
+To add a finding: add its row to Appendix A of `report.md` and its source to `sources_map.json` (key: the organization, a bar, then the first 40 characters of the finding). To credit whoever spotted it, add the same key, or the organization, under `spotted` in `credits.json`. A finding with no entry is credited to Claude. If that person asked to be shown with a title, an organization and a website, put the three under `people`, keyed by the same name; the row then shows them and links the organization. Put the key and the date under `added`, and when a row is corrected put its key and the date under `corrected`. If a row's first 40 characters change, change its key in both files; the build stops on a key that no longer matches a row.
+
+Every build ends with a house-rules check of the site's own style rules: serial commas, number words, dash asides, exclamation marks, retired terms, slogans and title-case headings. Fix what it reports. If a report is a false alarm, add it to the ALLOW list in `house_rules.py` with the reason. The check cannot judge the rules that need reading: a vendor flagged at first mention, no named individuals at source companies, no company leading on its own claims and verbs that match the evidence. Read new copy against those by hand.
+
+The local fonts are only for the preview pages. Without them the published page is the same, because it loads its fonts from Google Fonts.
+
+## The plugin area (since November 22, 2026)
+
+The published page is made in two steps: `build.py`, then `merge.py`, which puts the plugin area into the page and opens Home on a finding. `MERGE.md` has the steps and what the merge changes. A page published without the second step has no plugin area, and its Plugins links leave the site.
+
+The plugin area's own sources are in `plugins/`, with a README of their own.
+
+## The use-case index (since November 23, 2026)
+
+Home carries a table of the site's 13 GTM jobs: the register's records for each job by grade, a play or tool, and the skills in the labs' plugins. `merge.py --use-cases use_cases.json` puts it there. Run without the option, the merge leaves the index out.
+
+**A new record needs a job before the page can be built.** Add one line for it to `job_tags_by_key.json`, with the same key as in `sources_map.json`, then run `jobs_tags.py` and `use_cases.py` (stored here with `.txt` added). `jobs_tags.py` stops and names every record that has no line. `MERGE.md` has the steps under "When the register changes", and the owner accepts or changes each proposed job on the sheet Job tags of the proposal queue.
+""", encoding='utf-8')
+import asyncio, house_rules
+hr = asyncio.run(house_rules.site('file://' + str(DIST / 'all.html')))
+nb = sum(len(x) for r in hr.values() for x in r.values())
+print(f'house rules: {nb} possible breaches' + (' ' + json.dumps(hr, ensure_ascii=False)[:900] if nb else ''))
+n = len((DIST / 'index.html').read_text(encoding='utf-8'))
+print(f'built: index.html {n/1024:.0f} KB; report sections {len(toc)}; register rows {len(reg)}; evidence.json {(DIST / "evidence.json").stat().st_size/1024:.0f} KB')

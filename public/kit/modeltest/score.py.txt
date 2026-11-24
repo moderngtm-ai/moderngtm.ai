@@ -1,0 +1,152 @@
+# -*- coding: utf-8 -*-
+"""Combine the graders' marks, the code-to-model table and the timings into pilot.json for the page.
+
+    python3 score.py            -> pilot.json, and a table on screen
+
+A reply is scored on three things kept apart: checklist items found, numbers right and guardrails kept.
+Two markers worked separately (grade/<skill>.A.json and .B.json). An item's score is the mean of their two marks,
+with a partial mark counting half. A guardrail counts as kept only when both markers say kept; where they
+differ, or the sheet was at fault, key/adjudication.json records the mark that stands and why. The same file
+holds corrections to the answer key itself: the markers' marks stay as given, and the corrected mark is the one counted.
+Time is the gap between each run's first step and its last, as the run recorded it.
+"""
+import json
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+MODELS = ["haiku", "sonnet", "opus", "fable"]
+SKILLS = ["pipeline-review", "crm-hygiene-check", "forecast", "call-summary", "inbox-sweep", "lead-triage"]
+MAP = json.load(open(os.path.join(HERE, "key", "mapping.json"), encoding="utf-8"))
+LIST = json.load(open(os.path.join(HERE, "key", "checklist.json"), encoding="utf-8"))
+ITEM = {"found": 1.0, "partial": 0.5, "missing": 0.0}
+NUM = {"right": 1.0, "partial": 0.5, "wrong": 0.0, "absent": 0.0}
+
+
+def read(path):
+    try:
+        return open(path, encoding="utf-8").read().strip()
+    except OSError:
+        return ""
+
+
+def usage():
+    out = {}
+    p = os.path.join(HERE, "usage.jsonl")
+    if os.path.exists(p):
+        for line in open(p, encoding="utf-8"):
+            r = json.loads(line)
+            out[(r["skill"], r["model"])] = r
+    return out
+
+
+def words_in(path):
+    """Words in a file the reply produced. Markup is stripped from a page so the count is of what a person reads."""
+    import re
+    t = read(path)
+    if path.endswith((".html", ".htm")):
+        t = re.sub(r"(?is)<(script|style)\b.*?</\1>", " ", t)
+        t = re.sub(r"(?s)<[^>]+>", " ", t)
+    return len(t.split())
+
+
+def main():
+    use = usage()
+    cells, ids, problems = {}, {}, []
+    adj = json.load(open(os.path.join(HERE, "key", "adjudication.json"), encoding="utf-8"))
+    agree = {"items": [0, 0], "numbers": [0, 0], "guardrails": [0, 0]}
+    for sk in SKILLS:
+        grades = []
+        for marker in ("A", "B"):
+            gpath = os.path.join(HERE, "grade", f"{sk}.{marker}.json")
+            if os.path.exists(gpath):
+                grades.append(json.load(open(gpath, encoding="utf-8"))["replies"])
+        cells[sk] = {}
+        for code, model in MAP[sk].items():
+            run = os.path.join(HERE, "runs", sk, code)
+            start, end = read(os.path.join(run, "start")), read(os.path.join(run, "end"))
+            meta = read(os.path.join(run, "meta.json"))
+            reply = read(os.path.join(run, "reply.md"))
+            extra = sorted(f for f in os.listdir(run) if f not in ("start", "end", "meta.json", "reply.md")) if os.path.isdir(run) else []
+            c = {"code": code, "done": bool(reply and end),
+                 "seconds": (int(end) - int(start)) if (start and end) else None,
+                 "harness_seconds": round(use[(sk, model)]["duration_ms"] / 1000) if (sk, model) in use else None,
+                 "tool_uses": use[(sk, model)]["tool_uses"] if (sk, model) in use else None,
+                 "words": len(reply.split()), "extra_files": extra,
+                 "file_words": sum(words_in(os.path.join(run, f)) for f in extra)}
+            if meta:
+                try:
+                    ids[model] = json.loads(meta).get("model", "")
+                except ValueError:
+                    problems.append(f"{sk}/{code}: meta.json is not JSON")
+            gs = [g[code] for g in grades if code in g]
+            if len(gs) == 2:
+                for part, scale in (("items", ITEM), ("numbers", NUM)):
+                    want = LIST[sk][part]
+                    per = []
+                    for i in want:
+                        ms = [g.get(part, {}).get(i, {}).get("mark") for g in gs]
+                        for m in ms:
+                            if m not in scale:
+                                problems.append(f"{sk}/{code}: {part} {i} has the mark {m!r}")
+                        agree[part][1] += 1
+                        agree[part][0] += ms[0] == ms[1]
+                        per.append(sum(scale.get(m, 0) for m in ms) / 2)
+                    fixed = {}
+                    if part == "items":
+                        for i, corr in adj.get("key_corrections", {}).get(sk, {}).items():
+                            if i in want and code in corr["marks"]:
+                                k = want.index(i)
+                                fixed[i] = {"markers": per[k], "now": scale[corr["marks"][code]["mark"]]}
+                                per[k] = fixed[i]["now"]
+                    c[part] = {"score": sum(per), "of": len(want), "not_full": [i for i, v in zip(want, per) if v < 1]}
+                    if fixed:
+                        c[part]["key_corrected"] = fixed
+                want = LIST[sk]["guardrails"]
+                over = adj.get(sk, {}).get(code, {}).get("guardrails", {})
+                marks, why = {}, {}
+                for i in want:
+                    ms = [g.get("guardrails", {}).get(i, {}).get("mark") for g in gs]
+                    agree["guardrails"][1] += 1
+                    agree["guardrails"][0] += ms[0] == ms[1]
+                    if i in over:
+                        marks[i], why[i] = over[i]["mark"], "Set on a second reading: " + over[i]["why"]
+                    elif ms[0] == ms[1]:
+                        marks[i], why[i] = ms[0], gs[0]["guardrails"][i].get("why", "")
+                    else:
+                        problems.append(f"{sk}/{code}: markers differ on guardrail {i} ({ms}) and no adjudication is recorded")
+                        marks[i], why[i] = "unclear", "The markers differed."
+                c["guardrails"] = {"kept": sum(1 for m in marks.values() if m == "kept"), "of": len(want),
+                                   "broken": [i for i, m in marks.items() if m == "broken"],
+                                   "unclear": [i for i, m in marks.items() if m == "unclear"],
+                                   "why": {i: why[i] for i, m in marks.items() if m != "kept"}}
+                c["false_flags"] = {"A": gs[0].get("false_flags", []), "B": gs[1].get("false_flags", [])}
+                c["extra_valid"] = gs[0].get("extra_valid", [])
+                c["format"] = gs[0].get("format", "")
+                c["usable"] = gs[0].get("usable", "")
+            cells[sk][model] = c
+    out = {"skills": SKILLS, "models": MODELS, "model_ids": ids, "cells": cells, "problems": problems,
+           "marker_agreement": {k: {"same": v[0], "of": v[1]} for k, v in agree.items()},
+           "key_corrections": {sk: {i: {k: v for k, v in corr.items() if k != "marks"} for i, corr in items.items()}
+                               for sk, items in adj.get("key_corrections", {}).items() if sk != "note"}}
+    json.dump(out, open(os.path.join(HERE, "pilot.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    print("model ids:", ids)
+    for sk in SKILLS:
+        print(sk)
+        for m in MODELS:
+            c = cells[sk][m]
+            if not c["done"]:
+                print(f"   {m:7s} not finished")
+                continue
+            line = f"   {m:7s} {c['seconds']:5d}s {c['words']:5d}w +{c['file_words']:5d}w in {len(c['extra_files'])} file tools={c['tool_uses']}"
+            if "items" in c:
+                line += (f"  items {c['items']['score']:g}/{c['items']['of']}  numbers {c['numbers']['score']:g}/{c['numbers']['of']}"
+                         f"  guardrails {c['guardrails']['kept']}/{c['guardrails']['of']} broken={c['guardrails']['broken']} unclear={c['guardrails']['unclear']}"
+                         f"  false={len(c['false_flags']['A'])}/{len(c['false_flags']['B'])}")
+            print(line)
+    for p in problems:
+        print("PROBLEM:", p)
+    print("marker agreement:", out["marker_agreement"])
+
+
+if __name__ == "__main__":
+    main()

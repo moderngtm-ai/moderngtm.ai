@@ -1,0 +1,340 @@
+# -*- coding: utf-8 -*-
+"""The ChatGPT for Sales entry: one page in the plugin area. Data is in chatgpt_data.py.
+
+Every fact about the plugin on this page was reported by ChatGPT from an installed copy and is restated in this
+site's words. The page says so at the top, on every skill and in its method note."""
+import html
+import re
+
+import chatgpt_data as G
+import core as C
+import data as D
+import plugins_data as PD
+
+e = html.escape
+SCHED = [s for s in G.SKILLS if s["sflag"] == "yes"]
+MGR = [s for s in G.SKILLS if s["mflag"] == "yes"]
+WORD = {5: "Five", 7: "Seven"}
+
+
+def code(name):
+    return f"<code>{e(name)}</code>"
+
+
+def gchip(name):
+    return f'<a class="chip" href="#gpt-{name}">{e(name)}</a>'
+
+
+def join(items, last=" and "):
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + last + items[-1]
+
+
+def slots(text):
+    return re.sub(r"\[([^\]]+)\]", lambda m: f'<span class="slot">[{m.group(1)}]</span>', e(text))
+
+
+def link_names(text):
+    """Skill names inside running text become links to their cards."""
+    out = e(text)
+    for name in sorted(G.BY, key=len, reverse=True):
+        out = re.sub(r"(?<![\w>#-])" + re.escape(name) + r"(?![\w-])", f'<a class="skl" href="#gpt-{name}"><code>{name}</code></a>', out)
+    return out
+
+
+def flags(s):
+    out = [f'<span class="t">{G.FOR[s["who"]]}</span>']
+    if s["sflag"] == "yes":
+        out.append('<span class="t">Can be scheduled</span>')
+    if s["mflag"] == "yes":
+        out.append('<span class="t">For a named seller</span>')
+    return "".join(out)
+
+
+def skill(s, i):
+    name = s["name"]
+    before = G.SKILLS[i - 1]["name"] if i else ""
+    after = G.SKILLS[i + 1]["name"] if i + 1 < len(G.SKILLS) else ""
+    step = lambda n, word: (f'<button class="btn sm" type="button" data-gstep="{n}" data-of="{name}">{word}</button>' if n
+                            else f'<button class="btn sm" type="button" disabled>{word}</button>')
+    job = f'<div><dt>GTM job <small>Our read</small></dt><dd>{e(s["job"])}</dd></div>' if s["job"] else '<div><dt>GTM job <small>Our read</small></dt><dd>Outside the site\'s list of 13 jobs.</dd></div>'
+    return f'''<details class="gsk" id="gpt-{name}">
+<summary><span class="nm">{code(name)}</span><span class="tg">{e(s["title"])}</span><span class="fitm">{flags(s)}</span><span class="pm" aria-hidden="true"></span></summary>
+<div class="body">
+<p class="does">{e(s["does"])}</p>
+<div class="gcard">
+<div class="runhead"><h3>Use it</h3><p>As ChatGPT reported the skill's instructions. The example request is ours and was not run.</p></div>
+<dl class="runkv">
+<div><dt>When</dt><dd>{link_names(s["when"])}</dd></div>
+<div><dt>Ask</dt><dd><p class="sayline"><span class="sayt" id="gask-{name}">{slots(s["ask"])}</span><button class="btn sm jsonly" type="button" data-copy="gask-{name}">Copy</button></p></dd></div>
+<div><dt>Give it</dt><dd>{e(s["needs"])}</dd></div>
+<div><dt>You get</dt><dd>{e(s["back"])}</dd></div>
+</dl>
+</div>
+<dl class="kv">
+<div><dt>Reads</dt><dd>{e(s["reads"])}</dd></div>
+<div><dt>Can create or change</dt><dd>{e(s["makes"])}</dd></div>
+<div><dt>Asks first</dt><dd>{e(s["asks"])}</dd></div>
+<div><dt>Will not</dt><dd>{e(s["wont"])}</dd></div>
+<div><dt>Whose work it covers</dt><dd>{e(s["scope"])}</dd></div>
+<div><dt>On a schedule</dt><dd>{e(s["sched"])}</dd></div>
+<div><dt>With no app connected</dt><dd>{e(s["noapps"])}</dd></div>
+<div><dt>Company context it uses</dt><dd>{e(s["company"])}</dd></div>
+<div><dt>Before and after</dt><dd>{link_names(s["next"])}</dd></div>
+{job}
+</dl>
+<div class="skfoot jsonly">{step(before, "Previous")}{step(after, "Next")}<button class="btn sm shut" type="button" data-gshut="{name}">Close {code(name)}</button></div>
+</div>
+</details>'''
+
+
+def catalog():
+    out = []
+    i = 0
+    for key, title, sub in G.GROUPS:
+        rows = [s for s in G.SKILLS if s["group"] == key]
+        out.append(f'<div class="ggrp"><h3 id="gpt-g-{key}">{e(title)} <small>{e(sub)}</small></h3>')
+        for s in rows:
+            out.append(skill(s, G.SKILLS.index(s)))
+            i += 1
+        out.append("</div>")
+    assert i == G.SKILLS_N
+    return "\n".join(out)
+
+
+def glance():
+    jobs = "".join(f'<li id="gjob-{PD.job_slug(j)}"><span>{e(j)}</span><span class="chips">{"".join(gchip(n) for n in names)}</span></li>' for j, names in G.JOBS)
+    rows = [
+        ("Provider and offering", f'<p>OpenAI, a vendor. <a href="{G.NEWS_URL}">ChatGPT for Sales</a> was announced on November 17, 2026. It joins a <a href="{G.PLUGIN_URL}">Sales plugin</a> built by OpenAI with more than 30 new or enhanced partner plugins. The copy read for this page is version {G.VERSION}.</p>'),
+        ("Category", "<p>AI lab</p>"),
+        ("In one sentence", f"<p>A Sales plugin for ChatGPT with {G.SKILLS_N} skills, one that routes each request and 17 workflows, for researching accounts, preparing and following up meetings, planning deals, making the case to a buyer, reviewing a forecast and coaching reps.</p>"),
+        ("Go-to-market (GTM) jobs it covers", f'<ul class="jobs">{jobs}</ul><p class="note" style="margin-top:10px">Placed by us from the reported instructions. No skill of its own for {C.join(G.JOBS_NO_SKILL)}: several workflows draft CRM text for review, and a renewal is handled as a deal or a meeting. Outside the list: {join(gchip(n) for n in G.OUTSIDE_JOBS)}.</p>'),
+        ("Systems it works with", f'<p>The installed copy declares {G.INTEGRATIONS} optional integrations in 10 categories, from CRM and email to meeting transcripts and document signing. It does not record which are connected. <a href="#gpt-apps">The list</a>.</p>'),
+        ("Who can get it", f'<p>OpenAI\'s <a href="{G.HELP_URL}">help page</a> says the Sales plugin is on every ChatGPT plan, the free one included. Partner plugins depend on plan, region and workspace settings, and installing Sales connects no partner account. The plugin\'s page says to use it in ChatGPT Work or in Codex. No price is stated.</p>'),
+        ("Controls", '<p>Each workflow carries its own rules for what needs the user\'s say-so, and no workflow is reported to send a message or change a CRM record on its first pass. Admins of Business and Enterprise workspaces decide whether the plugin and partner plugins are available or installed, and review each app\'s access and allowed actions. The help page points to OpenAI\'s pages on security and compliance and does not itself say how customer data is kept or used.</p>'),
+        ("What the provider reports", "<p>No measured result. The announcement carries statements from customers. One has a number: a co-founder at a customer company estimates about 65% less manual effort for some activities when HubSpot, a vendor's product, is used with ChatGPT for Sales.</p>"),
+        ("Evidence in the register", "<p>None yet.</p>"),
+        ("Not public or not known", f'<p>The plugin\'s files are not public, and we have not read them. OpenAI\'s <a href="{G.REPO_URL}">role-specific-plugins</a> repository held only a placeholder note. Not known: whether each workflow behaves as its instructions say, since none was run. Also not known: which model runs a workflow, how any result is measured and the names behind {G.OPAQUE} integrations that the installed copy stores as codes.</p>'),
+        ("On this site", '<p>This entry. It rates nothing. Our read of fit, overlap and value, as the <a href="#overview">Claude Sales plugin entry</a> gives it, waits for the workflows to be run.</p>'),
+        ("Last checked", f"<p>{G.CHECKED_ON}: the installed copy through ChatGPT, and OpenAI's plugin page, help page and announcement by Claude.</p>"),
+    ]
+    return '<dl class="glance">' + "".join(f"<div><dt>{a}</dt><dd>{b}</dd></div>" for a, b in rows) + "</dl>"
+
+
+def works_with():
+    rows = []
+    for cat, n, names in G.WORKS_WITH:
+        rest = n - len(names)
+        more = f' <span class="more-n">and {rest} stored as {"a code" if rest == 1 else "codes"}</span>' if rest else ""
+        rows.append(f'<tr><th scope="row">{e(cat)}</th><td class="fmt" data-l="Entries">{n}</td><td class="fmt" data-l="Named">{e(", ".join(names))}{more}</td></tr>')
+    return ('<div class="scroll" tabindex="0" role="region" aria-label="Optional integrations the installed plugin declares, by category"><table class="rt dt stack wide"><thead><tr>'
+            '<th scope="col">Category, as the plugin stores it</th><th scope="col">Entries</th><th scope="col">Named in the plugin\'s list</th></tr></thead><tbody>'
+            + "".join(rows) + "</tbody></table></div>")
+
+
+def side_by_side():
+    out = ['<div class="scroll" tabindex="0" role="region" aria-label="The two sales plugins, fact by fact"><table class="rt dt stack wide"><thead><tr><th scope="col">Fact</th>'
+           '<th scope="col">Claude Sales plugin</th><th scope="col">ChatGPT Sales plugin</th></tr></thead><tbody>']
+    for a, b, c in G.SIDE:
+        out.append(f'<tr><th scope="row">{a}</th><td class="fmt" data-l="Claude">{b}</td><td class="fmt" data-l="ChatGPT">{c}</td></tr>')
+    out.append("</tbody></table></div>")
+    return "".join(out)
+
+
+def by_job():
+    """The site's 13 GTM jobs with each plugin's skills. It lists and does not rate."""
+    claude = {j: ids for j, ids in D.JOBS}
+    gpt = {j: ids for j, ids in G.JOBS}
+    order = PD.JOB_NAMES
+    assert len(order) == 13 and set(claude) | set(gpt) <= set(order)
+    assert all(s["job"] == j for j, names in G.JOBS for s in G.SKILLS if s["name"] in names)
+    assert all(s["job"] is None for s in G.SKILLS if s["name"] in G.OUTSIDE_JOBS)
+    cchip = lambda i: f'<a class="chip" href="#skill-{i}">{e(i)}</a>'
+    none = '<span class="nil">No skill of its own</span>'
+    # support has a plugin of its own on Anthropic's side, and the row says so
+    support = '<span class="nil">No skill of its own. Anthropic publishes a <a href="#customer-support">Customer support plugin</a>.</span>'
+    rows = []
+    for j in order:
+        a = "".join(cchip(i) for i in claude.get(j, [])) or (support if j == "Support" else none)
+        b = "".join(gchip(i) for i in gpt.get(j, [])) or none
+        rows.append(f'<tr id="job-{PD.job_slug(j)}"><th scope="row">{e(j)}</th><td data-l="Claude"><span class="chips">{a}</span></td><td data-l="ChatGPT"><span class="chips">{b}</span></td></tr>')
+    return ('<div class="scroll" tabindex="0" role="region" aria-label="The two sales plugins, by GTM job"><table class="rt dt stack wide"><thead><tr><th scope="col">GTM job</th>'
+            '<th scope="col">Claude Sales plugin</th><th scope="col">ChatGPT Sales plugin</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
+
+
+def view():
+    n_s, n_m = len(SCHED), len(MGR)
+    extra = join(G.README_EXTRA)
+    page_apps = join(G.PAGE_APPS)
+    leaves = join(gchip(n) for n in G.LEAVES_A_FILE)
+    return f'''<div id="chatgpt-sales" data-view="chatgpt-sales" data-group="gpt" data-title="ChatGPT for Sales">
+ <section class="open">
+  <div class="wrap">
+   <h1>ChatGPT for Sales, from OpenAI</h1>
+   <p class="lede">OpenAI, the AI lab that makes ChatGPT, is the vendor. Its Sales plugin gives ChatGPT {G.SKILLS_N} skills for sales work. This entry sets out what each one is reported to do, read and create, as ChatGPT read them from an installed copy.</p>
+   <div class="acts"><a class="btn pri" href="#gpt-skills">Browse the {G.SKILLS_N} skills</a><a class="btn" href="#gpt-source">Where these facts come from</a></div>
+   <p class="who"><span><b>Preview.</b> Reported by ChatGPT and checked by Claude. It awaits its editor's review.</span><span>Sales plugin {G.VERSION}, read on {G.RUN_ON}</span><span>For revenue leaders and operators</span></p>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="gpt-source">Where these facts come from</h2>
+   <p class="lead2">The plugin's files are not public, so this entry rests on a report and says so. Read it as one relay of what the plugin's own text says it does, not as a test of what it does.</p>
+   <div class="g3 mt">
+    <div class="def"><h3>Who read the plugin</h3><p>ChatGPT, an OpenAI model, in the editor's own account with the plugin installed. On {G.RUN_ON} it was given <a href="kit/chatgpt/inventory-prompt.md">a fixed prompt</a> that asked for an inventory of the plugin's own text and nothing else. It reported version {G.VERSION}, {G.SKILLS_N} skills and the full instructions of each. It ran no skill and called no connected app.</p></div>
+    <div class="def"><h3>How the report was checked</h3><p>By Claude, an Anthropic model. The prompt held back two facts from OpenAI's public page as a test: the count of skills and eight of their names. The report matched both. Every cross-reference between skills resolves to one of the {G.SKILLS_N}, and what it says of publisher, capabilities and how to call the plugin agrees with OpenAI's pages, opened again on {G.CHECKED_ON}.</p></div>
+    <div class="def"><h3>What that does not show</h3><p>We did not read the files, so a detail may be wrong or missing. No workflow was run, so nothing here says how well one works. The wording is ours: the plugin is quoted once, for its first prompt. Our own additions are marked: the grouping, who a skill is for, its GTM job and each example request.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="gpt-glance">At a glance</h2>
+   {glance()}
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="gpt-skills">The {G.SKILLS_N} skills</h2>
+   <p class="lead2">A user calls the plugin with @Sales and says what they want. One skill, {gchip("index")}, reads the request and hands it to the workflow that fits. The other 17 are reached through it.</p>
+   <ul class="gtally">
+    <li><b>{n_s} of {G.SKILLS_N}</b> describe a rerun on a schedule, and each asks before one is set up.</li>
+    <li><b>{n_m} of {G.SKILLS_N}</b> can be run by a manager for a named seller.</li>
+    <li><b>{G.SKILLS_N} of {G.SKILLS_N}</b> name a way to work from files or pasted text when no app is connected.</li>
+    <li><b>None</b> is reported to send a message or change a CRM record on its first pass.</li>
+   </ul>
+   <p class="note">The plugin sets no order for its skills. They are grouped here by the work they do, which is our read.</p>
+   {catalog()}
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="gpt-apps">What it works with</h2>
+   <p class="lead2">The installed copy declares {G.INTEGRATIONS} optional integrations, each a vendor's product. It does not record which of them an account has connected. Connecting an app, and what it may then reach, is settled with that app's provider.</p>
+   {works_with()}
+   <p class="note" style="margin-top:12px">{G.OPAQUE} of the {G.INTEGRATIONS} are stored as codes and not as names, and one of them sits in two categories. The plugin's README prints {G.README_NAMES} names. Nine of those match no plain identifier: {extra}. Its files tie only Clay to a code, so the others are not placed in a category here.</p>
+   <p class="note">Three counts do not agree. OpenAI's page shows eight apps ({page_apps}) and says there are {G.PAGE_APPS_MORE} more, which makes 41. The README names {G.README_NAMES}. The installed copy declares {G.INTEGRATIONS}. We could not reconcile them.</p>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="gpt-setup">Setup, company context and admin controls</h2>
+   <div class="g2 mt">
+    <div class="def"><h3>Install and connect</h3><p>From OpenAI's <a href="{G.HELP_URL}">help page</a>: open the Sales listing and install the plugin. Under "Works with", install the partner plugins you need, connect each with your own work account and review the permissions it asks for.</p><p>From the installed copy: a workflow asks for a source only when it needs one. If the user declines, it asks for the smallest export, excerpt or file that would do, and stops only when a first result cannot be supported.</p></div>
+    <div class="def"><h3>First run</h3><p>The plugin's README gives a first prompt: <span class="sayt">{e(G.START_PROMPT)}</span>. The routing skill answers it with an introduction and offers the {gchip("demo-exec-and-seller-dash")}. No separate skill for onboarding or company setup is stated.</p></div>
+    <div class="def"><h3>Company context</h3><p>No central settings screen and no company-wide intake is stated. Each workflow takes its context from records you give it or from sources it is allowed to read. For finding companies that means your ICP and territories. For a forecast, your stages and how you count amounts. For ranking accounts, your account plans and the rule for which accounts to leave alone. For research, the proof and messaging you have approved. For documents and decks, your templates.</p></div>
+    <div class="def"><h3>Customizing</h3><p>Dashboards, templates, reference inputs and some demo material can be customized, and a dashboard keeps its customizations when it is refreshed. A company's own connector can stand in for a source category. No way to edit, copy or extend the {G.SKILLS_N} skills is stated, and the plugin's manifest marks the package as proprietary.</p></div>
+    <div class="def"><h3>Admin controls</h3><p>From OpenAI's help page: in a Business or Enterprise workspace an admin opens the Admin Console, then Plugins, and sets the Sales plugin and partner plugins to available for installation or installed for the workspace. Admins also review each app's access, allowed actions and provider permissions. The installed copy states no control over single skills, over partner apps inside Sales or over single actions.</p></div>
+    <div class="def"><h3>An always-on agent</h3><p>OpenAI's <a href="{G.NEWS_URL}">announcement</a> describes dot, an agent in ChatGPT that is always on and can use the same plugins. The installed copy describes schedules workflow by workflow and no single agent that runs them all.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="gpt-rollout">Before rollout</h2>
+   <div class="g2 mt">
+    <div class="gsplit">
+     <h3>From the plugin's own text, as reported</h3>
+     <ul class="lim">
+      <li>A request that only reads can still leave a file behind. {leaves} do so as their normal result. A user who wants the competitive brief in the chat alone can ask for that.</li>
+      <li>Reading can still cost money. {gchip("enrich-company-and-contact-data")} asks for approval before any search, export or enrichment that uses a data provider's credits, and before it touches personal contact data.</li>
+      <li>Different sources answer different questions. The CRM settles ownership, opportunity fields and the state of the forecast. Transcripts settle what a customer said and what was promised on a call. The calendar settles the details of an invitation.</li>
+      <li>Publishing a dashboard and scheduling its refresh are two approvals, not one.</li>
+      <li>The demo is fiction. It does not show that any provider is connected or can be written to.</li>
+     </ul>
+    </div>
+    <div class="ourread flat gsplit">
+     <h3>Our read <small>Not from the plugin</small></h3>
+     <ul class="lim">
+      <li><b>Agree where the official number lives.</b> The two dashboards and {gchip("review-forecast")} give a second view of figures that a CRM or a forecasting tool already reports.</li>
+      <li><b>Decide who may spend provider credits</b> before {gchip("enrich-company-and-contact-data")} is in wide use.</li>
+      <li><b>Check your own rules for reviewing recorded calls</b> before managers use {gchip("get-rep-call-feedback")} and {gchip("review-rep-call-trends")} on named reps.</li>
+      <li><b>Keep a person on anything a customer will see.</b> Decks, business cases and follow-up emails are drafts until someone reviews them.</li>
+     </ul>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="side-by-side">Beside the Claude Sales plugin</h2>
+   <p>These tables set facts side by side. They do not say which plugin is better, and no skill of either was run for them.</p>
+   {side_by_side()}
+   <h3 class="mt" id="gpt-by-job">By GTM job</h3>
+   <p>The site's 13 jobs, with the skills of each plugin whose instructions cover the job. Placement is our read.</p>
+   {by_job()}
+   <p class="note" style="margin-top:12px">The Claude column is from version {D.PLUGIN_VERSION} of Anthropic's plugin, read in its public files. The ChatGPT column is from version {G.VERSION} of OpenAI's plugin, as ChatGPT reported it. One skill of the Claude plugin and two of the ChatGPT plugin fall outside the 13 jobs, and those are not in the second table.</p>
+  </div>
+ </section>
+</div>'''
+
+
+def method():
+    return f'''    <li>The ChatGPT for Sales entry rests on a report, because the plugin's files are not public. On {G.RUN_ON} the site's editor installed the plugin in his own ChatGPT account and gave ChatGPT <a href="kit/chatgpt/inventory-prompt.md">a fixed prompt</a>, kept in this page's files, that asked for a read-only inventory of the plugin's own text. ChatGPT reported version {G.VERSION} and the full instructions of {G.SKILLS_N} skills. Claude checked the report against two facts the prompt had held back, against itself and against OpenAI's <a href="{G.PLUGIN_URL}">plugin page</a>, <a href="{G.HELP_URL}">help page</a>, <a href="{G.NEWS_URL}">announcement</a> and <a href="{G.GUIDE_URL}">plugins guide</a>, opened on {G.CHECKED_ON}. The entry restates the report in this site's words and quotes the plugin once. No workflow was run, and nothing in the entry is rated.</li>
+    <li>What ChatGPT marked as its own inference is not given as fact: the plan and mode of the session, the order of the skills and the names behind integrations stored as codes.</li>'''
+
+
+def check(reply_path="/home/claude/chatgpt/skills_reported.json"):
+    """Hold the entry to the reply it restates, and keep the plugin's own wording out of it."""
+    import json
+    import os
+    names = [s["name"] for s in G.SKILLS]
+    assert len(names) == len(set(names)) == G.SKILLS_N == 18
+    assert len(SCHED) == 7 and len(MGR) == 5, (len(SCHED), len(MGR))
+    assert sum(n for _c, n, _x in G.WORKS_WITH) == G.INTEGRATIONS + 1 and len(G.WORKS_WITH) == 10
+    assert sum(len(x) for _c, _n, x in G.WORKS_WITH) + G.OPAQUE == G.INTEGRATIONS
+    assert sum(len(x) for _c, _n, x in G.WORKS_WITH) - 2 + len(G.README_EXTRA) == G.README_NAMES
+    assert len(G.PAGE_APPS) + G.PAGE_APPS_MORE == 41
+    placed = [x for _j, ids in G.JOBS for x in ids]
+    assert sorted(placed + G.OUTSIDE_JOBS) == sorted(names)
+    for s in G.SKILLS:
+        for field in ("does", "when", "ask", "needs", "back", "reads", "makes", "asks", "scope", "sched", "noapps", "company", "wont", "next"):
+            assert s[field] and s[field].strip() == s[field], (s["name"], field)
+        assert s["ask"].startswith("@Sales ")
+        assert (s["sflag"] != "") or s["sched"] == G.NS, s["name"]
+    if not os.path.exists(reply_path):
+        return "not checked against the reply: no copy here"
+    rep = {r["name"]: r for r in json.load(open(reply_path, encoding="utf-8"))}
+    assert sorted(rep) == sorted(names)
+    words = lambda t: re.findall(r"[a-z0-9']+", t.lower().replace("’", "'"))
+
+    def grams(t, n):
+        w = words(t)
+        return {" ".join(w[i:i + n]) for i in range(len(w) - n + 1)}
+    worst_plugin = worst_relay = 0
+
+    def longest(a, b, top):
+        return max((n for n in range(2, top + 1) if grams(a, n) & grams(b, n)), default=0)
+    for s in G.SKILLS:
+        r = rep[s["name"]]
+        ours = " . ".join(s[f] for f in ("title", "does", "when", "ask", "needs", "back", "reads", "makes", "asks", "scope", "sched", "noapps", "company", "wont", "next"))
+        # the plugin's own text: the description, the example prompt and every phrase the reply put in quotation marks
+        theirs = r["description"] + " . " + r["invoke"] + " . " + " . ".join(re.findall(r"\u201c([^\u201d]+)\u201d", " ".join(v for v in r.values() if isinstance(v, str))))
+        a = longest(ours, theirs, 6)
+        assert a < 5, (s["name"], "shares a run of", a, "words with the plugin's text", sorted(grams(ours, a) & grams(theirs, a))[:2])
+        # ChatGPT's own summary is not the plugin's text, but the entry should not lean on its wording either
+        relay = " . ".join(r[f] for f in ("does", "use_when", "inputs_required", "inputs_optional", "reads", "writes", "approval", "output", "hands_to", "follows", "scope", "schedule", "without_apps", "company_settings", "limits"))
+        b = longest(ours, relay, 9)
+        assert b < 8, (s["name"], "shares a run of", b, "words with the reply", sorted(grams(ours, b) & grams(relay, b))[:2])
+        worst_plugin, worst_relay = max(worst_plugin, a), max(worst_relay, b)
+    # the whole page, not only the cards
+    full_path = os.path.join(os.path.dirname(reply_path), "reply-2026-11-22.txt")
+    page = ""
+    if os.path.exists(full_path):
+        t = open(full_path, encoding="utf-8").read()
+        a, b = t.index("\n[\n") + 1, t.index("\n]\n") + 2
+        text = html.unescape(re.sub(r"<[^>]+>", " ", view())).replace(G.START_PROMPT, " ")
+        quoted = " . ".join(re.findall(r"\u201c([^\u201d]+)\u201d", t) + [r["description"] + " . " + r["invoke"] for r in rep.values()])
+        pa, pb = longest(text, quoted, 8), longest(text, t[:a] + " . " + t[b:], 10)
+        assert pa < 6, ("the page shares a run of", pa, "words with the plugin's text", sorted(grams(text, pa) & grams(quoted, pa))[:3])
+        assert pb < 8, ("the page shares a run of", pb, "words with the reply's prose", sorted(grams(text, pb) & grams(t[:a] + " . " + t[b:], pb))[:3])
+        page = f"; whole page: {pa} and {pb}"
+    return (f"18 skills held to the reply; longest run of words shared with the plugin's own text: {worst_plugin}; "
+            f"with ChatGPT's wording: {worst_relay}{page}")

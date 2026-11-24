@@ -1,0 +1,184 @@
+# -*- coding: utf-8 -*-
+"""The 13 GTM jobs, every skill placed under one, and a job tag for each record in the register.
+
+    python3 jobs_tags.py      -> job_tags.csv, job_tags.json, doc_jobs.md
+
+It reads job_tags_by_key.json, which holds the job of each record by the record's key. A new record in the register
+needs a line there first: the script stops and names every record that has none.
+
+All of it is our read. Claude proposed it on November 22, 2026 and Nathan Fierley accepted it the same day with one
+change: record 8 moved from outreach and follow-up to lead qualification. The placements now live in the plugin
+area's own data (data.py and chatgpt_data.py), and this script checks that they still match."""
+import csv
+import json
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, "/home/claude/provider")
+import data as D            # noqa: E402
+import chatgpt_data as G    # noqa: E402
+import plugins_data as PD   # noqa: E402
+
+ORG, BEYOND, MKT = "The revenue organization as a whole", "Beyond the revenue organization", "Marketing (jobs to come)"
+JOBS = PD.GTM_JOBS
+NEW = {"Deal strategy and reviews", "Account planning and expansion", "Daily planning"}
+
+# Every skill of the plugins the site covers in depth, placed under one job. A star marks a placement that
+# differs from the job table on the plugin pages today, or that those pages do not make.
+CLAUDE_SALES = {
+    "Lead qualification": ["lead-triage", "route-lead"],
+    "Account research and call preparation": ["account-research", "account-context", "call-prep"],
+    "Outreach and follow-up": ["draft-outreach", "call-summary", "inbox-sweep", "schedule-meeting*"],
+    "Deal strategy and reviews": ["deal-review*", "deal-advance-gap*", "deal-signals*", "stakeholder-map*", "handle-objection*", "competitive-intelligence*"],
+    "Proposals": ["close-plan*", "create-an-asset*"],
+    "Pipeline review and forecasting": ["pipeline-review", "forecast", "team-pipeline", "deal-slip-scenario"],
+    "CRM updates": ["update-opportunity", "log-activity", "crm-hygiene-check"],
+    "Account planning and expansion": ["account-plan*", "account-tiering*", "expansion-whitespace*"],
+    "Renewals": ["renewal-radar", "customer-health"],
+    "Coaching and enablement": ["rep-context", "win-loss-review", "customer-voice*"],
+    "Daily planning": ["daily-briefing*", "end-of-day*", "weekly-wrap*"],
+}
+CLAUDE_OUTSIDE = ["setup"]
+CLAUDE_SUPPORT = {"Support": ["ticket-triage", "customer-research", "draft-response", "customer-escalation", "kb-article"]}
+CHATGPT_SALES = {
+    "Lead qualification": ["enrich-company-and-contact-data"],
+    "Account research and call preparation": ["prepare-for-meeting", "analyze-account-signals", "sales-company-research", "find-key-internal-sources"],
+    "Outreach and follow-up": ["follow-up-after-call"],
+    "Deal strategy and reviews": ["plan-deal-strategy*", "build-competitive-brief*"],
+    "Proposals": ["build-business-case", "sales-presentations"],
+    "Pipeline review and forecasting": ["review-forecast", "seller-account-dashboard", "sales-leadership-dashboard"],
+    "Coaching and enablement": ["get-rep-call-feedback", "review-rep-call-trends", "find-customer-quotes"],
+}
+CHATGPT_OUTSIDE = ["index", "demo-exec-and-seller-dash"]
+
+# The job of each record is kept in job_tags_by_key.json, one line for each record, keyed as the register's own files
+# key a record: the organization, a bar, then the first 40 characters of the finding. So a record keeps its tag when
+# the register grows or is put in another order. Until November 23, 2026 the tags were kept here by record number.
+TAGS_FILE = os.path.join(HERE, "job_tags_by_key.json")
+
+
+def key_of(r):
+    return r["organization"] + "|" + r["finding"][:40]
+
+
+def load_tags(ev):
+    """(job, note, status) for each record of the register, in the register's order. Stops on a record with no line
+    and on a line whose record is gone, and names them."""
+    by_key = json.load(open(TAGS_FILE, encoding="utf-8"))["tags"]
+    keys = [key_of(r) for r in ev]
+    assert len(set(keys)) == len(keys), "two records share a key"
+    missing = [k for k in keys if k not in by_key]
+    stale = [k for k in by_key if k not in set(keys)]
+    if missing or stale:
+        lines = ["job_tags_by_key.json and the register do not match."]
+        if missing:
+            lines.append(f"{len(missing)} records have no job yet. Add a line for each:")
+            lines += ["  " + k for k in missing]
+        if stale:
+            lines.append(f"{len(stale)} lines name no record. If a finding's first 40 characters changed, change its key:")
+            lines += ["  " + k for k in stale]
+        sys.exit("\n".join(lines))
+    return [(by_key[k]["job"], by_key[k].get("note", ""), by_key[k].get("status", "Accept")) for k in keys]
+
+
+# Queue rows the owner has accepted that are not in the register yet, with the job Claude proposed for each on the
+# sheet Job tags. Empty this list when they are merged and have a line in job_tags_by_key.json.
+PENDING = []
+
+
+def en_list(items):
+    """'8', '8 and 87', '8, 87 and 88': the site's lists take no comma before the last item."""
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def main():
+    ev = json.load(open(os.path.join(HERE, "src", "evidence.json"), encoding="utf-8"))["findings"]
+    T = {i: t for i, t in enumerate(load_tags(ev), 1)}
+    names = [j for j, _ in JOBS]
+    allowed = names + [ORG, BEYOND, MKT]
+    assert all(v[0] in allowed for v in T.values())
+    # every skill placed once
+    cs = [s.rstrip("*") for ids in CLAUDE_SALES.values() for s in ids] + CLAUDE_OUTSIDE
+    assert sorted(cs) == sorted(s["id"] for s in D.SKILLS), set(cs) ^ {s["id"] for s in D.SKILLS}
+    gs = [s.rstrip("*") for ids in CHATGPT_SALES.values() for s in ids] + CHATGPT_OUTSIDE
+    assert sorted(gs) == sorted(s["name"] for s in G.SKILLS), set(gs) ^ {s["name"] for s in G.SKILLS}
+    assert set(CLAUDE_SALES) | set(CHATGPT_SALES) | set(CLAUDE_SUPPORT) <= set(names)
+    # the accepted placements are the ones the plugin pages are built from
+    strip = lambda d: [(j, [x.rstrip("*") for x in d[j]]) for j in names if j in d]
+    assert strip(CLAUDE_SALES) == D.JOBS and CLAUDE_OUTSIDE == D.OUTSIDE_JOBS, "Claude Sales placements differ from data.py"
+    assert strip(CHATGPT_SALES) == G.JOBS and CHATGPT_OUTSIDE == G.OUTSIDE_JOBS, "ChatGPT placements differ from chatgpt_data.py"
+    rows = []
+    for i, r in enumerate(ev, 1):
+        job, note, status = T[i]
+        rows.append({"n": i, "organization": r["organization"], "finding": r["finding"], "grade": r["grade"], "job": job, "note": note,
+                     "status": status})
+    with open(os.path.join(HERE, "job_tags.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["Status", "Record", "Organization", "Finding", "Grade", "Proposed job", "Note"])
+        for r in rows:
+            w.writerow([r["status"], r["n"], r["organization"], r["finding"], r["grade"], r["job"], r["note"]])
+    json.dump(rows, open(os.path.join(HERE, "job_tags.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    count = {a: [r for r in rows if r["job"] == a] for a in allowed}
+    best = lambda rs: next((g for g in ("A", "B", "C") if any(r["grade"] == g for r in rs)), "")
+    fmt = lambda ids: ", ".join(f"`{s.rstrip('*')}`" + ("\\*" if s.endswith("*") else "") for s in ids) if ids else ""
+    L = ["# The 13 GTM jobs, the skills under each and a job tag for every record", "",
+         "Written November 22, 2026 in the thread \"Claude Sales Skills guide\", after Nathan Fierley decided the use-case index's five questions (`claude/use-case-index-proposal.md`). "
+         "**He accepted all of it the same day, with one change: record 8, Salesforce's SDR agent, moved from outreach and follow-up to lead qualification.** "
+         "He made the change on the sheet Job tags of the proposal queue and said the rest can be accepted. His message named the tags. Claude read it as covering the placements too and said so in its reply. "
+         "It is our read throughout. The use-case index on Home is built from it: in the staging copy since November 22, and on the site since November 23, 2026, when he said the staging copy goes to the site.", "",
+         "**On November 23, 2026 eight records were added, numbers 87 to 94.** He had accepted them on the Queue sheet that day and told the plugin thread to merge them. They went into the staging copy first and onto the site the same day, on his word \"publish\". "
+         "Claude proposed a job for each. He answered the same day, when he said to publish: Lowe's and Walmart move from lead qualification to the revenue organization as a whole, and he named no other change. Claude read that as accepting the other six and told him so.", "",
+         "## The 13 jobs", "",
+         "The 10 that the plugin entries use, and three new ones, marked.", "",
+         "| Job | What it is | Records | Best grade | Claude Sales | Claude Customer support | ChatGPT for Sales |", "| --- | --- | --- | --- | --- | --- | --- |"]
+    for j, d in JOBS:
+        rs = count[j]
+        L.append(f"| {j}{' (new)' if j in NEW else ''} | {d} | {len(rs) or 'None'} | {best(rs)} | {len(CLAUDE_SALES.get(j, [])) or ''} | {len(CLAUDE_SUPPORT.get(j, [])) or ''} | {len(CHATGPT_SALES.get(j, [])) or ''} |")
+    with_rec = [j for j, _ in JOBS if count[j]]
+    L += ["",
+          f"{len(with_rec)} of the 13 jobs have a record: {', '.join(x.lower() for x in with_rec)}. The other {13 - len(with_rec)} have none. "
+          f"{len(count[ORG])} records describe the revenue organization as a whole, {len(count[BEYOND])} reach beyond it and {len(count[MKT])} {'is' if len(count[MKT]) == 1 else 'are'} about marketing, whose jobs come later.", "",
+          "## Every skill, placed", "",
+          "A star marks a placement that the plugin pages did not make before November 22: either the skill sat outside their 10-job table, or it moved.", "",
+          "| Job | Claude Sales (36) | ChatGPT for Sales (18) |", "| --- | --- | --- |"]
+    for j, _d in JOBS:
+        a = fmt(CLAUDE_SALES.get(j, []))
+        if j in CLAUDE_SUPPORT:
+            a = "None in Sales. Customer support plugin: " + fmt(CLAUDE_SUPPORT[j])
+        L.append(f"| {j} | {a or 'None'} | {fmt(CHATGPT_SALES.get(j, [])) or 'None'} |")
+    L.append(f"| Outside the jobs | {fmt(CLAUDE_OUTSIDE)}, which runs once for each person | {fmt(CHATGPT_OUTSIDE)}: the router and a fictional demo |")
+    L += ["",
+          "The Claude Marketing plugin's eight skills and the Small business plugin's workflows are not placed. Marketing jobs come later, by the owner's decision.", "",
+          "**Four placements changed something a plugin page said**, and were put to the owner as such:", "",
+          "1. `close-plan` and `create-an-asset` under Proposals. The Claude Sales entry had said proposals are not documented in the plugin's files. ChatGPT's `build-business-case` and `sales-presentations` already sit under Proposals, and these two make the same kinds of document.",
+          "2. Competitive work under Deal strategy and reviews, for both labs. That moves ChatGPT's `build-competitive-brief` out of Coaching and enablement.",
+          "3. `customer-voice` under Coaching and enablement, beside ChatGPT's `find-customer-quotes`.",
+          "4. `schedule-meeting` under Outreach and follow-up, and `weekly-wrap` under Daily planning with the two daily skills.", "",
+          f"## The tag of each of the {len(rows)} records", "",
+          "One tag each. Besides the 13 jobs there are three other values: the revenue organization as a whole, beyond the revenue organization (the whole company or another function) and marketing. "
+          "The numbers follow the order of `evidence.json`. Since November 23, 2026 the tags are kept by record key in `job_tags_by_key.json`: the organization, a bar, then the first 40 characters of the finding, as the register's own files key a record. "
+          "So a record keeps its tag when the register grows or changes its order.", "",
+          "| # | Organization | Finding | Grade | Job | Note |", "| --- | --- | --- | --- | --- | --- |"]
+    for r in rows:
+        f = r["finding"] if len(r["finding"]) <= 110 else r["finding"][:107].rstrip() + "..."
+        note = ("Proposed. " + r["note"]).strip() if r["status"] == "Proposed" else r["note"]
+        L.append(f"| {r['n']} | {r['organization']} | {f.replace('|', '/')} | {r['grade']} | {r['job']} | {note} |")
+    L += ["",
+          "## Where this stands", "",
+          f"- **The sheet.** Job tags in the proposal queue (https://claude.ai/artifact/MnDktnsfQujGatMeUjXms1) holds one row for each record of the register. {sum(1 for r in rows if r['status'] == 'Accept')} rows read Accept, set by Claude on the owner's word. Records {en_list([str(r['n']) for r in rows if r['status'] == 'Change'])} read Change: he set those jobs himself. "
+          + (f"{sum(1 for r in rows if r['status'] == 'Proposed')} rows read Proposed: records merged before he had answered. " if any(r['status'] == 'Proposed' for r in rows) else "")
+          + "The weekly scan reads the sheets Queue and Merged.",
+          "- **The plugin pages.** The job lists of both Sales plugin entries and the table that sets them side by side follow the 13 jobs and these placements, on the site and in the staging copy.",
+          "- **Home.** The use-case index is built from these tags and placements, on the site and in the staging copy.",
+          "- **The register.** The tags are not yet a field on each record in `evidence.json`. That is the register's build, and a filter by job in Evidence waits for it.",
+          "- **When records are added.** Each new record needs a line in `job_tags_by_key.json` before the page can be built: `jobs_tags.py` stops and names the records that have none. "
+          "Then run `use_cases.py`, and `merge.py` with `--use-cases use_cases.json`. `check_site.cjs` names the record count. `kit/MERGE.md` in the site's files has the steps."]
+    open(os.path.join(HERE, "doc_jobs.md"), "w", encoding="utf-8").write("\n".join(L) + "\n")
+    print("jobs with a record:", with_rec)
+    print({a: len(count[a]) for a in allowed if count[a]})
+    print("doc", len("\n".join(L)), "chars; csv rows", len(rows))
+
+
+if __name__ == "__main__":
+    main()

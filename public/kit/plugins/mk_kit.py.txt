@@ -1,0 +1,110 @@
+# -*- coding: utf-8 -*-
+"""Refresh the kit that travels with the plugin page, and the list of files to publish.
+
+    python3 build.py && python3 mk_kit.py
+
+Copies the sources into out/kit (scripts get .txt so that they are served as text), writes the ChatGPT for
+Sales entry's own folder (kit/chatgpt) and rewrites publish_list.json. ChatGPT's reply is never copied: it
+carries the plugin's own text."""
+import json
+import os
+import shutil
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import chatgpt_data as G    # noqa: E402
+
+KIT = os.path.join(HERE, "out", "kit")
+AS_TEXT = ["build.py", "check.cjs", "core.py", "data.py", "extract.py", "extract_base.py", "guide_port.py", "house_rules.py", "mk_modeltest_kit.py", "mk_test.py",
+           "plugins_data.py", "plugins_views.py", "chatgpt_data.py", "chatgpt_views.py", "mk_kit.py"]
+AS_IS = ["app.js", "base.css", "entry.css", "facts.json", "pilot.json"]
+
+LABEL = {"when": "use_when", "ask": "example_request_ours", "needs": "needs", "back": "returns", "reads": "reads", "makes": "can_create_or_change", "asks": "asks_first",
+         "scope": "whose_work_it_covers", "sched": "on_a_schedule", "noapps": "with_no_app_connected", "company": "company_context", "wont": "will_not", "next": "before_and_after"}
+
+
+def chatgpt_json():
+    groups = {k: t for k, t, _d in G.GROUPS}
+    skills = []
+    for s in G.SKILLS:
+        row = {"name": s["name"], "group": groups[s["group"]], "title_ours": s["title"], "does": s["does"]}
+        row.update({LABEL[k]: s[k] for k in LABEL})
+        row["our_read"] = {"for": G.FOR[s["who"]], "gtm_job": s["job"], "describes_a_scheduled_rerun": s["sflag"] == "yes",
+                           "can_be_run_for_a_named_seller": s["mflag"] == "yes"}
+        skills.append(row)
+    return {
+        "what": "The ChatGPT for Sales entry on Modern GTM, as data: every skill restated in this site's words from what ChatGPT reported out of an installed copy.",
+        "plugin": {"name": "Sales", "built_by": "OpenAI", "version_reported": G.VERSION, "skills": G.SKILLS_N},
+        "reported_by": "ChatGPT, an OpenAI model, in the editor's own account with the plugin installed",
+        "run_on": G.RUN_ON,
+        "checked_by": "Claude, an Anthropic model, against the reply itself and four of OpenAI's pages",
+        "checked_on": G.CHECKED_ON,
+        "sources": {"plugin_page": G.PLUGIN_URL, "help_page": G.HELP_URL, "announcement": G.NEWS_URL, "plugins_guide": G.GUIDE_URL},
+        "not_included": "ChatGPT's reply and the plugin's own wording. The plugin's package is labelled proprietary.",
+        "not_rated": "Nothing here is rated, and no workflow was run. The grouping, who a skill is for, the GTM job and each example request are this site's own.",
+        "quoted_from_the_plugin": G.START_PROMPT,
+        "integrations": {"in_the_manifest": G.INTEGRATIONS, "stored_as_codes": G.OPAQUE, "named_in_the_readme": G.README_NAMES, "implied_by_the_plugin_page": len(G.PAGE_APPS) + G.PAGE_APPS_MORE,
+                         "by_category": [{"category": c, "entries": n, "readable_names": names} for c, n, names in G.WORKS_WITH]},
+        "gtm_jobs_with_no_skill": G.JOBS_NO_SKILL,
+        "skills_outside_the_job_list": G.OUTSIDE_JOBS,
+        "skills": skills,
+    }
+
+
+def configure_edits():
+    """Every sentence of the configuration guide that this page changed after the cross-lab checks, before and after."""
+    import guide_port
+    md = lambda t: t.replace("<code>", "`").replace("</code>", "`").replace("<dd>", "").replace("</dd>", "").replace("|", "\\|")
+    L = ["# The Configure view: what was corrected on November 22, 2026", "",
+         "The Configure view is Nathan Fierley's guide, \"Configuring the Claude Sales plugin for your company\". Two models from",
+         "other labs checked it against the plugin's files with the rest of the entry. The changes below are the smallest ones",
+         "that make each sentence agree with the files. They are made in this page's copy, by `guide_port.py`, which stops the",
+         "build if a sentence it expects is no longer there.", "",
+         "**The guide's own published copy does not carry these changes.** That copy is its author's to change.", "",
+         "Each finding number is a row of the sheet \"Entry check OpenAI\" in the editor's proposal queue. \"Visible\" is the",
+         "guide as a reader sees it. \"Edition\" is the AI-ready edition that the guide offers to hand to Claude.", ""]
+    for finding in guide_port.CHECK_FINDINGS:
+        L.append(f"## {finding}")
+        L.append("")
+        L.append("| Layer | Before | After |")
+        L.append("| --- | --- | --- |")
+        for f, layer, old, new in guide_port.CHECK_EDITS:
+            if f == finding:
+                L.append(f"| {'Visible' if layer == 'v' else 'Edition'} | {md(old)} | {md(new)} |")
+        L.append("")
+    return "\n".join(L)
+
+
+def main():
+    os.makedirs(os.path.join(KIT, "chatgpt"), exist_ok=True)
+    for f in AS_TEXT:
+        shutil.copy(os.path.join(HERE, f), os.path.join(KIT, f + ".txt"))
+    for f in AS_IS:
+        shutil.copy(os.path.join(HERE, f), os.path.join(KIT, f))
+    assert "__CHECKS__" not in open(os.path.join(HERE, "KIT_README.md"), encoding="utf-8").read() or os.environ.get("DRAFT"), "fill in the number of checks in KIT_README.md"
+    shutil.copy(os.path.join(HERE, "KIT_README.md"), os.path.join(KIT, "README.md"))
+    shutil.copy(os.path.join(HERE, "CROSSLAB.md"), os.path.join(KIT, "CROSSLAB.md"))
+    open(os.path.join(KIT, "CONFIGURE-EDITS.md"), "w", encoding="utf-8").write(configure_edits())
+    shutil.copy(os.path.join(HERE, "chatgpt_kit_readme.md"), os.path.join(KIT, "chatgpt", "README.md"))
+    shutil.copy(os.path.join(HERE, "chatgpt_prompt.md"), os.path.join(KIT, "chatgpt", "inventory-prompt.md"))
+    json.dump(chatgpt_json(), open(os.path.join(KIT, "chatgpt", "skills.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    # nothing from the reply may travel
+    assert sorted(os.listdir(os.path.join(KIT, "chatgpt"))) == ["README.md", "inventory-prompt.md", "skills.json"]
+    for root, _d, files in os.walk(os.path.join(HERE, "out")):
+        for f in files:
+            assert not f.startswith("reply-2026") and "reported" not in f, os.path.join(root, f)
+    out = os.path.join(HERE, "out")
+    listing = []
+    for root, _d, files in os.walk(out):
+        for f in sorted(files):
+            p = os.path.join(root, f)
+            listing.append({"as": os.path.relpath(p, out), "path": p})
+    first = ["index.html", "skills.json", "kit/README.md"]
+    listing.sort(key=lambda x: (first.index(x["as"]) if x["as"] in first else len(first), x["as"]))
+    json.dump(listing, open(os.path.join(HERE, "publish_list.json"), "w"), indent=1)
+    print(len(listing), "files to publish;", sum(os.path.getsize(x["path"]) for x in listing) // 1024, "KB")
+
+
+if __name__ == "__main__":
+    main()

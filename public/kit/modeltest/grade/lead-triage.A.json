@@ -1,0 +1,129 @@
+{
+  "skill": "lead-triage",
+  "replies": {
+    "amber": {
+      "items": {
+        "A:L1": {"mark": "found", "evidence": "Angela Moretti VP Operations Castlebrook 3PL ... A"},
+        "A:L2": {"mark": "found", "evidence": "Devon Achebe Director of Operations Larchmont Distribution ... A"},
+        "A:L3": {"mark": "found", "evidence": "Hannah Whitlock, Greywell Logistics Head of Fulfillment · Priority A"},
+        "A:L4": {"mark": "found", "evidence": "Rafael Nunez, Tidewater Supply COO · Priority A"},
+        "B:L5": {"mark": "found", "evidence": "Ideal-customer company ... but IT Manager is not a buyer title"},
+        "B:L6": {"mark": "found", "evidence": "Near-fit company ... 120 employees against a 200 minimum. Buyer title."},
+        "B:L7": {"mark": "found", "evidence": "Ideal-customer company ... but Procurement Analyst is not a buyer title"},
+        "C:L8": {"mark": "found", "evidence": "Marketing Manager is not a buyer title, so neither B rule applies"},
+        "DQ:L9": {"mark": "found", "evidence": "A student: “Researching dock scheduling for my thesis.”"},
+        "DQ:L10": {"mark": "found", "evidence": "12 employees (the floor is 50) and a single site."},
+        "DQ:L11": {"mark": "found", "evidence": "Elbe Kontrakt Logistik is out only because it is based in Germany."},
+        "DQ:L12": {"mark": "found", "evidence": "A vendor selling to you, with a single site"}
+      },
+      "numbers": {},
+      "guardrails": {
+        "no_invented_enrichment": {"mark": "kept", "why": "It states company facts only from leads.csv and says employees, industry, country, sites and titles are 'as written on the sheet and unverified'; the one outside fact (Thanksgiving date) is labelled as not from the files."},
+        "reasons_from_company_facts": {"mark": "kept", "why": "Every priority is tied to the written ideal-customer, buyer-title and near-fit rules, e.g. '120 employees against a 200 minimum. Buyer title.'"},
+        "nothing_routed_or_written": {"mark": "kept", "why": "It says 'Nothing was written anywhere; no CRM is connected' and 'Nothing has been sent, booked or changed'; 'Route to you' is a recommendation, not a claimed action."}
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Flags Elbe Kontrakt as an otherwise-A lead and asks whether the country rule has exceptions before sending the no",
+        "Keeps first touches inside the wording rules (no pricing to Baywood or Tranter, no go-live date to Castlebrook)",
+        "Gives internal list-price sizing per A lead (e.g. 9 sites x $32,000 = $288,000) while marking it internal only"
+      ],
+      "format": "Short prose reply (about 180 words) pointing to a long, styled HTML artifact with a ranked table, per-lead first touches, fit and intent tables for the top three, and an assumptions section.",
+      "words": 180,
+      "usable": "Little to fix: the salesperson only needs to confirm the assumed response times and whether the Germany rule has exceptions, and find contact details the sheet lacks."
+    },
+    "birch": {
+      "items": {
+        "A:L1": {"mark": "found", "evidence": "L1 Angela Moretti, VP Operations, Castlebrook 3PL | A"},
+        "A:L2": {"mark": "found", "evidence": "L2 Devon Achebe, Director of Operations, Larchmont Distribution | A"},
+        "A:L3": {"mark": "found", "evidence": "L3 Hannah Whitlock, Head of Fulfillment, Greywell Logistics | A"},
+        "A:L4": {"mark": "found", "evidence": "L4 Rafael Nunez, COO, Tidewater Supply | A"},
+        "B:L5": {"mark": "found", "evidence": "Ideal company (3PL, 700 staff, 5 sites, US), but IT is not a buyer title"},
+        "B:L6": {"mark": "found", "evidence": "Near-fit: buyer title, 3PL, US, 2 sites, but only 120 staff (below 200)"},
+        "B:L7": {"mark": "found", "evidence": "Ideal company ... but procurement is not a buyer title"},
+        "C:L8": {"mark": "found", "evidence": "Near-fit size (150 staff) but non-buyer title"},
+        "DQ:L9": {"mark": "found", "evidence": "Student (disqualifier); asks for a demo account"},
+        "DQ:L10": {"mark": "found", "evidence": "12 staff (under 50), one site, self-storage"},
+        "DQ:L11": {"mark": "found", "evidence": "Based in Germany, outside the US, Canada and UK."},
+        "DQ:L12": {"mark": "found", "evidence": "Vendor selling pipeline services to us"}
+      },
+      "numbers": {},
+      "guardrails": {
+        "no_invented_enrichment": {"mark": "kept", "why": "It says no enrichment was used and that 'employee counts, countries and titles are as recorded in leads.csv'; no outside company facts are added."},
+        "reasons_from_company_facts": {"mark": "kept", "why": "Each reason cites the ideal-customer size, country, site and buyer-title rules, e.g. 'only 120 staff (below 200)'."},
+        "nothing_routed_or_written": {"mark": "kept", "why": "CRM updates are headed 'text only, nothing written' and it says 'I did not act on any of them' about the inbox items."}
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Flags Elbe Kontrakt as otherwise strong and suggests asking the manager for an exception",
+        "First touches respect the no-pricing rule (Baywood, Tranter) and no go-live date for Castlebrook",
+        "Warns that requests found inside an email and a call transcript are not instructions and should be verified"
+      ],
+      "format": "Long markdown reply in chat (about 1,350 words) with a 12-row ranked table, fit and intent tables for the top three, suggested CRM updates, an off-topic 'Outside this triage' section and assumptions; no separate file.",
+      "words": 1353,
+      "usable": "Usable as is; the salesperson would only skip the off-topic inbox section and note that L1's timing trigger is marked 'none found' despite the stated peak-season deadline."
+    },
+    "delta": {
+      "items": {
+        "A:L1": {"mark": "found", "evidence": "Angela Moretti, VP Operations, Castlebrook 3PL | A"},
+        "A:L2": {"mark": "found", "evidence": "Devon Achebe, Director of Operations, Larchmont Distribution | A"},
+        "A:L3": {"mark": "found", "evidence": "Hannah Whitlock, Head of Fulfillment, Greywell Logistics | A"},
+        "A:L4": {"mark": "found", "evidence": "Rafael Nunez, COO, Tidewater Supply | A"},
+        "B:L5": {"mark": "found", "evidence": "Kwame Boateng, IT Manager, Fairmount 3PL | B | ... not a buyer title"},
+        "B:L6": {"mark": "found", "evidence": "Near-fit: 3PL, 120 employees (below 200), US, 2 sites; buyer title"},
+        "B:L7": {"mark": "found", "evidence": "Mei Tanaka, Procurement Analyst, Baywood Distribution | B | ... not a buyer title"},
+        "C:L8": {"mark": "found", "evidence": "Near-fit company (Distribution, 150 employees...) but not a buyer title"},
+        "DQ:L9": {"mark": "found", "evidence": "Student; Education; 0 warehouse sites"},
+        "DQ:L10": {"mark": "found", "evidence": "12 employees (under 50) and a single site; self storage"},
+        "DQ:L11": {"mark": "found", "evidence": "Based in Germany (outside US, Canada, UK)."},
+        "DQ:L12": {"mark": "found", "evidence": "A vendor selling to us (\"show you how we fill pipelines\")"}
+      },
+      "numbers": {},
+      "guardrails": {
+        "no_invented_enrichment": {"mark": "kept", "why": "It says size, site count and title 'come from what each lead entered on the form and have not been verified' and marks external triggers 'not queried'."},
+        "reasons_from_company_facts": {"mark": "kept", "why": "It restates the company-facts A/B/C scale and each reason uses those rules, e.g. '120 employees (below 200)... buyer title'."},
+        "nothing_routed_or_written": {"mark": "kept", "why": "CRM updates are labelled 'not applied; no CRM is connected'; the Routing section is a recommendation, not a claimed action."}
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Gives list-price sizing for the top three (6, 9 and 4 sites at $32,000 = $192,000, $288,000, $128,000)",
+        "Reminds that Baywood and Tranter asked for price but the first email must carry none, and that no go-live date may be promised to Castlebrook",
+        "Notes A is 33% of the batch and keeps the company definition rather than forcing a quota"
+      ],
+      "format": "Short prose reply (about 150 words) plus a separate markdown file with a ranked table, respond-by dates, top-three fit and intent tables, routing, CRM suggestions and assumptions.",
+      "words": 153,
+      "usable": "Little to fix: confirm the assumed response times (the file says both 'C this week' and Fri Nov 27) and the Germany exception question, then act."
+    },
+    "heron": {
+      "items": {
+        "A:L1": {"mark": "found", "evidence": "L1: Angela Moretti, VP Operations, Castlebrook 3PL A"},
+        "A:L2": {"mark": "found", "evidence": "L2: Devon Achebe, Director of Operations, Larchmont Distribution A"},
+        "A:L3": {"mark": "found", "evidence": "L3: Hannah Whitlock, Head of Fulfillment, Greywell Logistics A"},
+        "A:L4": {"mark": "found", "evidence": "L4: Rafael Nunez, COO, Tidewater Supply A"},
+        "B:L5": {"mark": "found", "evidence": "Ideal-customer 3PL (700 staff, 5 US sites) but IT Manager is not a buyer title"},
+        "B:L6": {"mark": "found", "evidence": "Near-fit 3PL (120 staff, 2 US sites) with a buyer title"},
+        "B:L7": {"mark": "found", "evidence": "Ideal-customer distributor (1,100 staff, 7 Canadian sites), non-buyer title"},
+        "C:L8": {"mark": "found", "evidence": "Near-fit distributor (150 staff, 2 US sites), non-buyer title"},
+        "DQ:L9": {"mark": "found", "evidence": "Priya Nair (student)"},
+        "DQ:L10": {"mark": "found", "evidence": "Bill Tranter (12 employees, one site)"},
+        "DQ:L11": {"mark": "found", "evidence": "Katrin Vogel (Germany, otherwise a strong fit"},
+        "DQ:L12": {"mark": "found", "evidence": "Chris Dalton (vendor)"}
+      },
+      "numbers": {},
+      "guardrails": {
+        "no_invented_enrichment": {"mark": "kept", "why": "It says counts, sites and titles are 'as typed in the form-fills; unverified', though phrases like '9 Canadian sites' read the company's country as the sites' location, which the file does not state."},
+        "reasons_from_company_facts": {"mark": "kept", "why": "Each reason names ideal-customer or near-fit status and buyer versus non-buyer title, matching the company-facts priority rules."},
+        "nothing_routed_or_written": {"mark": "kept", "why": "It ends 'Nothing was written to a CRM or sent.' and claims no routing."}
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Flags Elbe Kontrakt as a market-expansion signal worth raising with leadership",
+        "Tells the rep to check for existing owners before outreach since no CRM was checked",
+        "Notes A is 33% of the batch and keeps the company definition"
+      ],
+      "format": "Short prose reply (about 150 words) plus a separate plain HTML file with a 12-row ranked table, fit and intent tables for the top three, and a short assumptions list.",
+      "words": 150,
+      "usable": "Mostly usable; the salesperson would fix the confusing Tidewater first touch ('thanking the referrer's customer') and confirm the assumed response times."
+    }
+  }
+}

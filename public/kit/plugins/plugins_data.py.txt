@@ -1,0 +1,203 @@
+# -*- coding: utf-8 -*-
+"""The directory of AI-lab plugins for go-to-market teams: what is listed and what each holds.
+
+Facts come from the providers' own files and pages, read on the dates below. Each skill line restates the
+skill's own description. Which skills a revenue leader may use, and who for, is our read.
+"""
+CHECKED_ON = "November 21, 2026"
+SITE_URL = "https://claude.ai/artifact/LXB6jHQSey282n21U5eMtp"
+SALES_ENTRY_URL = "https://claude.ai/artifact/AxiEd8sKnLcxSCXhRKCUuJ"
+REPO_URL = "https://github.com/anthropics/knowledge-work-plugins"
+REPO_READ = "the commit of November 19, 2026"
+OPENAI_PLUGIN_URL = "https://openai.com/business/plugins/sales/"
+OPENAI_NEWS_URL = "https://openai.com/index/introducing-chatgpt-for-sales/"
+OPENAI_REPO_URL = "https://github.com/openai/role-specific-plugins"
+GOOGLE_URL = "https://workspaceupdates.googleblog.com/2026/09/skills-gemini-app-workspace.html"
+MODEL_GUIDE_URL = "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model"
+# Microsoft is not listed. The note on it rests on two of its own pages, read on MS_READ_ON.
+MS_DOCS_URL = "https://learn.microsoft.com/en-us/dynamics365/sales/use-copilot-cowork-sales-skills"
+MS_DOCS_UPDATED = "November 3, 2026"
+MS_POST_URL = "https://www.microsoft.com/en-us/dynamics-365/blog/business-leader/2026/11/17/microsoft-ignite-2026-introducing-dynamics-365-in-copilot/"
+MS_POST_DATE = "November 17, 2026"
+MS_READ_ON = "November 23, 2026"
+
+# The site's GTM jobs, in the order work reaches a revenue team, with one line each. The list grew from 10 to 13 on
+# November 22, 2026, when the owner added deal strategy and reviews, account planning and expansion, and daily planning.
+GTM_JOBS = [
+    ("Lead qualification", "Deciding which leads are worth a seller's time, and who gets them."),
+    ("Account research and call preparation", "Learning an account and getting ready for a meeting."),
+    ("Outreach and follow-up", "Writing to prospects and customers, booking meetings and following up after a call."),
+    ("Deal strategy and reviews", "Working one deal: who decides, what is missing and what could lose it."),
+    ("Proposals", "The documents that make the case to a customer: a business case, a deck, a one-pager."),
+    ("Pipeline review and forecasting", "The number: coverage, movement, the forecast and a team's view of it."),
+    ("CRM updates", "Keeping the record right: logging, updating and checking it."),
+    ("Onboarding and adoption", "Getting a new customer live and using what they bought."),
+    ("Account planning and expansion", "Planning an existing account and finding where it could grow."),
+    ("Renewals", "Keeping the customer: renewal dates, health and risk."),
+    ("Support", "Answering customers' questions and problems."),
+    ("Coaching and enablement", "Making reps better: call feedback, lessons from wins and losses, what customers said."),
+    ("Daily planning", "A person's own day and week: briefings and wrap-ups."),
+]
+JOB_NAMES = [j for j, _what in GTM_JOBS]
+
+
+def job_slug(name):
+    """lead-qualification, crm-updates: the part of an address that names a job."""
+    import re
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def job_lower(name):
+    """A job's name inside a sentence: lower case, with CRM kept as it is."""
+    return name if name.startswith("CRM") else name[0].lower() + name[1:]
+
+# Anthropic's own plugins in the public repository: (key, name, version, skills, level, jobs or note)
+# level: entry = a full entry on this site; listed = its skills are restated here; adjacent = leader skills only; out = not covered
+ANTHROPIC = [
+    ("sales", "Sales", "2.1.0", 36, "entry",
+     "Lead qualification, account research and call preparation, outreach and follow-up, pipeline review and forecasting, CRM updates, renewals and coaching."),
+    ("marketing", "Marketing", "1.2.0", 8, "listed",
+     "Campaign planning, content, brand review, search and reporting. The site's list of GTM jobs does not yet name these."),
+    ("customer-support", "Customer support", "1.3.0", 5, "listed", "Support."),
+    ("small-business", "Small business", "1.35.2", 44, "listed",
+     "Of its 44 workflows, 18 serve sales, marketing or customers: lead qualification, outreach and follow-up, CRM updates, proposals and support."),
+    ("design", "Design", "1.2.0", 7, "adjacent", "Design review, research and interface copy."),
+    ("operations", "Operations", "1.3.0", 9, "adjacent", "Process, capacity, vendors and status reporting."),
+    ("data", "Data", "1.1.0", 10, "adjacent", "Analysis, dashboards and SQL."),
+    ("product-management", "Product management", "1.2.0", 8, "adjacent", "Specifications, roadmaps, research and stakeholder updates."),
+    ("enterprise-search", "Enterprise search", "1.3.0", 5, "adjacent", "One search across connected tools, and a digest."),
+    ("legal", "Legal", "1.3.0", 9, "adjacent", "Contract review, NDA triage and signature."),
+    ("human-resources", "Human resources", "1.3.0", 9, "adjacent", "Hiring, onboarding, reviews and headcount."),
+    ("finance", "Finance", "1.3.0", 8, "adjacent", "Accounting close, reconciliation and variance analysis."),
+    ("engineering", "Engineering", "1.2.0", 10, "out", "Software engineering."),
+    ("bio-research", "Bio-research", "1.2.0", 6, "out", "Preclinical life-science research."),
+    ("productivity", "Productivity", "1.3.1", 4, "out", "Personal tasks and memory."),
+    ("cowork-plugin-management", "Plugin management", "0.2.2", 2, "out", "Making and customizing plugins."),
+    ("pdf-viewer", "PDF viewer", "0.2.0", 1, "out", "Viewing and signing PDFs."),
+]
+
+# Partner-built plugins in the same repository: (name, built by, version, skills, what its own description says)
+PARTNERS = [
+    ("Apollo", "Apollo.io", "0.1.0", 3, "Sales workflows that chain Apollo's data: enrichment and prospecting."),
+    ("Common Room", "Common Room", "1.0.0", 6, "Account and contact research, call preparation and outreach from Common Room's data."),
+    ("Brand voice", "Tribe AI", "1.1.0", 3, "Turns scattered brand material into rules that drafts are held to."),
+    ("Slack", "Salesforce", "1.0.0", 2, "Slack's own connection: find, draft and post in Slack."),
+    ("Zoom", "Zoom", "1.1.0", 57, "For developers who build Zoom integrations. It is not a meeting assistant."),
+]
+
+# Skills restated from their own descriptions: plugin -> [(skill, what it does)]
+LISTED = {
+    "marketing": [
+        ("brand-review", "Checks a draft against your brand voice and style guide, and proposes fixes."),
+        ("campaign-plan", "Writes a campaign brief: goals, audience, messages, channels, a calendar and measures of success."),
+        ("competitive-brief", "Compares your positioning and messaging with competitors' and lists the gaps."),
+        ("content-creation", "Drafts marketing content for a named channel, from blog posts to case studies."),
+        ("draft-content", "A second drafting skill that adds formatting for the channel and advice for search."),
+        ("email-sequence", "Designs and writes a sequence of emails, with timing, branches and exit rules."),
+        ("performance-report", "Reports the results of a channel or campaign, with trends and what to change."),
+        ("seo-audit", "Audits a site's search health: keywords, pages, content gaps and technical checks."),
+    ],
+    "customer-support": [
+        ("customer-escalation", "Packages an issue for engineering, product or leadership with its full context."),
+        ("customer-research", "Researches a customer's question across sources and says where each answer came from."),
+        ("draft-response", "Drafts a reply to a customer, fitted to the situation and the relationship."),
+        ("kb-article", "Turns a resolved issue or a repeated question into a help-center article."),
+        ("ticket-triage", "Sorts a new ticket: category, priority from P1 to P4, owning team and duplicates."),
+    ],
+    "small-business": [
+        ("lead-finder", "Builds a ranked list of prospects that resemble your best customers."),
+        ("lead-triage", "Scores inbound leads and ranks the ones worth a call today."),
+        ("speed-to-lead", "Watches for new inquiries, qualifies each and drafts a reply with meeting times to approve."),
+        ("call-list", "Turns the ranked leads into today's call list, with talking points and time on the calendar."),
+        ("outreach-composer", "Writes outreach and follow-up sequences in the owner's own voice."),
+        ("crm-autopilot", "Keeps the CRM current from email, calendar and call transcripts."),
+        ("grow-pipeline", "Chains prospect finding, outreach and CRM logging, with an approval at each handoff."),
+        ("growth-pulse", "Shows whether sales and marketing are working, and ends with three actions for the week."),
+        ("reactivate", "Finds customers who have gone quiet and drafts a win-back message for each."),
+        ("proposal-builder", "Turns call notes, site photos or a request for proposal into a costed proposal."),
+        ("review-reputation", "Gathers reviews and complaints into themes and drafts a reply to each review."),
+        ("ticket-deflector", "Reads a customer's email, checks order and account history and drafts a reply."),
+        ("ad-manager", "Reads paid-ad results, recommends changes and makes the ones the owner approves."),
+        ("content-strategy", "Uses sales data to plan 30 days of what to promote."),
+        ("social-content-engine", "Keeps a rolling posting calendar, writes captions and stages posts for approval."),
+        ("canva-creator", "Carries out an approved campaign brief: calendar, designs, captions and staged posts."),
+        ("marketing-monday", "A weekly growth briefing on results, customer comments and competitors."),
+        ("seo-ai-visibility", "Audits how a site is found in search and in AI answers, and fixes what it can."),
+    ],
+}
+SMALL_BUSINESS_REST = ["ap-processor", "brand-style", "build-agent", "build-connector", "business-pulse", "cash-flow-snapshot", "close-month",
+                       "contract-review", "grant-rfp-writer", "hiring-screener", "inbox-manager", "inventory-planner", "invoice-chase",
+                       "job-post-builder", "monday-brief", "month-end-prep", "pay-the-bills", "payroll-prep", "plan-payroll", "report-builder",
+                       "report-pack", "restock", "smb-onboard", "smb-router", "tax-prep", "tax-season-organizer"]
+
+# Skills in other plugins that a revenue team may reach for: plugin -> [(skill, what it does, who may use it)]. The last column is our read.
+ADJACENT = {
+    "operations": [
+        ("capacity-plan", "Works out a team's workload and utilization for a planning round.", "A leader sizing territories or headcount"),
+        ("process-doc", "Documents a process as a flow, a list of who owns what and a written procedure.", "Revenue operations, for a handoff such as lead to rep"),
+        ("process-optimization", "Finds the slow steps in a process and proposes a simpler one.", "Revenue operations"),
+        ("change-request", "Writes up a proposed change with its impact and a way to undo it.", "Revenue operations, before a CRM change"),
+        ("status-report", "Writes a status report with measures, risks and actions for leadership.", "A leader's weekly or monthly update"),
+        ("vendor-review", "Evaluates a vendor on cost and risk, and ends with a recommendation.", "Whoever owns the sales tool budget"),
+        ("risk-assessment", "Lists operational risks with likelihood, impact and what would reduce each.", "A leader ahead of a launch or a reorganization"),
+    ],
+    "data": [
+        ("analyze", "Answers a data question, from one metric to a full analysis.", "A leader or an analyst"),
+        ("build-dashboard", "Builds an interactive dashboard page with charts, filters and tables.", "Revenue operations"),
+        ("validate-data", "Checks an analysis for method, accuracy and bias before it is shared.", "Anyone about to present a number"),
+        ("explore-data", "Profiles a dataset new to you: its shape, quality and patterns.", "Revenue operations"),
+        ("write-query", "Turns a data need stated in plain words into SQL.", "Revenue operations"),
+    ],
+    "product-management": [
+        ("competitive-brief", "Writes a competitive analysis of one or more competitors or a feature area.", "Enablement, for battle cards"),
+        ("stakeholder-update", "Writes an update fitted to its audience and how often it goes out.", "A leader reporting upward"),
+        ("synthesize-research", "Turns interviews, surveys and feedback into themes.", "Customer success, for the voice of the customer"),
+    ],
+    "design": [
+        ("design-critique", "Gives structured feedback on a design's usability, hierarchy and consistency.", "Marketing, on a landing page"),
+        ("ux-copy", "Writes or reviews interface copy such as buttons, errors and empty states.", "Marketing and product, on calls to action"),
+        ("research-synthesis", "Distills interviews, surveys and support tickets into themes and recommendations.", "Customer success and marketing"),
+        ("user-research", "Plans research: interview guides, usability tests and surveys.", "Whoever runs win-loss or customer interviews"),
+        ("accessibility-review", "Audits a design or page against the WCAG 2.1 AA accessibility standard.", "The team that owns the website"),
+    ],
+    "enterprise-search": [
+        ("search", "Searches every connected source in one query.", "Anyone looking for a decision or a document"),
+        ("digest", "Sums up a day's or a week's activity across connected sources.", "A leader back from time away"),
+    ],
+    "legal": [
+        ("review-contract", "Reviews a contract against your negotiation playbook and drafts redlines.", "Deal desk and legal, on customer agreements"),
+        ("triage-nda", "Sorts an incoming NDA into standard approval, counsel review or full review.", "Sales, with legal's rules"),
+        ("signature-request", "Runs a pre-signature checklist and routes a document for e-signature.", "Deal desk"),
+        ("legal-risk-assessment", "Classifies a legal risk by severity and likelihood, with rules for escalation.", "Deal desk, on a non-standard deal"),
+    ],
+    "human-resources": [
+        ("interview-prep", "Builds an interview plan with questions by competency and a scorecard.", "A manager hiring reps"),
+        ("onboarding", "Writes an onboarding checklist and a first-week plan for a new hire.", "A manager and enablement"),
+        ("org-planning", "Plans headcount, team structure and who to hire next.", "A leader in annual planning"),
+        ("performance-review", "Structures a review: self-assessment, manager's review and calibration.", "A manager"),
+        ("recruiting-pipeline", "Tracks candidates by stage.", "A manager with open roles"),
+    ],
+    "finance": [
+        ("variance-analysis", "Breaks a variance against budget or a prior period into its drivers.", "A leader explaining a miss or a beat on revenue"),
+    ],
+}
+
+# OpenAI's Sales plugin: the eight skills its page names, placed by name alone.
+OPENAI_SKILLS = ["Analyze Account Signals", "Build Business Case", "Build Competitive Brief", "Executive and Seller Dashboard Demo",
+                 "Enrich Company And Contact Data", "Find Customer Quotes", "Find Key Internal Sources", "Follow Up After Call"]
+OPENAI_JOBS = [
+    ("Account research and call preparation", ["Analyze Account Signals", "Enrich Company And Contact Data", "Find Key Internal Sources"]),
+    ("Outreach and follow-up", ["Follow Up After Call"]),
+    ("Proposals", ["Build Business Case"]),
+    ("Coaching and enablement", ["Build Competitive Brief", "Find Customer Quotes"]),
+    ("Not placed", ["Executive and Seller Dashboard Demo"]),
+]
+OPENAI_APPS = ["Slack", "Teams", "Zoom", "Zoom Revenue Accelerator", "Granola", "Fireflies", "Otter.ai", "Gong"]
+OPENAI_PARTNERS = [
+    ("Accounts and deals", "Salesforce, HubSpot, Close CRM and monday CRM"),
+    ("Prospecting", "Apollo, Clay, Common Room, Outreach and Salesloft"),
+    ("Customer conversations", "Gong, Otter.ai and Granola"),
+    ("Performance and risk", "Backstory and Hex"),
+    ("Quotes and agreements", "Docusign, Ironclad, PandaDoc and ServiceNow CPQ"),
+    ("Content and enablement", "Confluence, Guru, Seismic, Gamma, Canva and Figma"),
+]

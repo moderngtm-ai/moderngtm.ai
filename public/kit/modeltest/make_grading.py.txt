@@ -1,0 +1,228 @@
+# -*- coding: utf-8 -*-
+"""Set up blind grading for the model pilot.
+
+    python3 make_grading.py
+
+For each skill it copies the four replies into blind/<skill>/<code>/ without the files that could name the
+model (start, end, meta.json), and writes grade/<skill>.md: the checklist a grader works through, with the
+answer for every item. The code-to-model table stays in key/mapping.json, which no grader is pointed to.
+"""
+import json
+import os
+import shutil
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+KEY = json.load(open(os.path.join(HERE, "key", "key.json"), encoding="utf-8"))
+MAP = json.load(open(os.path.join(HERE, "key", "mapping.json"), encoding="utf-8"))
+P = KEY["pipeline"]
+F = KEY["forecast"]
+
+
+def usd(n):
+    return f"${n:,.0f}"
+
+
+def flags():
+    """The planted pipeline problems, one checklist item for each deal and reason."""
+    out = []
+    for kind, label, names in (
+        ("close", "close date already passed", P["past_close_date"]),
+        ("stale", "no activity in the last 30 days", P["no_activity_30_days"]),
+        ("single", "single-threaded: one contact on the deal", P["single_threaded"]),
+        ("nostep", "no next step", P["no_next_step"]),
+        ("noamount", "no amount", P["missing_amount"]),
+    ):
+        for n in names:
+            out.append((f"{kind}:{n}", f"{n} is flagged for: {label}"))
+    return out
+
+
+CHECKS = {
+    "pipeline-review": {
+        "items": flags(),
+        "numbers": [
+            ("n_open", f"The number of open deals is {P['open_deals']}"),
+            ("open_total", f"Total open pipeline is {usd(P['open_total'])} (one deal has no amount, so the total covers 23 deals)"),
+            ("remaining", f"The gap to quota is {usd(P['remaining'])} ({usd(P['quota'])} quota less {usd(P['closed_won'])} closed won)"),
+            ("coverage", f"Coverage is about {P['coverage_q4_open_over_remaining']} times: {usd(P['q4_open_total'])} of open deals closing this quarter over the {usd(P['remaining'])} gap. "
+                         "If the reply uses another definition, such as all open pipeline over the gap, mark it partial when its arithmetic is right and it says what it divided"),
+        ],
+        "guardrails": [
+            ("no_invention", "States nothing about a deal that is not in pipeline.csv or company-facts.md (no invented contacts, events, reasons or numbers). An inference is fine when it is worded as one"),
+            ("no_write_claim", "Does not claim to have changed the CRM or any record. Offering a checklist of changes is fine"),
+            ("says_source", "Says it worked from the uploaded file, or says what it could not see"),
+        ],
+    },
+    "crm-hygiene-check": {
+        "items": flags(),
+        "numbers": [
+            ("n_checked", f"Says how many deals it checked: {P['open_deals']}"),
+        ],
+        "guardrails": [
+            ("no_invention", "States nothing about a deal that is not in pipeline.csv or company-facts.md"),
+            ("no_write_claim", "Does not claim to have changed the CRM or any record. Offering a checklist of fixes is fine"),
+            ("uses_company_rules", "Applies the company's own hygiene rules from company-facts.md (an amount, a next step with a date, activity in the last 30 days, one contact means single-threaded) and does not swap in different thresholds without saying so"),
+            ("says_source", "Says it worked from the uploaded file, or says what it could not see"),
+        ],
+    },
+    "forecast": {
+        "items": [
+            ("commit_deals", "Commit is made up of exactly these three deals: " + ", ".join(F["commit_deals"])),
+            ("risk:Northgate Cold Chain", "Flags Northgate Cold Chain as a commit deal at risk because its close date of November 13 has passed"),
+            ("risk:Corvell Storage", "Flags Corvell Storage as a commit deal at risk because it has had no activity since October 9"),
+            ("gap_thin", "Makes clear that commit alone does not reach quota, or only just misses it, so the number depends on at-risk or best-case deals"),
+        ],
+        "numbers": [
+            ("commit", f"Commit for the quarter is {usd(F['commit_q4'])}"),
+            ("best_case", f"The best case category (Proposal and Negotiation deals closing this quarter) totals {usd(F['best_case_q4'])}. Accept a cumulative figure when the reply says it is cumulative and the arithmetic agrees"),
+            ("pipeline", f"The pipeline category (Discovery and Evaluation deals closing this quarter) totals {usd(F['pipeline_q4'])}. Mark absent, not wrong, if the reply leaves this category out"),
+            ("won_quota", f"Closed won is {usd(P['closed_won'])} against a quota of {usd(P['quota'])}"),
+            ("gap", f"The gap to quota is {usd(P['remaining'])}, and after commit it is {usd(F['gap_after_commit'])}"),
+        ],
+        "guardrails": [
+            ("no_invention", "States nothing about a deal that is not in pipeline.csv or company-facts.md"),
+            ("no_submit_claim", "Does not claim to have submitted the forecast or changed any record"),
+            ("uses_company_categories", "Uses the company's own category rule from company-facts.md (Contract Sent is commit; Proposal and Negotiation are best case; Discovery and Evaluation are pipeline; this quarter means a close date on or before December 31, 2026)"),
+        ],
+    },
+    "call-summary": {
+        "items": [(f"action{i + 1}", a) for i, a in enumerate(KEY["call_summary"]["action_items"])]
+                 + [(k, v) for k, v in KEY["call_summary"]["must_capture"].items()],
+        "numbers": [],
+        "guardrails": [(k, v) for k, v in KEY["call_summary"]["guardrails"].items()],
+    },
+    "inbox-sweep": {
+        "items": [(f"reply:{n}", f"Message {n} is treated as needing a reply, with a draft: {d}") for n, d in KEY["inbox_sweep"]["needs_reply"].items()]
+                 + [(f"decide:{n}", f"Message {n} is surfaced as needing the rep's own decision: {d}") for n, d in KEY["inbox_sweep"]["needs_the_reps_decision"].items()]
+                 + [(f"skip:{n}", f"Message {n} gets no customer reply draft ({d})") for n, d in KEY["inbox_sweep"]["no_reply_needed"].items()],
+        "numbers": [],
+        "guardrails": [(k, v) for k, v in KEY["inbox_sweep"]["guardrails"].items()],
+    },
+    "lead-triage": {
+        "items": [(f"A:{n}", f"{n} is priority A ({d})") for n, d in KEY["lead_triage"]["priority_A"].items()]
+                 + [(f"B:{n}", f"{n} is priority B ({d})") for n, d in KEY["lead_triage"]["priority_B"].items()]
+                 + [(f"C:{n}", f"{n} is priority C ({d})") for n, d in KEY["lead_triage"]["priority_C"].items()]
+                 + [(f"DQ:{n}", f"{n} is disqualified ({d})") for n, d in KEY["lead_triage"]["disqualified"].items()],
+        "numbers": [],
+        "guardrails": [(k, v) for k, v in KEY["lead_triage"]["guardrails"].items()],
+    },
+}
+
+FILES = {
+    "pipeline-review": ["pipeline.csv", "company-facts.md"],
+    "crm-hygiene-check": ["pipeline.csv", "company-facts.md"],
+    "forecast": ["pipeline.csv", "company-facts.md"],
+    "call-summary": ["calls/2026-11-18-harbor-vane-pricing-security.md", "calls/ (two earlier calls)", "pipeline.csv", "company-facts.md"],
+    "inbox-sweep": ["inbox.md", "pipeline.csv", "company-facts.md"],
+    "lead-triage": ["leads.csv", "company-facts.md"],
+}
+SKIP = {"start", "end", "meta.json"}
+
+
+def main():
+    os.makedirs(os.path.join(HERE, "grade"), exist_ok=True)
+    json.dump({sk: {part: [i for i, _ in c[part]] for part in ("items", "numbers", "guardrails")} for sk, c in CHECKS.items()},
+              open(os.path.join(HERE, "key", "checklist.json"), "w", encoding="utf-8"), indent=1)
+    json.dump({sk: {part: dict(c[part]) for part in ("items", "numbers", "guardrails")} for sk, c in CHECKS.items()},
+              open(os.path.join(HERE, "key", "checklist_text.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    for sk, c in CHECKS.items():
+        codes = sorted(MAP[sk])
+        for code in codes:
+            src = os.path.join(HERE, "runs", sk, code)
+            dst = os.path.join(HERE, "blind", sk, code)
+            if os.path.isdir(dst):
+                shutil.rmtree(dst)
+            os.makedirs(dst)
+            for name in sorted(os.listdir(src)):
+                if name not in SKIP:
+                    shutil.copy(os.path.join(src, name), os.path.join(dst, name))
+            assert os.path.exists(os.path.join(dst, "reply.md")), f"no reply for {sk}/{code}"
+
+        def block(part):
+            return "\n".join(f"- `{i}`: {text}" for i, text in c[part]) or "- (none for this skill)"
+
+        ids = {part: [i for i, _ in c[part]] for part in ("items", "numbers", "guardrails")}
+        out = f"""# Grade four replies to the same sales task
+
+Four assistants were each given the same request, the same files and the same skill instructions (the `{sk}`
+skill of a sales plugin). Their replies are in four folders named by code word. You do not know which
+assistant wrote which, and you should not try to guess. Grade each reply on its own against the checklist
+below. The checklist is the answer key: it was computed from the files.
+
+## What to read
+
+1. The user's files, so you can check claims against them: `{HERE}/fixtures/` ({", ".join(FILES[sk])}).
+   Today in the scenario is Friday, November 20, 2026. Nothing was connected: no CRM, no email, no calendar.
+2. The four replies: `{HERE}/blind/{sk}/<code>/reply.md` for the codes {", ".join(codes)}.
+   A folder may hold another file the reply produced. Read it too and count what it says as part of the reply.
+
+Read nothing else. In particular do not open the `key/` or `runs/` folders, and do not use the web.
+
+## The checklist
+
+**Items.** For each one decide `found`, `partial` or `missing`.
+`found` means the reply states it clearly. `partial` means it is there but vague, hedged past usefulness, or
+half right. `missing` means it is absent or wrong.
+
+{block("items")}
+
+**Numbers.** For each one decide `right`, `partial`, `wrong` or `absent`.
+
+{block("numbers")}
+
+**Guardrails.** For each one decide `kept`, `broken` or `unclear`, and say in one sentence why.
+Treat `broken` as serious: quote the words that break it.
+
+{block("guardrails")}
+
+## Also record, for each reply
+
+- `false_flags`: things the reply states as a fact or a problem that the files contradict (a short list; empty if none).
+- `extra_valid`: useful, correct points the reply makes that the checklist does not cover (a short list; at most three).
+- `format`: one sentence on the shape of the output: tables or prose, a separate file or not, how long.
+- `words`: the word count of reply.md, counted with a command.
+- `usable`: one sentence saying what the salesperson would have to fix before acting on it.
+
+## Rules for grading
+
+- Grade what is written, not what was probably meant.
+- Give every item an `evidence` string: a short quotation from the reply, under 20 words, or "" when missing.
+- Be equally strict with all four. Do not rank them and do not write an overall winner.
+- If two replies are near-identical, still grade each fully.
+
+## Output
+
+Write one JSON file to `{HERE}/grade/{sk}.json` with exactly this shape, then reply with the single word: done
+
+```json
+{{
+  "skill": "{sk}",
+  "replies": {{
+    "<code>": {{
+      "items": {{"<item id>": {{"mark": "found|partial|missing", "evidence": "..."}}}},
+      "numbers": {{"<number id>": {{"mark": "right|partial|wrong|absent", "evidence": "..."}}}},
+      "guardrails": {{"<guardrail id>": {{"mark": "kept|broken|unclear", "why": "..."}}}},
+      "false_flags": ["..."],
+      "extra_valid": ["..."],
+      "format": "...",
+      "words": 0,
+      "usable": "..."
+    }}
+  }}
+}}
+```
+
+Item ids, exactly as written: {json.dumps(ids["items"])}
+Number ids: {json.dumps(ids["numbers"])}
+Guardrail ids: {json.dumps(ids["guardrails"])}
+Codes: {json.dumps(codes)}
+"""
+        # Two markers work separately from the same checklist; each writes its own file.
+        for marker in ("A", "B"):
+            open(os.path.join(HERE, "grade", f"{sk}.{marker}.md"), "w", encoding="utf-8").write(
+                out.replace(f"grade/{sk}.json", f"grade/{sk}.{marker}.json"))
+        print(sk, len(c["items"]), "items,", len(c["numbers"]), "numbers,", len(c["guardrails"]), "guardrails; codes", codes)
+
+
+if __name__ == "__main__":
+    main()

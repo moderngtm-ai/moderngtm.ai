@@ -1,0 +1,419 @@
+# -*- coding: utf-8 -*-
+"""ChatGPT for Sales: OpenAI's Sales plugin, as an installed copy was reported to us.
+
+Where the facts come from. Nobody outside OpenAI can read this plugin's files in public. On November 22, 2026 the
+site's editor installed the plugin in his own ChatGPT account and gave ChatGPT a fixed prompt that asked for a
+read-only inventory of the plugin's own text (kit/chatgpt/inventory-prompt.md). ChatGPT reported version 1.1.7,
+18 skills and the full instructions of each. Every line below restates that reply in this site's own words.
+It quotes the plugin once, in START_PROMPT. Nothing here was read by us in the files, and no skill was run.
+
+What is ours and not the plugin's: the grouping, the audience (FOR), the GTM job, the example request (ask) and
+the two tallies (schedule and named seller).
+"""
+VERSION = "1.1.7"
+SKILLS_N = 18
+RUN_ON = "November 22, 2026"
+CHECKED_ON = "November 22, 2026"
+PLUGIN_URL = "https://openai.com/business/plugins/sales/"
+NEWS_URL = "https://openai.com/index/introducing-chatgpt-for-sales/"
+HELP_URL = "https://help.openai.com/en/articles/20001707-getting-started-with-chatgpt-for-sales"
+GUIDE_URL = "https://learn.chatgpt.com/docs/plugins"
+REPO_URL = "https://github.com/openai/role-specific-plugins"
+START_PROMPT = "@Sales Help me get started"      # the README's own first prompt: the one phrase quoted from the plugin
+
+GROUPS = [
+    ("start", "Start here", "The skill that routes every request, and a fictional demo."),
+    ("accounts", "Accounts and prospecting", "Finding companies and people, and understanding an account."),
+    ("meetings", "Meetings and calls", "Before a meeting, after a call and what customers said."),
+    ("deals", "Deals and proposals", "Working one deal and making its case."),
+    ("pipeline", "Pipeline and forecast", "Standing views of a book, a team and the forecast."),
+    ("coaching", "Coaching", "A rep's calls, against peers and over time."),
+]
+
+FOR = {"all": "Anyone", "seller": "Sellers", "lead": "Managers and leaders"}
+
+# The three workflows that leave a file behind as their normal result, by the report. No skill is reported to send
+# a message, post to a channel or change a CRM record on its first pass: each such step is a later one that the
+# user must ask for.
+LEAVES_A_FILE = ["seller-account-dashboard", "sales-leadership-dashboard", "build-competitive-brief"]
+
+
+def S(name, group, title, does, when, ask, needs, back, reads, makes, asks, scope, sched, noapps, company, wont, nxt,
+      who, job, sflag, mflag):
+    return dict(name=name, group=group, title=title, does=does, when=when, ask=ask, needs=needs, back=back, reads=reads,
+                makes=makes, asks=asks, scope=scope, sched=sched, noapps=noapps, company=company, wont=wont, next=nxt,
+                who=who, job=job, sflag=sflag, mflag=mflag)
+
+
+NS = "Not stated."
+# sflag: "yes" a schedule is described, "named" one is named with no mechanism, "no" the skill rules it out, "" not stated
+# mflag: "yes" a manager can run it for a named seller, "owner" a named owner can be chosen with no word on managers,
+#        "no" ruled out, "" not stated
+SKILLS = [
+    # ------------------------------------------------------------------------------------------ start here
+    S("index", "start", "The router",
+      "Picks the Sales workflow that fits a request, or introduces the plugin.",
+      "Any request with a seller, a leader, a customer, a prospect, a partner, an account or an opportunity in it. A broad question about how to begin gets the introduction.",
+      "@Sales what can you do for a renewal that is due next month?",
+      "The request itself.",
+      "A handoff to the chosen workflow. Asked how to begin, it gives a short tour with sample requests and offers the fictional demo. It lists every skill on request.",
+      "The descriptions of every skill, then the instructions of the one it chooses and the plugin's shared rules.",
+      "Nothing.",
+      NS,
+      "The whole plugin. Whether a manager may act for a named seller is left to the workflow it chooses.",
+      NS,
+      "It can introduce the plugin and route a request from its wording alone. The chosen workflow decides what evidence is needed.",
+      NS,
+      "Reading the catalog does not stand in for reading the chosen workflow. A general document-making skill may not take over a request that a Sales workflow owns.",
+      "All 17 other skills. A request for a stand-alone deck built from a complete set of customer facts goes to sales-presentations.",
+      "all", None, "", ""),
+
+    S("demo-exec-and-seller-dash", "start", "The fictional demo",
+      "Walks through a made-up company: a division leader's dashboard, a seller's book, a customer deck that already exists and a proposed CRM update.",
+      "Only when someone asks for the demo outright.",
+      "@Sales run the fictional demo",
+      "The request. Later replies choose the next step.",
+      "A conversation that leads from step to step, with links to two ready-made dashboards, the choice of seeing a deck or a sample email, and a proposed CRM change shown field by field, four fields in all. At the end it offers up to three workflows to try on real data.",
+      "Bundled fictional material only: company background, leadership and seller data, meeting notes and rules for the CRM update. Local files imitate records from Salesforce, Gmail, Google Calendar, Granola, Slack and Google Drive, each a vendor's product.",
+      "Nothing outside the chat in the hosted walk-through. The example email stays in the chat, unsent.",
+      "A simulated save completes only after a separate request for exactly the proposal that was reviewed, and the walk-through then confirms that no real record changed.",
+      "Fictional people and accounts only. A manager cannot put a real seller in their place.",
+      "It tells itself not to start a schedule.",
+      "Built to run with nothing connected.",
+      "None that is real.",
+      "It keeps real records out of the fiction and takes no real action: no search for connected providers, no installed app, no email, task, CRM change, meeting or published site. The ready-made deck is neither copied nor changed.",
+      "Afterwards it offers a real seller dashboard, meeting preparation or call follow-up with proposed CRM updates.",
+      "all", None, "no", "no"),
+
+    # ------------------------------------------------------------------------------------------ accounts and prospecting
+    S("enrich-company-and-contact-data", "accounts", "Find and enrich companies and contacts",
+      "Completes the records you hand it, searches for companies or people who fit your criteria, or sorts a defined set into tiers and segments.",
+      "Finding a buyer, identifying contacts, matching an ideal customer profile (ICP), completing missing fields, resolving duplicates, finding lookalikes or scanning a defined market signal. Not for meeting preparation, outreach to a known recipient or ranking a book you already own.",
+      "@Sales find 20 companies in [region] that match our ICP and the head of operations at each",
+      "A working set, or the criteria or seed companies to search from. Optional: a CSV or an export, domains, emails, the fields wanted, ICP rules, role, seniority, geography, size, technology, a ranking rule and a limit.",
+      "A table of the completed records, a list of full and partial matches, or a table that compares, tiers or flags signals. Every row shows its evidence, how sure the match is and what stayed unresolved, with the sources and how much ground was covered.",
+      "Data providers for facts about companies and people, the technology they use, buying intent and similar companies. The CRM, to tell who is already known, owned or in a deal, and to catch duplicates. Your files for the ICP, target lists, territories and segment rules, and any rows you supply. Public sources only to confirm a point or fill a narrow gap.",
+      "Nothing at first. Afterwards it can export the table to a spreadsheet with its evidence and open questions intact. For the CRM it only proposes field changes: writing them is a separate action.",
+      "Explicit approval before any search, export or enrichment that uses up provider credits, and before it touches personal contact data. A CRM update needs its own approval.",
+      "A single company, a few contacts or a supplied list. It can also run one bounded search across a territory or a market.",
+      NS,
+      "It uses equivalent data you have already supplied and keeps to those companies and fields. If a provider is needed, it asks for the fewest fields that would let it check the filters.",
+      "Your ICP and its hard limits, territories, segments, target lists, the conventions you follow when enriching records and any rule for ranking.",
+      "It does not invent contacts or fields, swap a data provider for broad web search or computer use, widen the scope quietly or claim to cover a whole market. It does not write to the CRM, create records or send outreach by itself.",
+      "Account prioritization or company research, as the next selling step.",
+      "seller", "Lead qualification", "", ""),
+
+    S("sales-company-research", "accounts", "Research a company and shape the outreach",
+      "Researches a company, partner or audience you already know, explains the fit and drafts an approach.",
+      "Judging the fit of a company or a partner. Also mapping who could refer you, checking a reputation and finding an angle for people you already know you want to reach. Working out who to contact belongs to the enrichment skill.",
+      "@Sales research [company] and draft an outreach approach for its finance lead",
+      "Something to anchor the research (a company, a domain, a partner type, a product or an offer) and the commercial purpose. Optional: the audience, approved positioning, proof points, partner criteria, the channel, the kind of draft wanted and outreach guardrails.",
+      "Sourced context, fit and motion, a recommended approach and a draft for the channel asked for, with fit confidence, risks and gaps. The draft is not sent.",
+      "Data providers for background on the company, its partners and people, and for signals. The CRM for who owns the account, where it stands and any earlier contact. Your files for positioning, proof and what you look for in a partner. Public research for facts the company controls, its reputation, partner programs and the market.",
+      "Nothing outside the chat. A later option is a short research brief or an internal note, once the content has been reviewed. Where that would be saved is not stated.",
+      "Sending outreach, creating a draft in another system and writing to the CRM each need a separate, explicit request.",
+      "A single company, partner or type of partner that you name, and the people you mean to reach there.",
+      NS,
+      "Nothing is required. It works from supplied material and public research, and labels assumptions and gaps.",
+      "The positioning you have approved, your proof points, what makes a good partner and any limits on outreach.",
+      "It does not invent company facts, partner terms, contacts, reputation or evidence of fit. Outreach stays a draft, and material claims carry a source.",
+      "Once a conversation is live: plan-deal-strategy or prepare-for-meeting. Finding contacts belongs to enrich-company-and-contact-data. Internal look-ups belong to find-key-internal-sources.",
+      "seller", "Account research and call preparation", "", ""),
+
+    S("analyze-account-signals", "accounts", "What changed at an account",
+      "Tells you how a single account stands today, or sums up what has materially changed across a watchlist of limited size.",
+      "A status check on a named account or a question about what changed there. Also a request for a digest of an owner's portfolio or of a watchlist. Ranking a whole book belongs to the seller dashboard skill.",
+      "@Sales what has changed at [account] in the last 14 days?",
+      "One identifiable company or CRM account. For monitoring: a watchlist, or an owner it can identify. Optional: the time window, which defaults to 14 days, focus areas and the style of the output.",
+      "For one account: a snapshot, recent signals, an interpretation, recommended actions, open questions and missing evidence. For a watchlist: accounts ranked by material change, an action for each, details of the run and a plain statement where nothing much moved.",
+      "The CRM for who owns the account, its health and status, open deals and recent activity. Call transcripts for the customer's own words and decisions. Email for progress and requests left unanswered. Internal messages, account plans and notes for what the team knows. The calendar for meetings ahead.",
+      "Nothing: the readout changes no record. Follow-ups are CRM-ready updates drafted for review and an offer to set up a recurring monitor. A recurring run may not post a digest or write to the CRM by itself.",
+      "No schedule until the user agrees. Tasks, posts, monitoring state kept elsewhere and CRM updates each need a separate request and approval.",
+      "A single account, or a watchlist of 50 accounts at most. An owner can be picked by ID or by email. Nothing is said about a manager's permission.",
+      "A daily or weekly rerun of the watchlist summary that only reads. It checks active and paused schedules for a duplicate first.",
+      "Complete records or an export that you supply. If it cannot establish the account or the change, it asks for the smallest missing identifier or piece of evidence.",
+      "CRM ownership, territory, the portfolio or watchlist, account status and the focus areas a user defines.",
+      "It does not read a past change into a field's current value or manufacture a trend. Given a portfolio that is too large, it does not pick part of it at random. Monitoring never becomes CRM updates, tasks or posts made without the user.",
+      "For a live deal: plan-deal-strategy. For a coming conversation: prepare-for-meeting.",
+      "seller", "Account research and call preparation", "yes", "owner"),
+
+    S("find-key-internal-sources", "accounts", "Who knows, and what to read",
+      "Points a seller to the colleague, document or channel that the evidence says is the right place to get a customer's question answered.",
+      "When it is unclear who inside the company knows, who owns or approves the answer, which document is authoritative, or where to escalate.",
+      "@Sales who owns the answer on data residency, and what should I read first?",
+      "A specific question, topic or problem from a customer, or a support task. Optional: the account, the kind of route wanted, a quick or deep search, privacy scope, the number of results, a document type and known names or aliases.",
+      "Ranked experts, documents and channels, a first message the seller can copy, and the gaps in coverage. A quick search returns up to three of each. A deep one returns five to eight where the evidence supports them.",
+      "Knowledge bases and file stores, for pages that are kept up to date, who owns them, FAQs, runbooks, field guides and recorded decisions. Internal messaging, for what a channel is about, who is active in it and how issues get escalated. The CRM, for the account or deal and whatever is blocking it.",
+      "Nothing. It only reads: no post, no assignment and no change to any system. A later option is a routing note to reuse. Where that would be saved is not stated.",
+      "The suggested first message is drafted in the chat and is not posted. No approval step for saving a routing note is stated.",
+      "One topic, question or support task, with or without an account.",
+      NS,
+      "Supplied documents, messages and what is already known. Where support is thin it names the smallest missing source and assigns no owner.",
+      "Product names, team names, abbreviations, old names, wiki hubs and internal process terms that the user gives or the sources show. Its own guidance says company-specific additions belong outside the plugin's package.",
+      "It trusts documented ownership over a mention in chat, and owning an account in the CRM does not make someone the owner of an answer. It searches public channels unless the user asks for private ones and has access. It invents no people or links and escalates nothing by itself.",
+      NS,
+      "seller", "Account research and call preparation", "", ""),
+
+    # ------------------------------------------------------------------------------------------ meetings and calls
+    S("prepare-for-meeting", "meetings", "Prepare for a meeting",
+      "Prepares one commercial meeting, lines up a day of them or builds a customer presentation out of the preparation.",
+      "A coming meeting with a customer, a prospect or a partner, a renewal or opportunity meeting, or an important internal one. Also a same-day call queue, a first call, an executive briefing or a workshop. Not for neutral research interviews with nothing commercial in them.",
+      "@Sales prepare me for tomorrow's meeting with [account]",
+      "Which meeting, or which date, and the kind of output when that is unclear. The calendar is required only when the meeting has to be found. Optional: the invitation, a link, the account, an attendee, the topic, a goal, a cut-off date for evidence, source documents, a template and a format.",
+      "One brief: date, attendees, summary, goal, open questions, a timed agenda, a recommended stance and gaps. For a day: briefs in time order with watch-outs and suggested closes. A customer deck of 6 to 9 slides when asked.",
+      "The calendar for which meeting it is, when, the agenda and who is coming. Earlier call transcripts for what was decided and promised. Email for what the customer has asked. Internal messages, notes, strategy documents, assets and templates for the team's own view. The CRM for the account, its stakeholders and the deal or renewal in question. A data provider where that adds something.",
+      "It can put the brief into a meeting note you already keep or start a fresh document to read beforehand, offer to attach that to the invitation, draft a short update for chat or email, and build the deck from the brief once you have reviewed it. It can set up a schedule.",
+      "An existing file is updated only on request. Sending, sharing and attaching need authorization. No schedule until the user agrees.",
+      "One meeting, or one seller's qualifying meetings on a date. Running it over a named seller's calendar as a manager is not stated.",
+      "Daily preparation that only reads, in the seller's time zone. The instructions also name a scheduled summary and action list after a meeting.",
+      "An invitation or meeting details that you supply, with any notes. It must then say that the meeting came from the user and was not confirmed in the calendar.",
+      "What is known of the account and the deal, your strategy and documents, and the sections, layout and branding of a template you supply.",
+      "It does not invent attendance, roles or checks of sources, and does not write scripts for facilitating the meeting. It respects a cut-off date. A recurring run may not attach notes, send messages or write to the CRM.",
+      "sales-presentations for the customer deck.",
+      "seller", "Account research and call preparation", "yes", ""),
+
+    S("follow-up-after-call", "meetings", "Follow up after a call",
+      "Works from the record of a finished call to set out what was decided, who owes what and the follow-up to send, or a readout for the customer.",
+      "Once a call is over: with a customer, a prospect or a partner, or an internal call that matters to a deal. It covers discovery, demos, reviews of a pilot or an evaluation, and qualification.",
+      "@Sales here are my notes from today's call with [account]. What are the next steps, and draft the follow-up",
+      "The kind of source and the evidence itself: a transcript, notes or a recording summary. The call has to be identifiable. Optional: the account, the date, the contact, an internal channel, the opportunity, a template and a format.",
+      "A call summary, next steps for the customer and the seller with owners and dates, three subject lines and an email of 150 to 220 words, one sentence for the CRM's next-step field, a draft for the internal team and the status of each action. Or one focused draft, a document or a readout deck of 6 to 10 slides.",
+      "The call itself: a transcript, a recording whose text can be fetched or notes. The calendar for when it was and who attended. The CRM for the account, the deal, the contact and who owns them. Email, in case the call or a promised follow-up is recorded there. Internal messages for the agreed place to post a recap. Your files for templates and assets.",
+      "By default the answer stays in the chat, and the CRM sentence is there to copy and paste. On request it updates a document or delivers a new one. In later steps, once you have reviewed them, it can save the email as a draft, post the recap to the team, build the readout deck and set up a follow-up schedule.",
+      "The exact draft and where it would go are reviewed before any approval. The first pass creates no email draft, sends nothing, posts nothing and writes nothing to the CRM. No schedule until the user agrees.",
+      "One completed call and its account or opportunity. Use by a manager for a named seller is not stated.",
+      "When the user wants follow-up to continue, or the full package records a firm commitment, decision date or meeting still to come, it can offer to run again for that call or account.",
+      "Pasted or uploaded notes, the text of a transcript, a transcript exported from a recording tool or a message thread that documents the call. With too little to go on it lists the calls it might be, or returns an outline plainly marked as incomplete.",
+      "A supplied document template with its branding, how accounts map to opportunities and the confirmed conventions for internal channels.",
+      "It does not rebuild the conversation from account records, invent recipients, owners, dates, prices or commitments, or write to a customer about an internal-only call without a basis.",
+      "sales-presentations for the customer readout.",
+      "seller", "Outreach and follow-up", "yes", ""),
+
+    S("find-customer-quotes", "meetings", "Find what customers said",
+      "Pulls customers' or prospects' exact words on a theme and shows the evidence for the words and for who said them.",
+      "Voice-of-customer research, testing a theme, objections, product friction, evidence for a use case or quotations from named calls.",
+      "@Sales find customer quotes about onboarding time from last quarter's calls",
+      "A theme, an objection, a product area, a use case, a storyline or named calls, with evidence that keeps people's direct speech and who was speaking. Optional: a company, a segment, dates, calls and the number of quotes. The default target is five for each theme.",
+      "Quotes grouped by theme, with the number found against the number wanted. Each quote names the speaker or company where known and gives a confidence score, a relevance score, the supporting evidence and its source. Gaps are listed and JSON is available on request. Anything said by a non-customer is labelled apart.",
+      "Meeting transcripts for the words, who spoke, who attended, the date and a link. The CRM only to identify a company, its customer status or a filter. Pasted or exported transcripts and notes, provided they keep the original wording.",
+      "Nothing at first. The user can later ask for chosen quotes to be packaged.",
+      "Posting, sending, packaging or saving quotes each wait for a later request from the user.",
+      "Any number of themes, across the calls, accounts or segments you name.",
+      NS,
+      "The text of a transcript, an export from a recording tool that includes text or call notes that preserve what was said and by whom. With none of these it asks for the smallest usable source.",
+      "Not stated. A company's CRM record, status and segment can filter the search.",
+      "It does not polish, splice, paraphrase or invent a quotation. It wants confidence of at least 0.8 that the speaker is a customer or prospect, and relevance of 0.75 by default. It returns fewer quotes, or none, when the evidence is thin. It gives no legal or compliance approval.",
+      "A business case, a competitive brief, meeting preparation or an evidence appendix can use the quotes. It can itself start from a recent call follow-up.",
+      "seller", "Coaching and enablement", "", ""),
+
+    # ------------------------------------------------------------------------------------------ deals and proposals
+    S("plan-deal-strategy", "deals", "Plan one deal",
+      "Lays out who is involved in a single deal, what has to be decided, what could go wrong and what to do next. It can also plan a first attempt to sell an offer.",
+      "A live opportunity, a renewal, a negotiation or a procurement process, or the first sale of a defined offer.",
+      "@Sales map the buying committee and the risks for the [account] renewal",
+      "Something that identifies the deal: the account, the opportunity, an initiative or your notes. And the decision or step you want help with. For a first sale it is enough to give the offer, the buyer in mind, the pilot or evaluation and the objections heard so far.",
+      "A deal snapshot, a deal map, a map of the buying committee, a register of procurement risks, next actions in priority order, gaps in the evidence and notes on what was inferred. Any one part on request.",
+      "The CRM for the deal in question, its contacts and fields. Call transcripts for decisions and objections. Email for exchanges with the customer. Internal messages for who owns what and what is stuck. Plans and risk logs in your files. The calendar for milestones. A data provider or public information only to check a point already raised.",
+      "Nothing at first. Later options: a plan of actions agreed with the buyer, or a tracker, messages to stakeholders drafted for review, and opportunity updates worded for the CRM and drafted for review.",
+      "A CRM update, a message, a recap or any further document each wait for a later request.",
+      "One deal, renewal, negotiation or first sales motion. Use by a manager for a named seller is not stated.",
+      NS,
+      "Deal details that you supply, with the gaps marked. A first-sale plan needs no CRM, named customer, price or earlier discovery call.",
+      "Account plans, CRM fields and any deal context supplied. No required sales method is stated.",
+      "It keeps other deals at the same account out of the picture. It does not make up a buying committee, a stage, a price, a date, a security sign-off or a promise, and it marks roles and risks it has inferred as inferences.",
+      "prepare-for-meeting when the request turns to meeting preparation.",
+      "seller", "Deal strategy and reviews", "", ""),
+
+    S("build-business-case", "deals", "Build a business case",
+      "Builds the reasoning and evidence for a customer's investment decision, and puts numbers on value where the inputs support them.",
+      "A business case, a return-on-investment analysis, a value model, a pricing rationale, a review of a commercial proposal, a value story or a decision deck that needs new commercial analysis.",
+      "@Sales make the business case for [customer] to replace manual invoice matching",
+      "A customer, an account or a generic scenario, with a workflow, an initiative, a pain, a target metric or a decision. A case for a named customer needs authoritative account and commercial context. Optional: the buyer, industry, constraints, current tools, the solution, notes, metrics, usage, pricing, an earlier case, a template and the kind of output.",
+      "A summary for executives, what the customer is trying to do and what stands in the way, the workflows and use cases that matter most, where value should come from, the metrics and assumptions, the return logic, what sets the offer apart, proof and caveats. It can be a structural case, a low, base and high model fit for finance, one focused output, or a decision deck of 8 to 12 slides.",
+      "The CRM for the account, the deal, its contacts, stage, amount and timing. Call transcripts for the customer's pain, decisions and any numbers they gave. Your files for plans, earlier cases, proof and the account's metrics. A data provider to fill gaps. The company's own public material or filings where useful. Workbooks, proposals and templates you supply.",
+      "Only the output asked for, unshared: a decision document or a customer deck when one is requested. A suggested next step is a value-model table laid out for a spreadsheet.",
+      "A request for a document or a deck authorizes that one item only. Otherwise the content is reviewed first, and saving or sharing needs an explicit request. It posts and sends nothing, leaves the CRM and your original template untouched, and creates no file you did not ask for.",
+      "A single customer, initiative or buying decision, or a generic scenario. Use by a manager for a named seller is not stated.",
+      NS,
+      "Notes, metrics, links, exports or a generic scenario. Without credible numbers it returns a structural case and names the inputs a finance review would need.",
+      "Commercial evidence for the account, proposal terms, customer metrics, proof points and templates.",
+      "It does not invent returns, prices, buyers, approval or evidence that a customer confirmed. Public or analogous proof is kept apart from the customer's own facts, and unsupported assumptions stay visible.",
+      "sales-presentations for a deck.",
+      "seller", "Proposals", "", ""),
+
+    S("sales-presentations", "deals", "Turn finished work into a deck",
+      "Turns finished sales analysis, or a complete set of customer facts, into an editable deck for the customer.",
+      "The user asks for slides outright or accepts an offered deck, and enough customer-specific content already exists.",
+      "@Sales turn the approved proposal for [customer] into a deck for its steering group",
+      "The request, with a completed brief, an approved proposal, a complete set of facts or the output of the workflow that came before. Presentation authoring has to be available. Optional: the audience, a template, a source deck, a visual preference, a format and supporting commercial or security material.",
+      "An editable deck, normally 16:9: the customer's priorities, the proposed approach, value or proof, risks, the plan and the decision. The length follows the workflow it came from. A sources or assumptions appendix is added when needed.",
+      "The earlier Sales output and its evidence. Knowledge and file systems for templates, source decks and reviewed material. Proposals, order forms or security documents for claims that depend on a contract. The installed instructions for presentation authoring.",
+      "The deck itself, in PowerPoint or Google Slides, and not only an outline.",
+      "It runs only on an explicit request or an accepted offer. Sending, sharing or attaching the deck, updating the CRM or making any other file needs authorization.",
+      "One customer and one meeting or decision audience. Use by a manager for a named seller is not stated.",
+      NS,
+      "Facts and templates that you supply can carry the content. If presentation authoring is missing it can offer to install it. If that is unavailable or declined, it must say that it cannot make the editable deck.",
+      "A customer's or the company's deck as the visual source, then any style direction, then the authoring default. Authoritative commercial, security and deployment material.",
+      "It leaves out private CRM notes, coaching for the seller, the chance of winning, negotiating stance, margins and unverified claims about competitors. It does not fall back on another way of making slides.",
+      "It comes after build-business-case, follow-up-after-call or prepare-for-meeting, and hands the layout to the presentation authoring plugin. A complete set of customer facts can start here.",
+      "seller", "Proposals", "", ""),
+
+    S("build-competitive-brief", "deals", "Build a competitive brief",
+      "Compares competitors from cited sources and advises the seller on what to say, what to check, what needs proof and what not to claim.",
+      "A vendor comparison, a market landscape, a battlecard, objection handling, positioning or a competitive view of one account.",
+      "@Sales build a competitive brief on [competitor A] and [competitor B] for mid-market buyers",
+      "At least one anchor: named competitors, an account or deal where a competitor is present, or a product, a workflow, a segment or a market. An anchor it had to infer is confirmed first. Optional: the buyer, a region, known objections, materials, a template and where to put the result.",
+      "A web page and a summary in the chat. The page sets out the context, the seller's own baseline, the landscape, a profile of each competitor, what a comparison matrix shows, how to respond, which claims to avoid and the sources. A brief about one account adds what it means for that account. Chat or Markdown only, on request.",
+      "Whatever you supply. The CRM for whether a competitor is really in a deal, and for the facts of that deal. Your own positioning, battlecards, plans and proof. Call transcripts and internal messages for what buyers and the field report. Official material from competitors, the seller and partners, including pricing pages, release notes and filings. Other research and a data provider to fill gaps.",
+      "By default a self-contained HTML brief, written to the place asked for, the workspace or a temporary folder. A new, unshared Google Slides deck when asked. It can offer a weekly digest on a schedule.",
+      "The default web page needs no extra approval. It asks before overwriting a file the user can see. No schedule until the user agrees.",
+      "A single competitor or several, a product or a market, or a single account or deal. Use by a manager for a named seller is not stated.",
+      "A weekly competitive digest that only reads, for the same competitors, product, category or account, after a check for an existing one.",
+      "Nothing is required. It works from supplied material and suitable public evidence, and names gaps and weaker evidence.",
+      "Your own baseline, positioning and proof, battlecards you already have, the segments you target, objections you know of and a presentation template.",
+      "Without evidence it does not say a competitor is in a deal. It makes up no prices or capabilities, and a story from the field stays a story until confirmed. The matrix covers five competitors by default and eight at most.",
+      "Meeting preparation as a possible next step, and Google Slides authoring when a deck is asked for.",
+      "seller", "Deal strategy and reviews", "yes", ""),
+
+    # ------------------------------------------------------------------------------------------ pipeline and forecast
+    S("seller-account-dashboard", "pipeline", "A seller's account dashboard",
+      "Builds or refreshes a seller's interactive dashboard of accounts and pipeline, or returns a ranked list of accounts to work.",
+      "A seller wants a home for their accounts, a working view of the pipeline, a ranking of accounts or the week's priorities. Not for the fictional demo or for finding new accounts.",
+      "@Sales build my account dashboard and rank this week's priorities",
+      "For a filled dashboard: the seller or an authorized stand-in, the scope and every account the seller owns, including those with no open opportunity. The goal and a design style when unclear. An empty placeholder needs no CRM. Optional: territory, named accounts, ranking criteria, sales motion, capacity and extra views.",
+      "A link to a working dashboard with Home, Accounts and Pipeline views, a brief summary, the gaps that matter and a single next step. A ranking alone returns lists to focus on, to monitor and to leave, with the sources and details of the run.",
+      "The CRM for who owns which accounts, their deals, contacts, stage, value and recent activity. The calendar for meetings. Call transcripts for what customers decided or objected to. Email for what was asked, answered and promised. Internal messages for changes and blockers. Your files for account plans, territories, lists and rules on which accounts to leave alone. A data provider for fit and contacts.",
+      "A dashboard, or the ranking, kept as a local project that the user owns. It can refresh the matching dashboard, publish it as a private site and set a refresh schedule. Unless the user declines, the shared dashboard routine also generates a private design image.",
+      "Agreement before any hosting, publishing, outside sharing or change of host. A second local dashboard needs an explicit choice when a matching unpublished one exists. No schedule without explicit approval.",
+      "One seller's book, a stated territory or a named set of accounts. A manager can ask for the dashboard of a named seller they are authorized to see.",
+      "Once the dashboard is hosted privately, one refresh that only reads: weekday mornings is the example given. A ranking with a reusable scope can rerun weekly. It checks active and paused schedules for a duplicate.",
+      "Authoritative records or an export, within the scope asked for. An empty placeholder needs no CRM. A supplied list with no link gets its ranking in the chat.",
+      "Who owns what, territories, target lists, account plans, which accounts to leave alone, how to rank, the sales motion, a seller's capacity, what the dashboard is for and design choices saved earlier.",
+      "Nothing on the dashboard is made up: no account, priority, score, value, reply or meeting. A broad dashboard keeps the whole book. It does not treat the demo's data as a customer's, duplicate outreach or widen access, and it acts in the CRM or sends outreach only with separate authorization.",
+      "ChatGPT Sites for hosting, once authorized.",
+      "seller", "Pipeline review and forecasting", "yes", "yes"),
+
+    S("sales-leadership-dashboard", "pipeline", "A leadership dashboard",
+      "Builds or refreshes a leadership dashboard of the forecast, the accounts that need executive attention and the team's performance.",
+      "An executive or a manager wants a standing dashboard for a team or a division, a change to one or a labelled placeholder. An ordinary forecast review belongs to review-forecast.",
+      "@Sales build a leadership dashboard for the [team] team for this quarter",
+      "For a filled view: a confirmed leader or authorized stand-in, the team or division, the reporting period, the scope of accounts, and current CRM evidence or an authoritative export. Optional: a named seller and fiscal quarter, earlier snapshots, targets, scorecards, forecast conventions and scenario assumptions.",
+      "A working dashboard with the forecast and key metrics, an account focus and a team focus where the evidence supports them. A note says what is missing and matters: history, targets, coverage of the team or inputs for a scenario.",
+      "The CRM for the owners, accounts, deals, forecasts and sellers the leader may see. When a seller and a quarter are named, the instructions point to a Salesforce query tool and to that seller's real open deals. Targets, scorecards, plans and the rules of the forecast, from your files. Internal messages for who owns what, what awaits approval and what is stuck. Call transcripts and email for decisions and risks. The calendar for meetings.",
+      "It refreshes a local dashboard that the user owns and offers private hosting. It can update the matching private site and set a refresh schedule.",
+      "Explicit agreement before a new site is created or published. Public visibility needs a further, express authorization. No schedule without explicit approval.",
+      "A division, a team or a leader's accounts, as authorized. A manager can name a seller and a fiscal quarter. The workflow must then confirm the owner and fetch that seller's real opportunities.",
+      "Once a private site exists, one approved refresh that only reads. It checks active and paused schedules for a duplicate first.",
+      "An authoritative export within scope. An empty placeholder, labelled as one, needs no CRM. A representative view still needs a confirmed leader, scope and evidence.",
+      "How the team is organized, the fiscal period, the conventions for forecast and amounts, targets, scorecards, account plans, the dashboard's goal and style, and earlier customizations.",
+      "It does not infer a seller's growth, quota, priorities, attainment or past movement from thin data. It keeps real zeros, reconciles totals, hides widgets it cannot support and keeps its CRM access to reading.",
+      "review-forecast for an ordinary forecast review, the demo for a fictional walk-through and ChatGPT Sites for hosting.",
+      "lead", "Pipeline review and forecasting", "yes", "yes"),
+
+    S("review-forecast", "pipeline", "Review a forecast",
+      "Reviews a defined forecast against the organization's own conventions and names deal risk, changes the evidence supports and what to follow up.",
+      "Preparing a forecast call, reviewing commit or upside, pipeline risk, forecast accuracy, movement between two snapshots, or a chosen set of deals.",
+      "@Sales review my team's commit for this quarter against last week's snapshot",
+      "A defined scope, an authoritative forecast source, the standard for forecast posture, the category convention and the basis for amounts. Values already set can come from the source. A default it had to infer is confirmed when it matters. Optional: a named owner, the period, focus deals, an earlier snapshot and how deep to go.",
+      "The scope reviewed, the overall posture with a roll-up by category, key movements, the deals at highest risk, recommended changes, gaps in the evidence and follow-up actions. It can cover the current state, movement, risk alone or chosen deals.",
+      "The CRM's reports, deals, forecast categories, amount fields and snapshots. Your files for pipeline exports, guidance from managers, close plans, approval trackers and conventions. Call transcripts for when the buyer means to decide and what they object to. Email for signs of engagement and for procurement. Internal messages for whatever is stuck with the team, legal or the deal desk.",
+      "Nothing at first. On request it drafts notes for a manager, text worded for the CRM, a spreadsheet layout or follow-up on a risk. A weekly review on a schedule, after approval.",
+      "Writing or sending anything takes its own explicit approval. No schedule until the user agrees.",
+      "One seller or book, a team, a period, a report, a pipeline view or chosen deals. A manager can limit it to the deals of a named owner.",
+      "A weekly rerun that only reads, for the same scope and conventions, after a check for a duplicate and the user's approval.",
+      "A pipeline export, a forecast table, a snapshot or a linked authoritative report. Anecdotes alone are not enough. It reviews risk only when the evidence cannot support a change of posture.",
+      "Team and book definitions, the reporting period, stage gates, category conventions, guidance from a manager or revenue operations, and the amount basis, such as ARR, ACV, TCV, a weighted amount or the CRM's main amount.",
+      "It claims no past movement without something to compare against and does not let chat override facts the CRM owns. It changes no category, amount, close date or record by itself.",
+      NS,
+      "lead", "Pipeline review and forecasting", "yes", "yes"),
+
+    # ------------------------------------------------------------------------------------------ coaching
+    S("get-rep-call-feedback", "coaching", "Coach a rep on their calls",
+      "Finds specific moments in a rep's calls to improve and, where comparable calls exist, shows how peers handled the same situation.",
+      "Coaching one rep or comparing a rep with peers. Also feedback on one call, motion, skill, account or topic.",
+      "@Sales give [rep] feedback on discovery calls, compared with two peers",
+      "A rep it can identify or calls you supply, evidence close to a transcript, and a coaching focus or a basis for comparison. A benchmark needs peer examples it can identify or a comparison set that has been confirmed.",
+      "A short summary, what was covered, peer examples, specific moments to improve and a sheet of lines to use on the next call. A 30-day practice plan on request. A limited version when peer or transcript evidence is weak.",
+      "Meeting transcripts for what was said on each call, or a summary of it, with the speakers, the date, a link and the moments that matter. Your files for exported calls, detailed notes, examples from a manager and coaching given before.",
+      "Nothing at first. Later options: a short note from manager to rep, or for self-coaching, drafted for review, and a coaching document to reuse.",
+      "Later documents come after review. The skill itself creates no scorecard, sends no feedback, posts nothing and saves no coaching file.",
+      "One named seller, with a bounded set of peers. A manager can name the rep and ask for coaching from manager to rep.",
+      NS,
+      "Pasted or exported material close to a transcript, or detailed call notes. When a comparison cannot be supported it gives a limited memo and names the gaps.",
+      "Earlier coaching and a manager's examples can be read. No required company method or scorecard is stated.",
+      "It does not rank reps, create formal scorecards, read personality or performance into thin evidence, or show raw connector IDs. It quotes at most 25 words from one source.",
+      NS,
+      "lead", "Coaching and enablement", "", "yes"),
+
+    S("review-rep-call-trends", "coaching", "How a rep's calls are changing",
+      "Compares a rep's older and newer calls to show what has changed in behavior that can be observed.",
+      "A manager or a rep asks what is improving, slipping or holding steady, in general or for one motion or topic.",
+      "@Sales how have [rep]'s pricing conversations changed since September?",
+      "A rep it can identify or a set of calls you supply, and a basis for comparison. Saying which way things moved needs usable older and newer calls.",
+      "What was covered, what improved, what slipped or signals risk, what stayed the same, three coaching actions for the next 2 weeks and calls to hear again. A limited version when the comparison is weak.",
+      "Meeting transcripts for summaries with dates, who took part, links and excerpts that back a point. Your files for exported transcripts, detailed summaries, calls a manager supplies and coaching history. A rubric of behaviors that comes with the plugin.",
+      "Nothing at first. Later options: the top three actions as a 2-week practice plan or a coaching note for review, and a repeat of the comparison at a later date.",
+      "The readout creates no tracker, sends no feedback, posts nothing and saves nothing. A coaching note is for review. No approval step for a later refresh is stated.",
+      "One named rep who sells or works with customers. For a manager's request it settles exactly which rep is meant.",
+      "A later refresh is named. How often it would run and by what means are not stated. Nor is anything always-on.",
+      "Older and newer calls, transcripts or substantial summaries that you supply. It limits the readout when the samples are few or uneven.",
+      "Coaching context from a manager can be used. The plugin brings its own rubric. No required company rubric is stated.",
+      "It does not call a trend from one anecdote, read personality or intent into the calls, invent outcomes, or claim improvement or decline without older and newer evidence. Excerpts normally stay within 25 words a source.",
+      "It offers a bounded comparison with peer examples.",
+      "lead", "Coaching and enablement", "named", "yes"),
+]
+BY = {s["name"]: s for s in SKILLS}
+
+# The site's 13 GTM jobs (plugins_data.GTM_JOBS), with the ChatGPT skills whose reported instructions cover each.
+# Placement is ours. The owner accepted it on November 22, 2026: deal strategy and reviews is new, and the competitive
+# brief moved to it from coaching and enablement.
+JOBS = [
+    ("Lead qualification", ["enrich-company-and-contact-data"]),
+    ("Account research and call preparation", ["prepare-for-meeting", "analyze-account-signals", "sales-company-research", "find-key-internal-sources"]),
+    ("Outreach and follow-up", ["follow-up-after-call"]),
+    ("Deal strategy and reviews", ["plan-deal-strategy", "build-competitive-brief"]),
+    ("Proposals", ["build-business-case", "sales-presentations"]),
+    ("Pipeline review and forecasting", ["review-forecast", "seller-account-dashboard", "sales-leadership-dashboard"]),
+    ("Coaching and enablement", ["get-rep-call-feedback", "review-rep-call-trends", "find-customer-quotes"]),
+]
+JOBS_NO_SKILL = ["CRM updates", "onboarding and adoption", "account planning and expansion", "renewals", "support", "daily planning"]
+OUTSIDE_JOBS = ["index", "demo-exec-and-seller-dash"]
+
+# "Works with": the manifest's 10 categories as stored, with the entries whose identifiers are plain names.
+# An identifier such as "otter-ai" is shown under its brand name, and names are in alphabetical order. The count in
+# each row is of all its entries.
+WORKS_WITH = [
+    ("Internal Messaging", 2, ["Microsoft Teams", "Slack"]),
+    ("Meeting Transcripts", 6, ["Fireflies", "Granola", "Otter.ai", "Zoom"]),
+    ("CRM", 8, ["Attio", "Close", "HubSpot", "Pipedrive", "Salesforce", "ServiceNow", "Zoho"]),
+    ("Sales Intelligence", 10, ["Actively", "Apollo", "Common Room", "HG Insights", "Meticulate", "Rox", "ZoomInfo"]),
+    ("Email", 4, ["Gmail", "Outlook Email", "Outreach"]),
+    ("Knowledge & Files", 10, ["Canva", "Figma", "Google Drive", "Notion", "SharePoint"]),
+    ("Calendar", 2, ["Google Calendar", "Outlook Calendar"]),
+    ("Scheduling", 1, ["Calendly"]),
+    ("Work Management", 1, ["Monday.com"]),
+    ("Document Signing", 3, ["DocuSign"]),
+]
+INTEGRATIONS = 46          # distinct identifiers in the manifest; one sits in two categories
+OPAQUE = 13                # identifiers that are codes, not names
+README_NAMES = 40          # brand names the plugin's README prints
+README_EXTRA = ["Agentforce Sales", "Backstory", "Clay", "Gamma", "Gong", "Highspot", "Salesloft", "Seismic", "Zoom Revenue Accelerator"]
+PAGE_APPS = ["Fireflies", "Gong", "Granola", "Otter.ai", "Slack", "Teams", "Zoom", "Zoom Revenue Accelerator"]
+PAGE_APPS_MORE = 33
+
+# The two sales plugins side by side: what can be said of each without rating either.
+SIDE = [
+    ("Built by", "Anthropic", "OpenAI"),
+    ("Version read", "2.1.0", "1.1.7"),
+    ("Skills", "36", "18: one that routes requests and 17 workflows"),
+    ("The plugin's files", "Public, under the Apache 2.0 license. Read by us", "No public copy. Reported to us by ChatGPT from an installed copy"),
+    ("Runs in", "Claude", "ChatGPT Work and Codex"),
+    ("How a skill is called", "When a request matches it, or directly by its name", "By asking @Sales. The routing skill picks the workflow"),
+    ("Tools it names", "23 servers set up in advance, in 10 categories", "46 optional integrations in 10 categories"),
+    ("Company setup", "A first-run skill, and company facts written down once", "No setup skill or company-wide settings are stated. Context is supplied to each workflow"),
+    ("On a schedule", "Seven skills are named as routines to run on a schedule", "Seven workflows describe a scheduled rerun"),
+    ("For a manager", "Nine skills can be run for a team and five for a named rep", "Five workflows can be run for a named seller"),
+    ("Who turns it on", "A person on a paid plan installs it, or an owner publishes it to the organization on a Team or Enterprise plan", "A person on any plan installs it. An admin of a Business or Enterprise workspace can install it for everyone"),
+    ("Results the provider reports", "None with a number", "One customer's estimate in the announcement"),
+    ("On this site", "A full entry, with our read of fit, overlap and value", "Every skill as ChatGPT reported it. Nothing is rated"),
+]

@@ -1,0 +1,306 @@
+{
+ "_about": "The job of each record in the register, as the owner accepted it or, where status says Proposed, as Claude proposed it. One line for each record, keyed as sources_map.json and credits.json key a record: the organization, a bar, then the first 40 characters of the finding. A new record needs a line here before the use-case index can be built. jobs_tags.py stops on a record with no line, and on a line whose record is gone. The job is one of the site's 13 GTM jobs, or one of three other values: The revenue organization as a whole, Beyond the revenue organization, Marketing (jobs to come). status is left out where the owner accepted Claude's proposal, is Change where he set the job himself and is Proposed where a record was merged before he had answered.",
+ "tags": {
+  "Klarna|About $39 million of cost savings from t": {
+   "job": "Support"
+  },
+  "Klarna|About $59 million of cost savings from t": {
+   "job": "Support"
+  },
+  "Fiserv|Agentic call center built with Sierra: a": {
+   "job": "Support"
+  },
+  "Vercel|Lead agent costs about $5,000 a year to ": {
+   "job": "Lead qualification"
+  },
+  "Fiserv|The same call center: a containment rate": {
+   "job": "Support"
+  },
+  "Salesforce|2.6 million help-site conversations in a": {
+   "job": "Support"
+  },
+  "Salesforce|Salesforce’s help agent has passed 5 mil": {
+   "job": "Support"
+  },
+  "Salesforce|SDR agent contacted 130,000 leads and cr": {
+   "job": "Lead qualification",
+   "note": "An SDR agent that contacts leads. The owner moved it here from outreach and follow-up.",
+   "status": "Change"
+  },
+  "Salesforce|Support headcount from about 9,000 to ab": {
+   "job": "Support"
+  },
+  "Klarna|2.3 million conversations in the assista": {
+   "job": "Support"
+  },
+  "Klarna|66% of chats handled in the 12 months to": {
+   "job": "Support"
+  },
+  "Klarna|80% of customer service chats handled in": {
+   "job": "Support"
+  },
+  "Fiserv|Clover risk-hold process: decision times": {
+   "job": "Beyond the revenue organization",
+   "note": "A risk process, with agents embedded."
+  },
+  "Citi|14,000 engineers use Citi’s main agentic": {
+   "job": "Beyond the revenue organization"
+  },
+  "SAP|Using AI tools for prospecting, SAP’s sa": {
+   "job": "Outreach and follow-up"
+  },
+  "SAP|SAP uses more than 40 AI tools to serve ": {
+   "job": "The revenue organization as a whole"
+  },
+  "FactSet|FactSet says its client assist agent, no": {
+   "job": "Support"
+  },
+  "Fin (formerly Intercom; part of Salesforce since September 2026)|76% average resolution rate across custo": {
+   "job": "Support"
+  },
+  "Fin (formerly Intercom; part of Salesforce since September 2026)|More than 81% of its own customer suppor": {
+   "job": "Support"
+  },
+  "HubSpot|The average resolution rate HubSpot give": {
+   "job": "Support"
+  },
+  "ServiceNow|50% of ServiceNow’s net new business com": {
+   "job": "The revenue organization as a whole"
+  },
+  "Vercel|Support agent automates 91% of support t": {
+   "job": "Support"
+  },
+  "Vercel|A later snapshot, from a talk: the suppo": {
+   "job": "Support",
+   "note": "Also gives the lead agent's cost, which belongs to lead qualification."
+  },
+  "Vercel|Lead agent lets one SDR do the work of 1": {
+   "job": "Lead qualification"
+  },
+  "Brynjolfsson, Li and Raymond (QJE)|AI assistance raised issues resolved per": {
+   "job": "Support"
+  },
+  "Tannenbaum (arXiv preprint)|In a randomized trial on 100 live websit": {
+   "job": "Lead qualification",
+   "note": "A loose fit: an agent that sells to a site's visitors."
+  },
+  "Nandi and others (arXiv preprint)|Across 13 enterprise-style procedures, c": {
+   "job": "Beyond the revenue organization",
+   "note": "Bears on orchestration, which is the site's read."
+  },
+  "Stanford Digital Economy Lab|Employment of U.S. workers aged 22 to 25": {
+   "job": "Beyond the revenue organization"
+  },
+  "Bloomberry|GTM engineering and RevOps postings, cou": {
+   "job": "The revenue organization as a whole"
+  },
+  "Instantly|3.43% average reply rate, counting all r": {
+   "job": "Outreach and follow-up"
+  },
+  "Gong|Win rates and deal length steady in 2025": {
+   "job": "The revenue organization as a whole",
+   "note": "Deal outcomes across sellers, not one job."
+  },
+  "Gong|From platform records: sellers who use A": {
+   "job": "The revenue organization as a whole",
+   "note": "Deal outcomes across sellers, not one job."
+  },
+  "Gong|Organizations with AI at the core of the": {
+   "job": "The revenue organization as a whole",
+   "note": "Deal outcomes across sellers, not one job."
+  },
+  "Klarna|AI assistant expected to drive a $40 mil": {
+   "job": "Support"
+  },
+  "Fiserv|Project Elevate savings target raised to": {
+   "job": "Beyond the revenue organization"
+  },
+  "Salesloft|All respondents use AI somewhere in the ": {
+   "job": "The revenue organization as a whole"
+  },
+  "LeanData|93% have deployed at least one AI agent;": {
+   "job": "The revenue organization as a whole"
+  },
+  "LeanData|70% say poor data quality degrades GTM e": {
+   "job": "The revenue organization as a whole"
+  },
+  "Gartner|AI saves sellers 4.8 hours a week; 72% o": {
+   "job": "The revenue organization as a whole"
+  },
+  "Gartner|Sales organizations that give sellers AI": {
+   "job": "The revenue organization as a whole"
+  },
+  "Gartner|Agents to outnumber sellers 10 to 1 by 2": {
+   "job": "The revenue organization as a whole"
+  },
+  "Gartner|CSOs who overhaul data, automation and u": {
+   "job": "The revenue organization as a whole"
+  },
+  "Gartner|45% of B2B buyers used GenAI in a recent": {
+   "job": "The revenue organization as a whole"
+  },
+  "Gartner|95% of sellers’ research workflows will ": {
+   "job": "Account research and call preparation",
+   "note": "A forecast, not a measurement."
+  },
+  "Gartner|21% of service and support leaders reduc": {
+   "job": "Support"
+  },
+  "Gartner|Half of companies that cut service staff": {
+   "job": "Support"
+  },
+  "Gartner|87% of customers say companies using Gen": {
+   "job": "Support"
+  },
+  "Gartner|13% of CIOs report significant or transf": {
+   "job": "Beyond the revenue organization"
+  },
+  "Gartner|CMOs allocate 15.3% of marketing budgets": {
+   "job": "Marketing (jobs to come)"
+  },
+  "McKinsey|60% of market-share leaders against 21% ": {
+   "job": "The revenue organization as a whole"
+  },
+  "BCG|Future-built companies, 7.5% of the samp": {
+   "job": "Beyond the revenue organization"
+  },
+  "BCG|Future-built companies had deployed 62% ": {
+   "job": "Beyond the revenue organization"
+  },
+  "BCG|Agentic AI about 40% of AI value by 2030": {
+   "job": "Beyond the revenue organization"
+  },
+  "Bain|Winners report twice the AI-attributed r": {
+   "job": "Beyond the revenue organization"
+  },
+  "Deloitte|40% of companies let AI act without huma": {
+   "job": "Beyond the revenue organization"
+  },
+  "Deloitte|71% of companies track total AI inferenc": {
+   "job": "Beyond the revenue organization"
+  },
+  "Deloitte|28% of companies report revenue gains fr": {
+   "job": "Beyond the revenue organization"
+  },
+  "Deloitte|81% say AI has sped up decisions and exe": {
+   "job": "Beyond the revenue organization"
+  },
+  "ICONIQ|At software companies building AI produc": {
+   "job": "The revenue organization as a whole"
+  },
+  "ICONIQ|Between 40% and 56% of respondents, risi": {
+   "job": "Beyond the revenue organization"
+  },
+  "ICONIQ|Over the next 12 to 24 months, 50% of re": {
+   "job": "The revenue organization as a whole"
+  },
+  "ICONIQ|Respondents put the average productivity": {
+   "job": "The revenue organization as a whole"
+  },
+  "ICONIQ|68% of respondents say the true cost of ": {
+   "job": "Beyond the revenue organization"
+  },
+  "BCG|90% of sales and revenue leaders report ": {
+   "job": "The revenue organization as a whole"
+  },
+  "BCG|Asked to rank areas of measurable AI imp": {
+   "job": "The revenue organization as a whole"
+  },
+  "BCG|Organizations with more autonomous agent": {
+   "job": "The revenue organization as a whole"
+  },
+  "BCG|81% of sales and revenue organizations h": {
+   "job": "The revenue organization as a whole"
+  },
+  "BCG|65% of revenue leaders expect headcount ": {
+   "job": "The revenue organization as a whole"
+  },
+  "JPMorgan|JPMorgan’s finance chief says the benefi": {
+   "job": "Beyond the revenue organization"
+  },
+  "Infosys|In January 2026 Infosys’s finance chief ": {
+   "job": "Beyond the revenue organization"
+  },
+  "HCLTech|HCLTech expects AI to shrink revenue on ": {
+   "job": "Beyond the revenue organization"
+  },
+  "Salesforce|Sellers spend 40% of their time selling;": {
+   "job": "The revenue organization as a whole"
+  },
+  "Salesforce|Data and analytics leaders estimate that": {
+   "job": "Beyond the revenue organization"
+  },
+  "Microsoft|43% of Frontier Professionals deliberate": {
+   "job": "Beyond the revenue organization"
+  },
+  "Microsoft|28% of managers considering hiring AI wo": {
+   "job": "Beyond the revenue organization"
+  },
+  "Highspot|28% say AI improves revenue-driving sale": {
+   "job": "The revenue organization as a whole"
+  },
+  "Seismic|56% cite poor integration with existing ": {
+   "job": "The revenue organization as a whole"
+  },
+  "Apollo|6% of sales and marketing leaders, as Ap": {
+   "job": "The revenue organization as a whole"
+  },
+  "Klarna|CEO said cost had weighed too heavily an": {
+   "job": "Support"
+  },
+  "Shopify|Teams must show why AI cannot do the wor": {
+   "job": "Beyond the revenue organization"
+  },
+  "Zapier|AI fluency required of every new hire, a": {
+   "job": "Beyond the revenue organization"
+  },
+  "ChurnZero|81% of customer success leaders say AI r": {
+   "job": "Renewals",
+   "note": "About customer success leaders, with net revenue retention."
+  },
+  "HubSpot|Free trials of its AI agents and pricing": {
+   "job": "The revenue organization as a whole"
+  },
+  "Fiserv|One Fiserv transformation program expens": {
+   "job": "Beyond the revenue organization"
+  },
+  "HubSpot|Net revenue retention was 103% in Q3 202": {
+   "job": "Renewals"
+  },
+  "Carta|In Q3 2026, 57.7% of fund managers on Ca": {
+   "job": "Beyond the revenue organization",
+   "note": "The record is graded Not used."
+  },
+  "Lowe’s|Lowe’s says online customers who use its": {
+   "job": "The revenue organization as a whole",
+   "note": "Consumer retail, outside B2B: shoppers who use an AI assistant against those who do not. The owner moved it here from lead qualification.",
+   "status": "Change"
+  },
+  "Walmart|Walmart says customers and members who u": {
+   "job": "The revenue organization as a whole",
+   "note": "Consumer retail, as for the Lowe's record. The owner moved it here from lead qualification.",
+   "status": "Change"
+  },
+  "Fin (formerly Intercom; part of Salesforce since September 2026)|Fin says it takes part in half of incomi": {
+   "job": "Support"
+  },
+  "Microsoft|Microsoft says an internal study of its ": {
+   "job": "The revenue organization as a whole",
+   "note": "Names three jobs at once: account planning, call preparation and proposals."
+  },
+  "Richardson|Richardson reports that 62% of sales lea": {
+   "job": "The revenue organization as a whole"
+  },
+  "SnapLogic|SnapLogic reports that 54% of the IT dec": {
+   "job": "Beyond the revenue organization",
+   "note": "IT decision-makers, on agentic AI projects in general."
+  },
+  "Gartner|91% of C-level executives expect AI to p": {
+   "job": "Marketing (jobs to come)"
+  },
+  "Zendesk|Zendesk reports that 81% of the business": {
+   "job": "Support",
+   "note": "Leaders in customer experience, IT and contact centers, and consumers."
+  }
+ }
+}

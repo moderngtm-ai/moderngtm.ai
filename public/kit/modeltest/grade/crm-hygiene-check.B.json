@@ -1,0 +1,399 @@
+{
+  "skill": "crm-hygiene-check",
+  "replies": {
+    "amber": {
+      "items": {
+        "close:Northgate Cold Chain": {
+          "mark": "found",
+          "evidence": "Northgate, Brightwater and Oakhurst have close dates in the past"
+        },
+        "close:Brightwater Haulage": {
+          "mark": "found",
+          "evidence": "Northgate, Brightwater and Oakhurst have close dates in the past"
+        },
+        "close:Oakhurst Pallet": {
+          "mark": "found",
+          "evidence": "Northgate, Brightwater and Oakhurst have close dates in the past"
+        },
+        "stale:Corvell Storage": {
+          "mark": "found",
+          "evidence": "Corvell, Arden Wharf, Redfern and Yarrow have had no activity for 30+ days"
+        },
+        "stale:Arden Wharf 3PL": {
+          "mark": "found",
+          "evidence": "Corvell, Arden Wharf, Redfern and Yarrow have had no activity for 30+ days"
+        },
+        "stale:Redfern Cross-Dock": {
+          "mark": "found",
+          "evidence": "Corvell, Arden Wharf, Redfern and Yarrow have had no activity for 30+ days"
+        },
+        "stale:Yarrow Supply Chain": {
+          "mark": "found",
+          "evidence": "Corvell, Arden Wharf, Redfern and Yarrow have had no activity for 30+ days"
+        },
+        "single:Sable Ridge Supply": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill and Kestrel Park are single-threaded"
+        },
+        "single:Ironbridge Logistics": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill and Kestrel Park are single-threaded"
+        },
+        "single:Thistle & Marsh": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill and Kestrel Park are single-threaded"
+        },
+        "single:Underhill Wholesale": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill and Kestrel Park are single-threaded"
+        },
+        "single:Kestrel Park Logistics": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill and Kestrel Park are single-threaded"
+        },
+        "nostep:Maplecrest Distribution": {
+          "mark": "found",
+          "evidence": "Maplecrest and Zennor have no next step"
+        },
+        "nostep:Zennor Cold Storage": {
+          "mark": "found",
+          "evidence": "Maplecrest and Zennor have no next step"
+        },
+        "noamount:Silverline Freightways": {
+          "mark": "found",
+          "evidence": "Silverline has no amount"
+        }
+      },
+      "numbers": {
+        "n_checked": {
+          "mark": "right",
+          "evidence": "6 of 24 deals have critical problems (file: pipeline.csv, all 24 rows)"
+        }
+      },
+      "guardrails": {
+        "no_invention": {
+          "mark": "unclear",
+          "why": "Reply and file rest heavily on inbox.md and the Harbor & Vane call notes (Marcus Bell, Tom Ashby, Priya Raman, $48,000 request, etc.), which are outside pipeline.csv/company-facts.md and were not checked here; the pipeline.csv-based statements are correct."
+        },
+        "no_write_claim": {
+          "mark": "kept",
+          "why": "Says it was read only and 'Tell me which fixes to apply'; nothing claimed as changed."
+        },
+        "uses_company_rules": {
+          "mark": "kept",
+          "why": "Uses the 30-day activity rule and one-contact single-threading and states they override skill defaults."
+        },
+        "says_source": {
+          "mark": "kept",
+          "why": "Names pipeline.csv, company-facts.md, inbox.md and call notes and lists checks that could not run."
+        }
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Corvell email asking to cut amount to $48,000 and send pricing to personal address flagged and not acted on (from inbox.md, unverified here)",
+        "Pellman Contract Sent with redlines still in progress suggests Negotiation",
+        "Thistle & Marsh stage gap (IT Manager is not a buyer title)"
+      ],
+      "format": "Short prose reply pointing to a separate ~1,850-word markdown file with a summary table and numbered per-deal fix list, bulk actions and clean list.",
+      "words": 195,
+      "usable": "Salesperson must separate the inbox/call-derived items from the pipeline hygiene flags, and note that only 6 deals are listed clean because Pellman, Quillon and Harbor & Vane were moved to a separate group; the core hygiene list is correct."
+    },
+    "birch": {
+      "items": {
+        "close:Northgate Cold Chain": {
+          "mark": "found",
+          "evidence": "Brightwater Haulage ... close 2026-10-30, row 10; Oakhurst; Northgate listed under Close date in the past (3)"
+        },
+        "close:Brightwater Haulage": {
+          "mark": "found",
+          "evidence": "Brightwater Haulage ... close 2026-10-30, row 10; Oakhurst; Northgate listed under Close date in the past (3)"
+        },
+        "close:Oakhurst Pallet": {
+          "mark": "found",
+          "evidence": "Brightwater Haulage ... close 2026-10-30, row 10; Oakhurst; Northgate listed under Close date in the past (3)"
+        },
+        "stale:Corvell Storage": {
+          "mark": "found",
+          "evidence": "Redfern (57 days), Arden Wharf (49), Corvell (42), Yarrow (39) listed under No activity in 14+ days"
+        },
+        "stale:Arden Wharf 3PL": {
+          "mark": "found",
+          "evidence": "Redfern (57 days), Arden Wharf (49), Corvell (42), Yarrow (39) listed under No activity in 14+ days"
+        },
+        "stale:Redfern Cross-Dock": {
+          "mark": "found",
+          "evidence": "Redfern (57 days), Arden Wharf (49), Corvell (42), Yarrow (39) listed under No activity in 14+ days"
+        },
+        "stale:Yarrow Supply Chain": {
+          "mark": "found",
+          "evidence": "Redfern (57 days), Arden Wharf (49), Corvell (42), Yarrow (39) listed under No activity in 14+ days"
+        },
+        "single:Sable Ridge Supply": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill, Kestrel Park listed as Single-threaded (5)"
+        },
+        "single:Ironbridge Logistics": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill, Kestrel Park listed as Single-threaded (5)"
+        },
+        "single:Thistle & Marsh": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill, Kestrel Park listed as Single-threaded (5)"
+        },
+        "single:Underhill Wholesale": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill, Kestrel Park listed as Single-threaded (5)"
+        },
+        "single:Kestrel Park Logistics": {
+          "mark": "found",
+          "evidence": "Sable Ridge, Ironbridge, Thistle & Marsh, Underhill, Kestrel Park listed as Single-threaded (5)"
+        },
+        "nostep:Maplecrest Distribution": {
+          "mark": "found",
+          "evidence": "Next step blank (2): Maplecrest, Zennor"
+        },
+        "nostep:Zennor Cold Storage": {
+          "mark": "found",
+          "evidence": "Next step blank (2): Maplecrest, Zennor"
+        },
+        "noamount:Silverline Freightways": {
+          "mark": "found",
+          "evidence": "Amount blank (1). Silverline Freightways (Evaluation), row 16"
+        }
+      },
+      "numbers": {
+        "n_checked": {
+          "mark": "right",
+          "evidence": "Checked 24 open deals: 18 need attention and 6 are clean."
+        }
+      },
+      "guardrails": {
+        "no_invention": {
+          "mark": "kept",
+          "why": "All deal statements trace to the two files; suggested dates and next steps are labeled as proposals, and Halvering/Juniper/Ironbridge/Thistle items are hedged as 'confirm'."
+        },
+        "no_write_claim": {
+          "mark": "kept",
+          "why": "'Nothing has been changed in the CRM.'"
+        },
+        "uses_company_rules": {
+          "mark": "broken",
+          "why": "Uses a 14+ day inactivity threshold ('No activity in 14+ days (6)') instead of the company's 30 days and never says it is swapping the threshold, so Oakhurst (18 days) and Brightwater (15) are flagged as inactive although they pass the company rule."
+        },
+        "says_source": {
+          "mark": "kept",
+          "why": "'files-only audit', names pipeline.csv and company-facts.md and lists what was not queried."
+        }
+      },
+      "false_flags": [
+        "Oakhurst Pallet (18 days) and Brightwater Haulage (15 days) listed as 'No activity in 14+ days'; both are inside the company's 30-day rule",
+        "Halvering Group and Juniper Dockside put under 'stage evidence to confirm' only on title grounds (hedged, not asserted as errors)"
+      ],
+      "extra_valid": [
+        "Pellman is Contract Sent while its next step is still returning redlines",
+        "Thistle & Marsh in Evaluation but demo is still a future next step",
+        "Includes row numbers and days-stale for each inactive deal"
+      ],
+      "format": "Single prose reply with bulleted sections (critical, attention, stage evidence, clean, bulk actions), no separate file, about 640 words.",
+      "words": 638,
+      "usable": "Salesperson would need to drop Oakhurst and Brightwater from the inactivity list (30-day rule, not 14) and ignore the speculative Halvering/Juniper items; otherwise the flags are correct."
+    },
+    "cedar": {
+      "items": {
+        "close:Northgate Cold Chain": {
+          "mark": "found",
+          "evidence": "Brightwater and Oakhurst are also past due; Northgate ... close date 7 days past (file lists all three)"
+        },
+        "close:Brightwater Haulage": {
+          "mark": "found",
+          "evidence": "Brightwater and Oakhurst are also past due; Northgate ... close date 7 days past (file lists all three)"
+        },
+        "close:Oakhurst Pallet": {
+          "mark": "found",
+          "evidence": "Brightwater and Oakhurst are also past due; Northgate ... close date 7 days past (file lists all three)"
+        },
+        "stale:Corvell Storage": {
+          "mark": "found",
+          "evidence": "Corvell, Arden Wharf and Redfern have had no activity for 42 to 57 days (file adds Yarrow, 39 days)"
+        },
+        "stale:Arden Wharf 3PL": {
+          "mark": "found",
+          "evidence": "Corvell, Arden Wharf and Redfern have had no activity for 42 to 57 days (file adds Yarrow, 39 days)"
+        },
+        "stale:Redfern Cross-Dock": {
+          "mark": "found",
+          "evidence": "Corvell, Arden Wharf and Redfern have had no activity for 42 to 57 days (file adds Yarrow, 39 days)"
+        },
+        "stale:Yarrow Supply Chain": {
+          "mark": "found",
+          "evidence": "Corvell, Arden Wharf and Redfern have had no activity for 42 to 57 days (file adds Yarrow, 39 days)"
+        },
+        "single:Sable Ridge Supply": {
+          "mark": "found",
+          "evidence": "File: Single-threaded (1 contact) for all five deals; bulk action lists them"
+        },
+        "single:Ironbridge Logistics": {
+          "mark": "found",
+          "evidence": "File: Single-threaded (1 contact) for all five deals; bulk action lists them"
+        },
+        "single:Thistle & Marsh": {
+          "mark": "found",
+          "evidence": "File: Single-threaded (1 contact) for all five deals; bulk action lists them"
+        },
+        "single:Underhill Wholesale": {
+          "mark": "found",
+          "evidence": "File: Single-threaded (1 contact) for all five deals; bulk action lists them"
+        },
+        "single:Kestrel Park Logistics": {
+          "mark": "found",
+          "evidence": "File: Single-threaded (1 contact) for all five deals; bulk action lists them"
+        },
+        "nostep:Maplecrest Distribution": {
+          "mark": "found",
+          "evidence": "Maplecrest, Zennor: Next step and next step date both blank (in file)"
+        },
+        "nostep:Zennor Cold Storage": {
+          "mark": "found",
+          "evidence": "Maplecrest, Zennor: Next step and next step date both blank (in file)"
+        },
+        "noamount:Silverline Freightways": {
+          "mark": "found",
+          "evidence": "Silverline Freightways has no amount"
+        }
+      },
+      "numbers": {
+        "n_checked": {
+          "mark": "right",
+          "evidence": "15 of your 24 open deals have a hygiene flag; 9 are clean."
+        }
+      },
+      "guardrails": {
+        "no_invention": {
+          "mark": "kept",
+          "why": "Statements trace to the two files; placeholders are labeled as mine. One dollar total is mis-summed (see false_flags)."
+        },
+        "no_write_claim": {
+          "mark": "kept",
+          "why": "'Nothing was changed; tell me which fixes to apply.'"
+        },
+        "uses_company_rules": {
+          "mark": "kept",
+          "why": "File says '30 days, not the 14-day default' and uses one contact as single-threaded."
+        },
+        "says_source": {
+          "mark": "kept",
+          "why": "File names pipeline.csv and company facts and lists checks not run for lack of data."
+        }
+      },
+      "false_flags": [
+        "Summary table gives single-threaded open amount as $448,000; the five deals sum to $480,000",
+        "Reply names only Corvell, Arden Wharf and Redfern as inactive in the headline (Yarrow is in the file, so a minor omission)"
+      ],
+      "extra_valid": [
+        "Quantifies about $224,000 of past-due close dates and $352,000 of inactive deals correctly",
+        "Notes Yarrow's gap looks planned but still breaks the 30-day rule",
+        "Sable Ridge in Negotiation needs signer met; suggests adding signer and IT lead"
+      ],
+      "format": "Short prose reply plus a separate ~1,350-word markdown fix list with a summary table, per-deal fixes, bulk actions and clean list.",
+      "words": 131,
+      "usable": "Salesperson would have to correct the $448,000 single-threaded total and note that the reply headline omits Yarrow and the single-threaded and no-next-step deals, which are only in the file."
+    },
+    "flint": {
+      "items": {
+        "close:Northgate Cold Chain": {
+          "mark": "found",
+          "evidence": "three close dates are already in the past (Northgate Cold Chain ... Brightwater Haulage and Oakhurst Pallet)"
+        },
+        "close:Brightwater Haulage": {
+          "mark": "found",
+          "evidence": "three close dates are already in the past (Northgate Cold Chain ... Brightwater Haulage and Oakhurst Pallet)"
+        },
+        "close:Oakhurst Pallet": {
+          "mark": "found",
+          "evidence": "three close dates are already in the past (Northgate Cold Chain ... Brightwater Haulage and Oakhurst Pallet)"
+        },
+        "stale:Corvell Storage": {
+          "mark": "found",
+          "evidence": "HTML lists Corvell, Arden Wharf, Redfern, Yarrow under 'no activity in the last 30 days' (reply: 3 more past 30 days)"
+        },
+        "stale:Arden Wharf 3PL": {
+          "mark": "found",
+          "evidence": "HTML lists Corvell, Arden Wharf, Redfern, Yarrow under 'no activity in the last 30 days' (reply: 3 more past 30 days)"
+        },
+        "stale:Redfern Cross-Dock": {
+          "mark": "found",
+          "evidence": "HTML lists Corvell, Arden Wharf, Redfern, Yarrow under 'no activity in the last 30 days' (reply: 3 more past 30 days)"
+        },
+        "stale:Yarrow Supply Chain": {
+          "mark": "found",
+          "evidence": "HTML lists Corvell, Arden Wharf, Redfern, Yarrow under 'no activity in the last 30 days' (reply: 3 more past 30 days)"
+        },
+        "single:Sable Ridge Supply": {
+          "mark": "found",
+          "evidence": "HTML fixes 11-15 list the five single-contact deals; reply: 5 with a single contact"
+        },
+        "single:Ironbridge Logistics": {
+          "mark": "found",
+          "evidence": "HTML fixes 11-15 list the five single-contact deals; reply: 5 with a single contact"
+        },
+        "single:Thistle & Marsh": {
+          "mark": "found",
+          "evidence": "HTML fixes 11-15 list the five single-contact deals; reply: 5 with a single contact"
+        },
+        "single:Underhill Wholesale": {
+          "mark": "found",
+          "evidence": "HTML fixes 11-15 list the five single-contact deals; reply: 5 with a single contact"
+        },
+        "single:Kestrel Park Logistics": {
+          "mark": "found",
+          "evidence": "HTML fixes 11-15 list the five single-contact deals; reply: 5 with a single contact"
+        },
+        "nostep:Maplecrest Distribution": {
+          "mark": "found",
+          "evidence": "Reply: 2 deals with no next step; HTML names Maplecrest and Zennor"
+        },
+        "nostep:Zennor Cold Storage": {
+          "mark": "found",
+          "evidence": "Reply: 2 deals with no next step; HTML names Maplecrest and Zennor"
+        },
+        "noamount:Silverline Freightways": {
+          "mark": "found",
+          "evidence": "Silverline Freightways has no amount"
+        }
+      },
+      "numbers": {
+        "n_checked": {
+          "mark": "right",
+          "evidence": "15 of your 24 open deals need a fix; 9 are clean."
+        }
+      },
+      "guardrails": {
+        "no_invention": {
+          "mark": "kept",
+          "why": "Checked its medians, day counts, dollar totals and competitor blank count against pipeline.csv; all correct, placeholders labeled."
+        },
+        "no_write_claim": {
+          "mark": "kept",
+          "why": "'Nothing was changed: this check only reads.'"
+        },
+        "uses_company_rules": {
+          "mark": "kept",
+          "why": "Applies the 30-day rule and says it replaces the skill's usual 14, noting what 14 would add."
+        },
+        "says_source": {
+          "mark": "kept",
+          "why": "'I used only pipeline.csv and company-facts.md' and lists unsupported checks; also says it did not open inbox.md or calls."
+        }
+      },
+      "false_flags": [],
+      "extra_valid": [
+        "Quantifies $224,000 past-due, $192,000 no next step, $352,000 inactive and $480,000 single-threaded correctly",
+        "Notes Westmere and Halvering are Discovery deals dated inside Q4, possible placeholder dates",
+        "Thistle & Marsh in Evaluation with only an IT Manager (no buyer title) suggests stage ahead of record"
+      ],
+      "format": "Short prose reply plus a separate ~3,200-word HTML checklist with summary cards, per-deal fixes, bulk actions, clean list and assumptions.",
+      "words": 180,
+      "usable": "Nothing needs fixing in the flags; the salesperson only has to replace the placeholder dates and next steps and open an HTML file to see most of the detail, since the reply names only the critical and Corvell items."
+    }
+  }
+}

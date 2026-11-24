@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+"""Take the shared base out of the Modern GTM site's stylesheet, unchanged, so this entry carries the site's own
+tokens, type, masthead, openers, buttons, tables and footer.
+
+    python3 extract_base.py src/site_style.css base.css
+
+Rules are chosen by selector. Everything that belongs to a part this entry does not have (the score figure, the
+evidence register, the tools) is left behind. Change the site first, then run this again.
+"""
+import re
+import sys
+
+KEEP = re.compile(r"""^(
+ :root|\*|html|body|::selection|a$|a:hover|:focus-visible|:is\(\.mast|\.js\ \[data-view\]|h1|h2|h3|h4|p$|ul,ol|li$|figure|
+ \.wrap|\.skip|\.lede|\.read|\.note|\.meta|\.go$|\.scroll|\.mast|\.wm\b|\.nav|\.asof|\.open$|\.open\ (h1|\.lede|\.sub|a|\.btn)|\.subnav|\.acts|\.btn|
+ \.sec|\.g2|\.g57|\.g75|\.mt$|\.hl$|\.tag$|\.def|table|th$|td$|td:first-child|input,textarea,select|\.toc|\.tocm|\.rep$|\.art|
+ \.princ|\.log|\.wk\b|\.chk|\.tbar|\.chips|\.warn|pre$|\.foot|\.wmx|\.fcols|\.fnav|\.fine|\.stack|\.mk
+)""", re.X)
+DROP = re.compile(r"\.(phases?|gate|weak|figs4|mres|res)\b")
+
+
+def take(block):
+    got = []
+    for m in re.finditer(r"([^{}]+)\{([^{}]*)\}", block):
+        # a selector list that mixes kept and dropped parts keeps only the parts this entry has
+        sel = ",".join(x for x in m.group(1).strip().split(",") if not DROP.search(x))
+        if sel and KEEP.match(sel):
+            got.append(sel + "{" + m.group(2).strip() + "}")
+    return got
+
+
+def main(src, dst):
+    css = re.sub(r"/\*.*?\*/", "", open(src, encoding="utf-8").read(), flags=re.S)
+    out, pos = [], 0
+    for m in re.finditer(r"@(?:media|supports)[^{]*\{((?:[^{}]*\{[^{}]*\})*)\}|@keyframes[^{]*\{(?:[^{}]*\{[^{}]*\})*\}", css):
+        out.extend(take(css[pos:m.start()]))
+        if not m.group(0).startswith("@keyframes"):
+            inner = take(m.group(1))
+            if inner:
+                out.append(m.group(0)[:m.group(0).index("{")] + "{" + "".join(inner) + "}")
+        pos = m.end()
+    out.extend(take(css[pos:]))
+    head = ("/* Base: taken unchanged from the Modern GTM site's stylesheet (its kit/style.css), so this entry shares the\n"
+            "   site's tokens, type, masthead, openers, buttons, tables and footer. Change the site first, then re-extract. */\n")
+    open(dst, "w", encoding="utf-8").write(head + "\n".join(out) + "\n")
+    print(len(out), "rules,", sum(len(r) for r in out), "bytes")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1], sys.argv[2])

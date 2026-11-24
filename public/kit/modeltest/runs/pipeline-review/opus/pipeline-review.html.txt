@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Pipeline review - Dana Okafor - Q4 2026</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:1100px;margin:24px auto;padding:0 16px;color:#1f2328;line-height:1.45}
+h1{font-size:22px;margin-bottom:2px}h2{font-size:17px;margin-top:28px;border-bottom:1px solid #d0d7de;padding-bottom:4px}
+.sub{color:#57606a;font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:14px}
+.tile{border:1px solid #d0d7de;border-radius:8px;padding:10px 12px}.tile b{display:block;font-size:20px}.tile span{font-size:12px;color:#57606a}
+.warn b{color:#b35900}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}th,td{border-bottom:1px solid #eaeef2;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f6f8fa}
+td.n{text-align:right;white-space:nowrap}.src{color:#57606a;font-size:12px;white-space:nowrap}
+.flag{display:inline-block;background:#fff1e5;color:#8a4600;border-radius:4px;padding:0 5px;margin:1px 2px 1px 0;font-size:12px}
+ul{padding-left:20px}li{margin:4px 0}.note{font-size:12px;color:#57606a}
+</style></head><body>
+<h1>Pipeline review: Dana Okafor, Q4 2026</h1>
+<div class="sub">Scope: deals owned by Dana Okafor (all 24 rows). Period: Q4 2026, close date on or before Dec 31, 2026. Today used: Friday, Nov 20, 2026 (matches the export; latest activity in it is Nov 19).<br>
+Sources: From pipeline.csv (CRM export, this morning), 24 open deals; From company-facts.md (quota, stages, forecast categories, hygiene rules). No CRM, email or calendar connected: links below point to the export row, not a CRM record.</div>
+
+<h2>Summary</h2>
+<div class="tiles">
+<div class="tile"><b>24 deals / $2,144,000</b><span>All open deals (1 deal, Silverline, has a blank amount)</span></div>
+<div class="tile"><b>14 deals / $1,216,000</b><span>Closing in Q4 (on or before Dec 31)</span></div>
+<div class="tile"><b>$290,000</b><span>Gap to quota: $600,000 quota minus $310,000 closed won</span></div>
+<div class="tile"><b>$870,000</b><span>Coverage target: 3x the remaining gap</span></div>
+<div class="tile warn"><b>$585,600 = 2.0x</b><span>Q4 weighted pipeline vs the gap: under the 3x bar (weights are an assumption, see notes)</span></div>
+<div class="tile"><b>4.2x</b><span>Q4 unweighted pipeline vs the gap ($1,216,000 / $290,000)</span></div>
+<div class="tile"><b>$288,000 / $608,000 / $320,000</b><span>Q4 Commit / Best case / Pipeline, by your forecast categories</span></div>
+<div class="tile warn"><b>15 deals / $1,248,000</b><span>At risk (one or more flags), plus Silverline with no amount. In Q4: 9 deals / $672,000</span></div>
+</div>
+<p class="note">Totals from pipeline.csv, all rows. Commit is Contract Sent, Best case is Proposal or Negotiation, Pipeline is Discovery or Evaluation (company-facts.md).</p>
+
+<h2>By stage</h2>
+<table><tr><th>Stage</th><th class="n">Deals</th><th class="n">Amount</th><th class="n">Of which Q4</th><th class="n">Avg age in stage</th><th class="n">Avg days since last activity</th><th class="n">No activity 14+ days</th><th class="n">No activity 30+ days</th><th class="n">Blank next step</th></tr>
+<tr><td>Contract Sent</td><td class="n">3</td><td class="n">$288,000</td><td class="n">$288,000</td><td class="n">not in export</td><td class="n">17.3</td><td class="n">1</td><td class="n">1</td><td class="n">0</td></tr>
+<tr><td>Negotiation</td><td class="n">4</td><td class="n">$448,000</td><td class="n">$320,000</td><td class="n">not in export</td><td class="n">15.8</td><td class="n">1</td><td class="n">1</td><td class="n">0</td></tr>
+<tr><td>Proposal</td><td class="n">5</td><td class="n">$448,000</td><td class="n">$288,000</td><td class="n">not in export</td><td class="n">7.4</td><td class="n">1</td><td class="n">0</td><td class="n">1</td></tr>
+<tr><td>Evaluation</td><td class="n">6</td><td class="n">$448,000 (1 blank)</td><td class="n">$160,000 (1 blank)</td><td class="n">not in export</td><td class="n">17.0</td><td class="n">2</td><td class="n">1</td><td class="n">0</td></tr>
+<tr><td>Discovery</td><td class="n">6</td><td class="n">$512,000</td><td class="n">$160,000</td><td class="n">not in export</td><td class="n">9.3</td><td class="n">1</td><td class="n">1</td><td class="n">1</td></tr>
+</table>
+<p class="note">From pipeline.csv, all rows. The export has no created date or stage-entry date, so age in stage and the "stuck" flag cannot be computed; days since last activity is shown instead.</p>
+
+<h2>At-risk deals</h2>
+<p class="note">Flags: Past close date; Stale = no activity in 30+ days (your hygiene rule; 14 to 29 days shown as "Quiet"); Blank next step; Blank amount; Single-threaded = one contact (your rule); Stage criteria = the deal record does not show what your exit criteria need. Sorted by Q4 first, then amount.</p>
+<table><tr><th>Account</th><th>Stage</th><th class="n">Amount</th><th>Close</th><th>Flags and evidence (as read)</th><th>Suggested action</th><th>Source</th></tr>
+<tr><td>Maplecrest Distribution</td><td>Proposal</td><td class="n">$128,000</td><td>2026-12-29</td><td><span class="flag">Blank next step</span> Next step: blank; Next step date: blank. Last activity 2026-11-13.</td><td>Set a dated next step that gets the signer named (Proposal exit), and confirm the Dec 29 close is real.</td><td class="src">From pipeline.csv, row 11</td></tr>
+<tr><td>Northgate Cold Chain</td><td>Contract Sent</td><td class="n">$96,000</td><td>2026-11-13</td><td><span class="flag">Past close date</span> Close 2026-11-13, 7 days ago. Next step "Chase signature with the signer", 2026-11-24.</td><td>Get a signing date from the signer on the Nov 24 chase, then move the close date to it.</td><td class="src">From pipeline.csv, row 3</td></tr>
+<tr><td>Arden Wharf 3PL</td><td>Negotiation</td><td class="n">$96,000</td><td>2026-12-15</td><td><span class="flag">Stale</span> Last activity 2026-10-02 (49 days). Next step "Send revised terms", 2026-11-25.</td><td>Send the revised terms now rather than Nov 25 and log the touch; re-test the Dec 15 close.</td><td class="src">From pipeline.csv, row 6</td></tr>
+<tr><td>Redfern Cross-Dock</td><td>Evaluation</td><td class="n">$96,000</td><td>2026-12-30</td><td><span class="flag">Stale</span> Last activity 2026-09-24 (57 days). Next step "Technical deep dive", 2026-12-01.</td><td>Re-engage this week; an Evaluation deal silent for 8 weeks is unlikely to close by Dec 30. Consider moving it to Q1.</td><td class="src">From pipeline.csv, row 15</td></tr>
+<tr><td>Corvell Storage</td><td>Contract Sent</td><td class="n">$64,000</td><td>2026-12-11</td><td><span class="flag">Stale</span> Last activity 2026-10-09 (42 days) while final paper is out. Competitor field: Slotwise.</td><td>Call the signer before the Nov 27 "Confirm signing date"; this is Commit money gone quiet.</td><td class="src">From pipeline.csv, row 4</td></tr>
+<tr><td>Brightwater Haulage</td><td>Proposal</td><td class="n">$64,000</td><td>2026-10-30</td><td><span class="flag">Past close date</span> <span class="flag">Quiet</span> Close 2026-10-30 (21 days ago). Last activity 2026-11-05 (15 days).</td><td>Use the Nov 26 follow-up to agree a new close date; update the record.</td><td class="src">From pipeline.csv, row 10</td></tr>
+<tr><td>Oakhurst Pallet</td><td>Evaluation</td><td class="n">$64,000</td><td>2026-11-06</td><td><span class="flag">Past close date</span> <span class="flag">Quiet</span> Close 2026-11-06 (14 days ago). Last activity 2026-11-02 (18 days). Next step "Second demo for the night shift lead", 2026-11-25.</td><td>Reset the close date after the Nov 25 demo; confirm a technical owner is named (Evaluation exit).</td><td class="src">From pipeline.csv, row 14</td></tr>
+<tr><td>Sable Ridge Supply</td><td>Negotiation</td><td class="n">$64,000</td><td>2026-12-22</td><td><span class="flag">Single-threaded</span> <span class="flag">Stage criteria</span> Contacts on the deal: 1 (Director of Operations). Negotiation needs the signer met; security review still open ("Security review with their IT lead", 2026-11-30).</td><td>Add the IT lead and the signer as contacts; confirm the signer has been met.</td><td class="src">From pipeline.csv, row 7</td></tr>
+<tr><td>Silverline Freightways</td><td>Evaluation</td><td class="n">blank</td><td>2026-12-19</td><td><span class="flag">Blank amount</span> Amount: blank. Next step "Scope the number of sites", 2026-11-27.</td><td>Enter an amount after scoping sites (list price is $32,000 per site per year).</td><td class="src">From pipeline.csv, row 16</td></tr>
+<tr><td>Thistle &amp; Marsh</td><td>Evaluation</td><td class="n">$128,000</td><td>2027-02-26</td><td><span class="flag">Single-threaded</span> <span class="flag">Stage criteria</span> 1 contact, title IT Manager (not a buyer title, which Discovery exit requires).</td><td>Get a VP/Director of Operations, Head of Warehousing or COO onto the deal.</td><td class="src">From pipeline.csv, row 17</td></tr>
+<tr><td>Kestrel Park Logistics</td><td>Discovery</td><td class="n">$128,000</td><td>2027-03-12</td><td><span class="flag">Single-threaded</span> 1 contact (Head of Fulfillment).</td><td>Use the Dec 2 site-mapping session to add a second contact.</td><td class="src">From pipeline.csv, row 23</td></tr>
+<tr><td>Ironbridge Logistics</td><td>Proposal</td><td class="n">$96,000</td><td>2027-02-12</td><td><span class="flag">Single-threaded</span> 1 contact (Director of Operations). Next step "Present to the signer", 2026-12-08.</td><td>Add the signer as a contact before Dec 8.</td><td class="src">From pipeline.csv, row 12</td></tr>
+<tr><td>Yarrow Supply Chain</td><td>Discovery</td><td class="n">$96,000</td><td>2027-01-30</td><td><span class="flag">Stale</span> Last activity 2026-10-12 (39 days). Next step "Reconnect after their peak season", 2026-12-07.</td><td>Log a light touch so it meets the 30-day rule, or park it until the Dec 7 reconnect.</td><td class="src">From pipeline.csv, row 21</td></tr>
+<tr><td>Underhill Wholesale</td><td>Evaluation</td><td class="n">$64,000</td><td>2027-01-15</td><td><span class="flag">Single-threaded</span> 1 contact (Director of Operations). Competitor field: Slotwise.</td><td>Name and add the technical owner (Evaluation exit) with the Nov 24 integration overview.</td><td class="src">From pipeline.csv, row 18</td></tr>
+<tr><td>Zennor Cold Storage</td><td>Discovery</td><td class="n">$64,000</td><td>2027-02-19</td><td><span class="flag">Blank next step</span> Next step: blank; Next step date: blank.</td><td>Book the next meeting (Discovery exit) and record it.</td><td class="src">From pipeline.csv, row 22</td></tr>
+</table>
+<p class="note">Also worth a look, not flagged: Halvering Group (Discovery, $96,000, close 2026-12-16, main contact Procurement Lead, row 25) and Westmere Depot (Discovery, $64,000, close 2026-12-23, row 20) are early-stage deals with Q4 close dates; four stages in about four weeks is a stretch. Unflagged deals: Pellman, Quillon, Tamarind, Harbor &amp; Vane, Fennick &amp; Lowe, Vantage Row, Juniper Dockside (rows 2, 5, 8, 9, 13, 19, 24).</p>
+
+<h2>Conversion signal</h2>
+<p>Not available: the export holds open deals only, so stage-to-stage rates, win rate and median cycle cannot be computed. An export of the last two quarters of closed deals (won and lost, with created and close dates) would fill this in.</p>
+
+<h2>Recommended focus</h2>
+<ul>
+<li><b>Protect Commit.</b> Commit is $288,000 against a $290,000 gap, so closing all three Contract Sent deals gets you to $598,000, $2,000 short of quota. Two of the three have problems: Northgate's close date passed on Nov 13 (row 3) and Corvell has been silent for 42 days (row 4). From pipeline.csv.</li>
+<li><b>Highest-dollar Q4 at-risk deal: Maplecrest Distribution, $128,000.</b> It has no next step and closes Dec 29. Set a dated next step aimed at naming the signer. From pipeline.csv, row 11.</li>
+<li><b>Stage with the most flags: Evaluation</b> (5 of 6 deals: Oakhurst, Redfern, Silverline, Thistle &amp; Marsh, Underhill). Common gaps are a missing technical owner or buyer title and stale activity. "Stuck" (time in stage) cannot be measured from this export. From pipeline.csv.</li>
+<li><b>Coverage gap.</b> Weighted Q4 pipeline is 2.0x the gap, under the 3x bar; you need about $284,400 more weighted pipeline in Q4. Best case (Quillon $160,000, Arden Wharf $96,000, Sable Ridge $64,000, Harbor &amp; Vane $96,000, Maplecrest $128,000, Brightwater $64,000) is where the slack is: pick one or two to pull firmly forward as cover for Commit.</li>
+<li><b>Hygiene fixes</b> (Arden Wharf, Redfern, Corvell, Yarrow stale; Maplecrest, Zennor no next step; Silverline no amount; three past close dates) go through update-opportunity once your CRM is connected. This review only reads.</li>
+</ul>
+
+<h2>Assumptions and what was not used</h2>
+<ul class="note">
+<li>Weighted pipeline uses default stage weights, since none were given: Discovery 10%, Evaluation 20%, Proposal 40%, Negotiation 60%, Contract Sent 80%. Adding your real weights to the project instructions would replace these.</li>
+<li>Stale threshold is 30 days, from your hygiene rule, instead of the 14-day default. 14+ day counts are still shown in the stage table.</li>
+<li>Past-close-date deals (Northgate, Brightwater, Oakhurst) are counted in Q4 because their close dates are before Dec 31.</li>
+<li>Not available in a single export: time in stage, close-date slip history, contact roles (only a contact count), closed-deal baselines. Not used: CRM, email, calendar (not connected).</li>
+</ul>
+</body></html>

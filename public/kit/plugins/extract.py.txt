@@ -1,0 +1,78 @@
+"""Derive the checkable facts from the plugin's own SKILL.md files."""
+import sys, os, re, json
+root, outp = sys.argv[1], sys.argv[2]
+names = sorted(n for n in os.listdir(root) if os.path.isfile(os.path.join(root, n, "SKILL.md")))
+facts = {}
+for name in names:
+    txt = open(os.path.join(root, name, "SKILL.md"), encoding="utf-8").read()
+    m = re.match(r"^---\n(.*?)\n---\n(.*)$", txt, re.S)
+    fm, body = m.group(1), m.group(2)
+    desc = re.search(r"^description:\s*(.*)$", fm, re.M).group(1)
+    # tools table
+    tools = []
+    tm = re.search(r"## Tools used\n(.*?)(?=\n## )", body, re.S)
+    if tm:
+        for line in tm.group(1).splitlines():
+            if line.startswith("|") and not line.startswith("|---") and "Tool type" not in line:
+                cells = [c.strip() for c in line.strip().strip("|").split("|")]
+                if len(cells) >= 3:
+                    tools.append({"type": cells[0], "required": cells[2].lower().startswith("yes")})
+    # tiers
+    tiers = {}
+    tb = re.search(r"```\ntiers:\n(.*?)```", body, re.S)
+    if tb:
+        cur = None
+        for line in tb.group(1).splitlines():
+            mm = re.match(r"\s{2}(files-only|read-only|gated-writes):\s*(.*)$", line)
+            if mm:
+                cur = mm.group(1); tiers[cur] = mm.group(2).strip()
+            elif cur:
+                tiers[cur] += " " + line.strip()
+    # body without the shared rules block
+    rules = re.search(r"\*\*Rules \(apply[^\n]*\n((?:- .*\n(?:  .*\n)*)+)", body)
+    own = body.replace(rules.group(0), "") if rules else body
+    refs = sorted({r for r in re.findall(r"`([a-z]+(?:-[a-z]+)+|forecast|setup)`", own) if r in names and r != name})
+    plain_refs = sorted({n for n in names if n != name and re.search(r"(?<![a-z-])" + re.escape(n) + r"(?![a-z-])", own)})
+    # the tools table again, with what each tool is used for, and the line of the file's own write tier
+    uses = {}
+    if tm:
+        for line in tm.group(1).splitlines():
+            if line.startswith("|") and not line.startswith("|---") and "Tool type" not in line:
+                cells = [c.strip() for c in line.strip().strip("|").split("|")]
+                if len(cells) >= 3:
+                    uses[cells[0]] = cells[1]
+    for t in tools:
+        t["used_for"] = uses[t["type"]]
+    flat = re.sub(r"\s+", " ", own)
+    facts[name] = {
+        "desc_words": len(desc.split()),
+        "tools": tools,
+        "gated": tiers.get("gated-writes", ""),
+        # the file's own text (the shared rules block left out) says what a scheduled run of this skill may do
+        "sched_own": bool(re.search(r"[Ss]cheduled(?: or routine)? (?:runs?|sweep)\b|scheduled intake|evening scheduled run|weekly digest \(scheduled\)", flat)),
+        # ... and carries the sentence that a value from outside content is never written on a schedule
+        "value_ban": "is never written in a scheduled run, even when the schedule was set up to make that kind of update" in flat,
+        "names_hygiene_flow": "the crm hygiene flow" in flat,
+        "setup_routines": sorted(n for n in names if n != name and re.search(r"routines offer[^.]*\b" + re.escape(n) + r"\b", flat)) if name == "setup" else [],
+        "schedule_in_desc_text": bool(re.search(r"on (?:a|an evening|a weekly) schedule|scheduled (?:task|intake sweep)", desc, re.I)),
+        "gated_none": tiers.get("gated-writes", "").lower().startswith("none"),
+        "refs": plain_refs,
+        "schedule_in_desc": bool(re.search(r"schedul", desc, re.I)),
+        "schedule_section": bool(re.search(r"^## .*schedul", own, re.I | re.M)),
+        "words": len(txt.split()),
+    }
+json.dump(facts, open(outp, "w"), indent=1)
+for n, f in facts.items():
+    t = ", ".join(x["type"] + ("*" if x["required"] else "") for x in f["tools"])
+    print(f"{n:26s} | {t}")
+print()
+for n, f in facts.items():
+    print(f"{n:26s} | none={str(f['gated_none']):5s} | sched desc={str(f['schedule_in_desc']):5s} sect={str(f['schedule_section']):5s} | refs: {', '.join(f['refs'])}")
+print()
+uo = [n for n, f in facts.items() if "update-opportunity" in f["refs"]]
+la = [n for n, f in facts.items() if "log-activity" in f["refs"]]
+print("mention update-opportunity:", len(uo), uo)
+print("mention log-activity:", len(la), la)
+print("either:", len(set(uo) | set(la)))
+print("gated none:", sum(f["gated_none"] for f in facts.values()), "of", len(facts))
+print("total words:", sum(f["words"] for f in facts.values()))

@@ -1,0 +1,511 @@
+# -*- coding: utf-8 -*-
+"""Put the plugin area inside the Modern GTM site, and open the home page on a finding from the evidence register.
+
+In the site's build folder, after build.py has made dist/:
+
+    python3 merge.py                      -> dist/index.html and dist/llms.txt, merged in place
+
+The page as build.py made it is kept beside it as dist/index.before-merge.html, and a second run starts from
+that copy. The plugin area comes from the folder plugins/ beside this script: the plugin page as built
+(index.html, or index.html.txt as the kit keeps it), its stylesheet (entry.css) and its script (app.js).
+To try a change before it goes to the site:
+
+    python3 merge.py --site <page> --plugins <folder> --out <page> --preview
+
+--preview adds the lime strip that marks a staging copy and gives the page the staging copy's title.
+
+It works on built pages, not on sources, and changes neither input.
+
+What the merge does:
+1. Navigation. Plugins becomes an in-page section of the site's own navigation.
+2. Plugin area. Its eleven views go inside one wrapper (.plg) at the end of <main>, with their own second row
+   (a way back, the plugin's name, its sections), shown only while a plugin view is open.
+3. Styles. The plugin area's stylesheet is scoped to the wrapper so that it cannot restyle the site's views, and
+   nine class names that mean something else in the site's stylesheet are renamed inside the plugin area.
+4. Script. One router answers every change of address. The site's script still opens the first view itself,
+   and the plugin area's router marks the site's navigation.
+5. Film. The 60-second film is left out of Configure, at the owner's request (FILM = False).
+6. Home. The opener leads with a finding from the register. The diagram of agents and people moves down, to
+   sit under "Our read" as its illustration.
+7. llms.txt. The plugin pages are added to the site's list for AI readers.
+"""
+import argparse
+import html
+import json
+import os
+import re
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+SITE_URL = "https://claude.ai/artifact/LXB6jHQSey282n21U5eMtp"
+PLUGINS_URL = "https://claude.ai/artifact/AxiEd8sKnLcxSCXhRKCUuJ"
+PREVIEW_TITLE = "Modern GTM: merged preview"
+FILM = False      # the 60-second film: the owner took it out of the site; the plugin page and the public guide keep it
+STRIP = ('<aside class="pvw" aria-label="About this preview"><p class="wrap"><b>Preview.</b> A staging copy of Modern GTM. '
+         "Changes are tried here before they go to the site.</p></aside>")
+RENAME = ["cell", "finds", "grp", "lab", "nm", "row", "rows", "say", "seg"]
+REN_RE = re.compile(r"\.(%s)(?![\w-])" % "|".join(RENAME))
+
+
+def read(p):
+    return open(p, encoding="utf-8").read()
+
+
+def once(text, old, new, n=1):
+    assert text.count(old) == n, (old[:90], text.count(old))
+    return text.replace(old, new)
+
+
+# ----------------------------------------------------------------------------- the plugin area's markup
+def drop_film(h):
+    """Take the 60-second film out of the Configure opener, which goes back to one column like the other openers."""
+    a = h.index('<figure class="film" id="film">')
+    b = h.index("</figure>", a) + len("</figure>")
+    h = h[:a].rstrip() + "\n  " + h[b:].lstrip()
+    h, n = re.subn(r'<div class="wrap g75">(\s*<div>\s*<h1>Configure it for your company</h1>)', r'<div class="wrap">\1', h)
+    assert n == 1 and "<video" not in h and "explainer.mp4" not in h and "poster.jpg" not in h
+    return h
+
+
+def plugin_markup(mine):
+    nav = mine[mine.index('<nav class="tabs"'):mine.index("</nav>", mine.index('<nav class="tabs"')) + 6]
+    main = mine[mine.index('<main id="main">') + len('<main id="main">'):mine.index("</main>")]
+    h = nav + "\n" + main
+    if not FILM:
+        h = drop_film(h)
+    # addresses that the site already uses
+    h = h.replace('id="method" data-view="method"', 'id="plugins-method" data-view="plugins-method"')
+    h = h.replace('href="#method"', 'href="#plugins-method"')
+    h = once(h, 'id="q" name="q"', 'id="sk-q" name="q"')
+    h = once(h, '<label for="q">', '<label for="sk-q">')
+    # the site's own copy buttons read data-copy as a selector, so the plugin area's use another name
+    h = h.replace(" data-copy=", " data-pcopy=")
+    # links that used to leave for the site now stay on the page
+    h = h.replace(SITE_URL + "#", "#").replace(f'href="{SITE_URL}"', 'href="#home"')
+    # the front door is no longer the first view
+    h = once(h, 'data-group="home" data-title="Plugins" class="on"', 'data-group="home" data-title="Plugins"')
+
+    def classes(m):
+        return 'class="' + " ".join("p-" + c if c in RENAME else c for c in m.group(1).split()) + '"'
+    h = re.sub(r'class="([^"]*)"', classes, h)
+    assert "claude.ai/artifact" not in h, re.findall(r'href="(https://claude\.ai/artifact[^"]*)"', h)[:3]
+    disc = re.search(r'<p class="disc">(.*?)</p>', mine, re.S).group(1)
+    fine = re.search(r'<div class="fine"><span>.*?</span><span>(.*?)</span></div>', mine, re.S).group(1)
+    foot = ('<div class="plgfoot"><div class="wrap"><p>' + disc + '</p>'
+            '<p><a href="#plugins-method">Method and sources for the plugin pages</a><span>' + fine + '</span></p></div></div>')
+    return '<div class="plg" id="plg">\n' + h + "\n" + foot + "\n</div>\n"
+
+
+# ----------------------------------------------------------------------------- the plugin area's styles
+def split_selectors(s):
+    out, depth, cur = [], 0, ""
+    for ch in s:
+        if ch in "([":
+            depth += 1
+        elif ch in ")]":
+            depth -= 1
+        if ch == "," and depth == 0:
+            out.append(cur)
+            cur = ""
+        else:
+            cur += ch
+    out.append(cur)
+    return [x.strip() for x in out if x.strip()]
+
+
+DROP_PREFIX = (".mast .", ".wm", ".asof", ".foot")
+
+
+def scope_selector(sel):
+    """Tie one selector to the plugin area, or return None to drop a rule that restyled the masthead or footer.
+    :where() adds no weight, so every rule keeps the rank it had against the site's styles on the plugin page."""
+    if sel == "html":
+        return "html.plg-on"
+    if sel == ".mast":
+        return ".plg-on .mast"
+    if sel.startswith(DROP_PREFIX):
+        return None
+    if sel.startswith("html:not(.js)"):
+        return "html:not(.js) :where(.plg)" + sel[len("html:not(.js)"):]
+    if sel.startswith(".js "):
+        return ".js :where(.plg) " + sel[4:]
+    return ":where(.plg) " + sel
+
+
+# Rules that exist only in the site's stylesheet and would restyle parts of the plugin area. Each keeps its
+# weight and simply stops at the plugin area's edge.
+SITE_ONLY = [
+    "figcaption{font-size:13.5px;",
+    "td a{display:block;",
+    "td a+a{margin-top:9px}",
+    "textarea{resize:vertical;",
+]
+
+
+def fence_site_css(site):
+    for rule in SITE_ONLY:
+        sel, rest = rule.split("{", 1)
+        site = once(site, "\n" + rule, "\n" + sel + ":where(:not(.plg *)){" + rest)
+    return site
+
+
+def scope_css(css):
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    out, dropped = [], 0
+    for line in css.split("\n"):
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("@media"):
+            m = re.match(r"(@media[^{]*\{)(.*)$", s)
+            out.append(m.group(1))
+            s = m.group(2).strip()
+            closing = False
+            if s.endswith("}}"):          # a whole block on one line
+                s, closing = s[:-1], True
+            if s:
+                for rule in re.findall(r"[^{}]+\{[^{}]*\}", s):
+                    r = scope_rule(rule)
+                    dropped += r is None
+                    out.append(r or "")
+            if closing:
+                out.append("}")
+            continue
+        if s == "}":
+            out.append("}")
+            continue
+        assert re.fullmatch(r"[^{}]+\{[^{}]*\}", s), s[:120]
+        r = scope_rule(s)
+        dropped += r is None
+        out.append(r or "")
+    return "\n".join(x for x in out if x), dropped
+
+
+def scope_rule(rule):
+    sel, body = rule.split("{", 1)
+    sels = [scope_selector(REN_RE.sub(lambda m: ".p-" + m.group(1), x)) for x in split_selectors(sel)]
+    sels = [x for x in sels if x]
+    return (",".join(sels) + "{" + body) if sels else None
+
+
+EXTRA_CSS = """
+/* ---- the merge: the plugin area's second row and foot show only while a plugin view is open */
+html.js:not(.plg-on) .plg .tabs,html.js:not(.plg-on) .plgfoot{display:none}
+.plgfoot{border-top:1px solid var(--line);padding:22px 0 30px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.plgfoot p{margin:0;max-width:62ch}
+.plgfoot p+p{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 22px}
+/* ---- home: the opener leads with a finding */
+.hero h1{font-size:clamp(32px,4.7vw,58px);max-width:20em;text-wrap:balance}
+.hero h1 .hl{background:var(--lime);color:#1E1E32;padding:0 .12em;border-radius:.06em;font-weight:inherit;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hgrid{display:grid;gap:clamp(24px,3.2vw,40px);margin-top:clamp(24px,3.2vw,40px)}
+.hintro .lede{margin-top:0}
+.gap{margin:0;display:grid;gap:18px;max-width:560px}
+.gr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 16px;align-items:baseline}
+.gr .gl{font:500 15.5px/1.35 var(--disp);color:#fff}
+.gr b{font:700 22px/1 var(--disp);font-stretch:108%;color:#fff}
+.gr .gt{grid-column:1/-1;display:block;height:14px;border-radius:3px;background:rgba(255,255,255,.16);overflow:hidden}
+.gr .gt i{display:block;height:100%;border-radius:3px;background:var(--lime)}
+.gr.q .gt i{background:#B9B2EC}
+.gap figcaption{font:400 14.5px/1.5 var(--disp);color:var(--vt);margin-top:2px}
+.gap figcaption .mk{border-color:var(--vt);color:#fff;margin-right:8px}
+.gap figcaption b{color:#fff;font-weight:650}
+@media(min-width:960px){.hgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}.hgrid .gap{grid-column:2;grid-row:1;justify-self:end;width:100%}.hgrid .hintro{grid-column:1;grid-row:1}}
+@media(forced-colors:active){.gr .gt{border:1px solid CanvasText}.gr .gt i{background:CanvasText}}
+/* ---- home: the picture of agents and people, in a band of its own under "Our read" */
+.band h2{color:#fff;max-width:20em;margin-bottom:0}
+"""
+PREVIEW_CSS = """/* ---- the strip that marks a staging copy; the site itself has none */
+.pvw{background:var(--lime);color:#1E1E32;font:600 13.5px/1.4 var(--disp);padding:8px 0}
+.pvw p{margin-block:0}
+.pvw b{font-weight:800}
+/* with the strip above it a view starts lower than the room kept for the masthead, so keep a view's own address at the very top */
+main>[data-view]{scroll-margin-top:60px}
+"""
+LLMS = """## Plugins
+
+- [Plugins](/#plugins): what Anthropic and OpenAI, both AI labs and vendors, publish for revenue teams, with one page for each plugin
+- [Claude Sales plugin](/#overview): 36 skills, each with what it does, reads and can change, then fit, rollout and configuration
+- [ChatGPT for Sales](/#chatgpt-sales): 18 skills as ChatGPT reported them from an installed copy, checked against OpenAI's pages
+- [Claude Sales skills as JSON](/skills.json)
+
+Claude compiled the plugin pages. The ratings in the Claude Sales entry are its own read and await their editor's review, and nothing in the ChatGPT for Sales entry is rated.
+"""
+
+
+# ----------------------------------------------------------------------------- the plugin area's script
+def patch_app(js):
+    js = once(js, "var D = JSON.parse(document.getElementById('data').textContent);", "var D = JSON.parse(document.getElementById('plg-data').textContent);\n  var PLG = document.getElementById('plg');")
+    js = once(js, "function $(sel, root) { return (root || document).querySelector(sel); }", "function $(sel, root) { return (root || PLG).querySelector(sel); }")
+    js = once(js, "function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }",
+              "function $$(sel, root) { return Array.prototype.slice.call((root || PLG).querySelectorAll(sel)); }")
+    # one router for every view of the site; only the plugin area's views give up their ids
+    js = once(js, "var views = $$('[data-view]');", "var views = $$('[data-view]', document);\n  var mastLinks = $$('.mast .nav a', document);\n  var NAVCUR = { report: 'research', contribute: 'about' };")
+    js = once(js, "views.forEach(function (v) { viewByName[v.getAttribute('data-view')] = v; v.removeAttribute('id'); });",
+              "views.forEach(function (v) { viewByName[v.getAttribute('data-view')] = v; if (PLG.contains(v)) { v.removeAttribute('id'); } });")
+    js = once(js, "    navEl.setAttribute('data-group', view.getAttribute('data-group') || 'page');",
+              "    var inPlg = PLG.contains(view);\n"
+              "    document.documentElement.classList.toggle('plg-on', inPlg);\n"
+              "    var cur = inPlg ? 'plugins' : (NAVCUR[name] || name);\n"
+              "    mastLinks.forEach(function (a) { if (a.getAttribute('href') === '#' + cur) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); } });\n"
+              "    navEl.setAttribute('data-group', view.getAttribute('data-group') || 'page');")
+    js = js.replace("$('#q')", "$('#sk-q')")
+    js = js.replace("'[data-copy]'", "'[data-pcopy]'").replace("getAttribute('data-copy')", "getAttribute('data-pcopy')")
+    js = re.sub(r"(?<=['\" >+~,(])\.(%s)(?![\w-])" % "|".join(RENAME), lambda m: ".p-" + m.group(1), js)
+    assert "data-copy" not in js
+    return js
+
+
+# ----------------------------------------------------------------------------- the home page
+HEADLINE = 'All 500 U.S. revenue leaders in one survey use AI. <span class="hl">20.6%</span> call their AI strategy production-ready.'
+SALESLOFT_FIND = "<li>All 500 U.S. revenue leaders in Salesloft’s 2026 benchmark"
+
+
+def new_home(site):
+    """The opener leads with one finding from the register, shown as a two-row figure with its grade and source.
+    The picture of agents and people keeps its place on the home page, lower down, under the old headline."""
+    start = site.index('<section class="open hero">')
+    end = site.index("</section>", start) + len("</section>")
+    hero = site[start:end]
+    old_h1 = re.search(r"<h1>(.*?)</h1>", hero, re.S).group(1)
+    fs, fe = hero.index('<figure class="score">'), hero.index("</figure>") + len("</figure>")
+    figure = hero[fs:fe]
+    lede = re.search(r'<p class="lede">.*?</p>', hero, re.S).group(0)
+    acts = re.search(r'<div class="acts">.*?</div>', hero, re.S).group(0)
+    opener = f"""<section class="open hero">
+<div class="wrap">
+<h1>{HEADLINE}</h1>
+<div class="hgrid">
+<figure class="gap">
+<div class="gr q"><span class="gl">Use AI somewhere in the revenue process</span><b>100%</b><span class="gt" aria-hidden="true"><i style="width:100%"></i></span></div>
+<div class="gr"><span class="gl">Call their AI strategy production-ready, with measurable outcomes</span><b>20.6%</b><span class="gt" aria-hidden="true"><i style="width:20.6%"></i></span></div>
+<figcaption><span class="mk">C</span><b>Self-reported, vendor survey.</b> Salesloft, a vendor, surveyed 500 U.S. revenue leaders at companies with 200 or more employees, May 28–June 10, 2026. <a href="#evidence">Find it in the register</a></figcaption>
+</figure>
+<div class="hintro">
+{lede}
+{acts}
+</div>
+</div>
+</div>
+</section>"""
+    band = f"""<section class="open band">
+<div class="wrap">
+<h2>{old_h1}</h2>
+{figure}
+</div>
+</section>"""
+    site = site[:start] + opener + site[end:]
+    # the finding now opens the page, so the list of findings under it carries the other three
+    a = site.index(SALESLOFT_FIND)
+    b = site.index("</li>", a) + len("</li>")
+    assert "20.6%" in site[a:b] and site[a:b].count("<li>") == 1
+    site = site[:a] + site[b:].lstrip("\n")
+    # the picture follows "Our read", which it illustrates
+    i = site.index("<h2>Our read: agents are multiplying faster than teams can coordinate them</h2>")
+    close = site.index("</section>", i) + len("</section>")
+    return site[:close] + "\n" + band + site[close:]
+
+
+# ----------------------------------------------------------------------------- home: the use-case index
+USE_CASES_CSS = """/* ---- home: the use-case index, one row for each GTM job */
+.uc{table-layout:fixed}
+.uc thead th{width:16.5%}
+.uc thead th:first-child{width:34%}
+.uc thead th small{display:block;font-weight:400;font-size:12.5px;line-height:1.35;margin-top:3px;max-width:22ch}
+.uc tbody th{font:inherit;color:var(--ink);text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:15px 28px 15px 0}
+.uc tbody th b{display:block;font:800 19px/1.2 var(--disp);font-stretch:108%;letter-spacing:-.01em}
+.uc tbody th span{display:block;font:400 15.5px/1.45 var(--serif);color:var(--muted);margin-top:4px}
+.uc td{padding-block:15px}
+.uc td a{display:inline-block;font-size:15px;line-height:1.35;font-weight:650;padding-block:2px}
+.uc td small{display:block;font-size:13.5px;line-height:1.4;color:var(--muted);margin-top:4px}
+.uc .lb{display:none}
+.uc .nil{color:var(--muted)}
+.uc .ucg{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font:600 13.5px/1 var(--disp);color:var(--muted)}
+.uc .ucg span{display:inline-flex;align-items:center;gap:5px}
+.uc .ucg .mk{vertical-align:0}
+.uc tr:target th b{background:linear-gradient(transparent 56%,var(--hl) 56%)}
+.ucn{display:grid;gap:10px 60px;margin-top:22px}
+.ucn .note{margin:0}
+@media(min-width:761px){.ucn{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+/* a job reached from the index is marked under its name only, and the jobs before it stay in sight */
+.plg .glance .jobs li{scroll-margin-top:56px}
+.plg .glance .jobs li:target>span:first-child{justify-self:start}
+/* narrower than a laptop: a job on its own line, its four counts in a row beneath, each under its own label.
+   The column heads stay in the page for a screen reader and leave the screen; the roles on the table keep it a table. */
+@media(max-width:960px){
+.uc,.uc tbody{display:block}
+.uc thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.uc tbody{border-top:2px solid var(--ink)}
+.uc tbody tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 18px;padding-block:16px;border-bottom:1px solid var(--line)}
+.uc tbody th{grid-column:1/-1;display:block;border:0;padding:0 0 8px}
+.uc td{display:block;border:0;padding:0}
+.uc .lb{display:block;font:700 12.5px/1.3 var(--disp);color:var(--muted);margin-bottom:4px}
+}
+/* a phone: the four counts two by two, and the job's name alone */
+@media(max-width:560px){
+.uc tbody tr{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+.uc tbody th{padding-bottom:0}
+.uc tbody th span{display:none}
+}
+"""
+UC_ANCHORS = [   # an address for each part of Playbooks that the index names; the page as build.py makes it has none
+    ("<h3>A worked handoff: preparing a renewal</h3>", '<h3 id="worked-handoff">A worked handoff: preparing a renewal</h3>'),
+    ("<h3>Scorecard, with public reference points and their limits</h3>", '<h3 id="scorecard">Scorecard, with public reference points and their limits</h3>'),
+]
+
+
+def use_case_index(site, uc):
+    """Home's second screen sorts the site by the reader's work: one table, a row for each GTM job, with the register's
+    records by grade, a play or tool whose own worked example is that job, and the skills in the labs' plugins.
+    It takes the place of the list that sorted the site by its own shelves. `uc` is use_cases.json."""
+    e = html.escape
+    for old, new in UC_ANCHORS:
+        site = once(site, old, new)
+    for href, proof in uc["example_proof"].items():
+        assert proof in site, f"the page no longer says what the index leans on for {href}: {proof}"
+    mk = {"A": "mk mk-A", "B": "mk mk-B", "C": "mk mk-C"}
+    low = lambda j: j if j.startswith("CRM") else j[0].lower() + j[1:]
+    rows = []
+    for j in uc["jobs"]:
+        r, ex, an, oa = j["records"], j["example"], j["anthropic"], j["openai"]
+        if r["count"]:
+            n = f'{r["count"]} record' + ("" if r["count"] == 1 else "s")
+            marks = "".join(f'<span><span class="{mk.get(g, "mk mk-x")}">{e(g)}</span>{c}</span>' for g, c in r["by_grade"].items())
+            said = ", ".join(f"{c} graded {g}" if g in mk else f"{c} marked {g}" for g, c in r["by_grade"].items())
+            ev = f'<a href="#evidence" aria-label="{n} on {e(low(j["job"]))} in the register: {e(said)}">{n}</a><span class="ucg" aria-hidden="true">{marks}</span>'
+        else:
+            ev = '<span class="nil">No record yet</span>'
+        play = (f'<a href="{ex["href"]}">{e(ex["label"])}</a><small>{e(ex["why"])}</small>' if ex else '<span class="nil">None yet</span>')
+
+        def lab(x, owner):
+            if not x:
+                return '<span class="nil">No skill</span>'
+            n = f'{x["skills"]} skill' + ("" if x["skills"] == 1 else "s")
+            # the column is the lab's Sales plugin; a cell names its plugin only when it is another one
+            other = "" if x["plugin"] == "Sales" else f'<small>In its {e(x["plugin"])} plugin</small>'
+            return f'<a href="{x["href"]}" aria-label="{n} for {e(low(j["job"]))} in {owner} {e(x["plugin"])} plugin">{n}</a>' + other
+        lb = lambda t: f'<span class="lb" aria-hidden="true">{t}</span>'   # the column's name, shown where the column heads are not
+        rows.append(f'<tr id="uc-{j["slug"]}" role="row"><th scope="row" role="rowheader"><b>{e(j["job"])}</b><span>{e(j["what"])}</span></th>'
+                    f'<td role="cell">{lb("Evidence")}{ev}</td><td role="cell">{lb("Play or tool")}{play}</td>'
+                    f'<td role="cell">{lb("From Anthropic")}{lab(an, "Anthropic’s")}</td><td role="cell">{lb("From OpenAI")}{lab(oa, "OpenAI’s")}</td></tr>')
+    reg = uc["register"]
+    rest = reg["records"] - reg["on_one_job"]
+    assert rest == reg["the_revenue_organization_as_a_whole"] + reg["beyond_the_revenue_organization"] + reg["marketing"]
+    section = f"""<section class="sec" id="use-cases">
+<div class="wrap">
+<h2>Start with the work your team does</h2>
+<p class="lede">A use case here is a job a revenue team already does, and what AI is shown to do in it. Each row counts what this site holds for one GTM job, down to the skills that Anthropic and OpenAI, both AI labs and vendors, publish for it.</p>
+<table class="uc" role="table" aria-label="AI use cases by GTM job">
+<thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">GTM job</th><th scope="col" role="columnheader">Evidence <small>Records in the register, by grade</small></th><th scope="col" role="columnheader">Play or tool <small>One whose worked example is this job</small></th><th scope="col" role="columnheader">From Anthropic <small>Skills in its Sales plugin</small></th><th scope="col" role="columnheader">From OpenAI <small>Skills in its Sales plugin, as ChatGPT reported it</small></th></tr></thead>
+<tbody role="rowgroup">
+{chr(10).join(rows)}
+</tbody>
+</table>
+<div class="ucn">
+<p class="note">Which job a record or a skill belongs to is our read. Of the register’s {reg["records"]} records, {reg["on_one_job"]} bear on one job. The other {rest} describe the revenue organization as a whole ({reg["the_revenue_organization_as_a_whole"]}), reach beyond it ({reg["beyond_the_revenue_organization"]}) or concern marketing ({reg["marketing"]}), whose jobs are not listed yet.</p>
+<p class="note">The <a href="#playbooks">plays</a> and <a href="#tools">tools</a> apply to any job, and the table names one only where its own worked example is that job. A job with nothing beside it stays in the table, because a gap is information.</p>
+</div>
+</div>
+</section>"""
+    i = site.index("<h2>Start with the part you need</h2>")
+    start = site.rindex('<section class="sec">', 0, i)
+    end = site.index("</section>", i) + len("</section>")
+    assert site[start:end].count("<section") == 1 and '<ul class="idx">' in site[start:end]
+    return site[:start] + section + site[end:]
+
+
+def merge_llms(text):
+    """Add the plugin pages to the site's llms.txt, once, ahead of the part on contributing."""
+    if "## Plugins" in text:
+        return text
+    mark = "## Contributing"
+    if mark in text:
+        return text.replace(mark, LLMS + "\n" + mark, 1)
+    return text.rstrip("\n") + "\n\n" + LLMS
+
+
+def build(site_path, plug_dir, out_path, preview=False, llms_path=None, llms_out=None, use_cases=None):
+    site = read(site_path)
+    assert 'id="plg"' not in site, "this page already holds the plugin area: give the page as build.py made it"
+
+    def plug(name):
+        # in the kit the plugin page is kept as index.html.txt, so that it is served as text and not as a second page
+        p = os.path.join(plug_dir, name)
+        return read(p if os.path.exists(p) else p + ".txt")
+    mine = plug("index.html")
+    # 1. navigation: Plugins is a section of this page
+    assert site.count(PLUGINS_URL) == 3
+    # the arrow that marks a link leaving the site is written as a character or as an entity, by the build that made the page
+    site, n = re.subn(r'<a href="%s">Plugins <span aria-hidden="true">(?:&#8599;|\u2197)</span></a>' % re.escape(PLUGINS_URL), '<a href="#plugins">Plugins</a>', site)
+    assert n == 2, n
+    site = once(site, f'<li><a href="{PLUGINS_URL}"><b>See the labs\' plugins</b>', '<li><a href="#plugins"><b>See the labs\' plugins</b>')
+    site = once(site, "and shorter pages for four more. A preview that opens as a page of its own.</span>", "and shorter pages for four more.</span>")
+    assert PLUGINS_URL not in site
+    # 5. the home page leads with a finding
+    site = new_home(site)
+    # 6. the use-case index takes the place of the list of the site's shelves (the staging copy, until the owner says otherwise)
+    uc = json.loads(read(use_cases)) if use_cases else None
+    if uc:
+        site = use_case_index(site, uc)
+    # 2. the plugin area
+    site = once(site, "</main>", plugin_markup(mine) + "</main>")
+    # 3. styles
+    site = fence_site_css(site)
+    scoped, dropped = scope_css(plug("entry.css"))
+    site = once(site, "</style>", "\n/* ---- the plugin area, scoped to .plg ---- */\n" + scoped + EXTRA_CSS + (USE_CASES_CSS if uc else "") + (PREVIEW_CSS if preview else "") + "</style>")
+    # 4. scripts: the plugin area's data and script follow the site's, and one router serves every view
+    # the site's script still opens the first view itself, so the rest of it starts as it does today; from then on
+    # the plugin area's router, which knows every view, answers each change of address
+    site = once(site, "addEventListener('hashchange',()=>route(true));\nroute(false);", "route(false);")
+    # the report's contents marker looks only at the report, now that the plugin area has contents lists of its own
+    site = once(site, "const links=$$('.toc a'),heads=$$('.art>h2[id]'),rep=$('#report');", "const links=$$('#report .toc a'),heads=$$('#report .art>h2[id]'),rep=$('#report');")
+    data = re.search(r'<script type="application/json" id="data">(.*?)</script>', mine, re.S).group(1)
+    aimd = re.search(r'<script type="application/json" id="ai-md">(.*?)</script>', mine, re.S).group(1)
+    tail = ('<script type="application/json" id="plg-data">' + data + '</script>\n<script type="application/json" id="ai-md">' + aimd
+            + "</script>\n<script>\n" + patch_app(plug("app.js")) + "</script>\n</body>")
+    site = once(site, "</body>", tail)
+    if preview:
+        site = re.sub(r"<title>.*?</title>", f"<title>{PREVIEW_TITLE}</title>", site, count=1)
+        site = once(site, '<header class="mast">', STRIP + '\n<header class="mast">')
+    site = once(site, "</head>", '<link rel="alternate" type="application/json" href="skills.json" title="The 36 skills of the Claude Sales plugin as data">\n</head>')
+    if uc:
+        # every address the index names opens something: an element of the page, or a view
+        block = site[site.index('<section class="sec" id="use-cases">'):]
+        block = block[:block.index("</section>")]
+        for target in sorted(set(re.findall(r'href="#([^"]+)"', block))):
+            assert f'id="{target}"' in site or f'data-view="{target}"' in site, "the use-case index links to #%s, which the page does not hold" % target
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+    open(out_path, "w", encoding="utf-8").write(site)
+    ids = re.findall(r'\sid="([^"]+)"', site)
+    dup = sorted({i for i in ids if ids.count(i) > 1})
+    print("built", out_path, len(site.encode()), "bytes;", len(re.findall(r'data-view="', site)), "views; css rules dropped:", dropped, "; duplicate ids:", dup,
+          "; preview strip:", "yes" if preview else "no", "; use-case index:", "yes" if uc else "no")
+    if llms_path and os.path.exists(llms_path):
+        text = merge_llms(read(llms_path))     # read before the file is opened for writing: the two can be one file
+        open(llms_out or llms_path, "w", encoding="utf-8").write(text)
+        print("llms.txt: plugin pages listed in", llms_out or llms_path)
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Put the plugin area inside the Modern GTM site.")
+    ap.add_argument("--site", default=os.path.join(HERE, "dist", "index.html"), help="the site's page as build.py made it")
+    ap.add_argument("--plugins", default=os.path.join(HERE, "plugins"), help="folder with the plugin page's index.html, entry.css and app.js")
+    ap.add_argument("--out", help="where to write the merged page (default: over --site, keeping a copy of it)")
+    ap.add_argument("--llms", help="the site's llms.txt (default: llms.txt beside --site)")
+    ap.add_argument("--llms-out", help="where to write the merged llms.txt (default: over --llms)")
+    ap.add_argument("--preview", action="store_true", help="mark the page as a staging copy")
+    ap.add_argument("--use-cases", help="use_cases.json: put the use-case index on the home page, in place of the list of the site's parts")
+    a = ap.parse_args()
+    site_path, out = a.site, a.out
+    if not out:
+        # in place: keep the page as build.py made it, and start from that copy on a second run
+        keep = os.path.join(os.path.dirname(os.path.abspath(site_path)), "index.before-merge.html")
+        if 'id="plg"' not in read(site_path):
+            open(keep, "w", encoding="utf-8").write(read(site_path))
+        site_path, out = keep, a.site
+    llms = a.llms or os.path.join(os.path.dirname(os.path.abspath(a.site)), "llms.txt")
+    # with --out the inputs stay as they are: the merged llms.txt goes beside the merged page
+    llms_out = a.llms_out or (os.path.join(os.path.dirname(os.path.abspath(a.out)), "llms.txt") if a.out else None)
+    build(site_path, a.plugins, out, a.preview, llms, llms_out, a.use_cases)
+
+
+if __name__ == "__main__":
+    main()

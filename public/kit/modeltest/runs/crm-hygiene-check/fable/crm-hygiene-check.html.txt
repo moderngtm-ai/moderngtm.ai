@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM hygiene check - Dana Okafor - 2026-11-20</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --fg: #1b1b1b; --muted: #595959; --line: #d9d9d9;
+    --card: #fafafa; --quote: #efefef;
+    --crit: #b3261e; --attn: #8a5300; --ok: #1e6b3a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171717; --fg: #ededed; --muted: #a8a8a8; --line: #3b3b3b;
+      --card: #1f1f1f; --quote: #2b2b2b;
+      --crit: #ff8f85; --attn: #f0bd5c; --ok: #7fd3a0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 4px; }
+  h2 { font-size: 1.3rem; line-height: 1.3; margin: 40px 0 12px; padding-top: 20px; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.05rem; margin: 28px 0 8px; }
+  h4 { font-size: 1rem; margin: 0 0 2px; }
+  p { margin: 0 0 10px; }
+  ul { margin: 0 0 10px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  .sub { color: var(--muted); margin-bottom: 14px; }
+  .src { color: var(--muted); font-size: 0.875rem; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 10px; }
+  .tile { border: 1px solid var(--line); border-top-width: 4px; border-radius: 6px; background: var(--card); padding: 12px 14px; }
+  .tile h3 { margin: 0; font-size: 0.95rem; }
+  .tile .count { font-size: 1.75rem; font-weight: 700; line-height: 1.2; margin: 0 0 6px; }
+  .tile ul { margin: 0; font-size: 0.9375rem; }
+  .tile.crit { border-top-color: var(--crit); } .tile.crit h3 { color: var(--crit); }
+  .tile.attn { border-top-color: var(--attn); } .tile.attn h3 { color: var(--attn); }
+  .tile.ok   { border-top-color: var(--ok); }   .tile.ok h3   { color: var(--ok); }
+
+  .deal { border: 1px solid var(--line); border-left-width: 4px; border-radius: 6px; background: var(--card);
+          padding: 14px 16px 6px; margin: 0 0 12px; }
+  .deal.crit { border-left-color: var(--crit); }
+  .deal.attn { border-left-color: var(--attn); }
+  .deal label { display: flex; gap: 10px; align-items: baseline; cursor: pointer; }
+  .deal input[type="checkbox"] { flex: none; width: 1.05em; height: 1.05em; margin: 0; position: relative; top: 2px; }
+  .num { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .meta { color: var(--muted); font-size: 0.9375rem; margin-bottom: 8px; }
+  .sugg { font-size: 0.8125rem; font-weight: 700; color: var(--muted); margin: 0; }
+  blockquote { margin: 4px 0 10px; padding: 8px 12px; border-left: 3px solid var(--muted); border-radius: 0 4px 4px 0;
+               background: var(--quote); font: 0.9375rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .why { font-size: 0.9375rem; }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    main { max-width: none; padding: 0; }
+    .deal, .tile { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>CRM hygiene check</h1>
+  <p class="sub">Dana Okafor &middot; 24 open deals &middot; as of Friday, November 20, 2026</p>
+  <p>Read from pipeline.csv, this morning's export, and checked against the rules in company-facts.md. Nothing has been changed: this check only reads, and no CRM is connected. That also means there are no record links to give, so each deal names its spreadsheet row instead, counting the header as row 1.</p>
+</header>
+
+<section aria-labelledby="summary">
+  <h2 id="summary">Summary</h2>
+  <div class="tiles">
+    <div class="tile crit">
+      <h3>Critical</h3>
+      <p class="count">4 deals</p>
+      <ul>
+        <li>3 with a close date in the past ($224,000)</li>
+        <li>1 with a blank amount</li>
+      </ul>
+    </div>
+    <div class="tile attn">
+      <h3>Attention</h3>
+      <p class="count">11 deals</p>
+      <ul>
+        <li>2 with no next step ($192,000)</li>
+        <li>4 with no activity in the last 30 days ($352,000)</li>
+        <li>5 with a single contact ($480,000)</li>
+      </ul>
+    </div>
+    <div class="tile ok">
+      <h3>Clean</h3>
+      <p class="count">9 deals</p>
+      <ul>
+        <li>Pass every check this export supports</li>
+      </ul>
+    </div>
+  </div>
+  <p class="src">From pipeline.csv, all 24 rows. No deal carries more than one of these flags.</p>
+  <p><strong>Where to start:</strong> two of the 15 are Contract Sent deals, which is your Commit category. Northgate Cold Chain (fix 1) has a close date that has already passed, and Corvell Storage (fix 7) has gone 42 days without logged activity.</p>
+</section>
+
+<section aria-labelledby="fixes">
+  <h2 id="fixes">Fix list</h2>
+  <p>Fifteen deals, most urgent first. Every suggested value is a recommendation: tick a deal off once you have dealt with it, or leave it as it is.</p>
+
+  <h3>Critical: close date in the past (3)</h3>
+  <p class="src">The export has no history of how long your deals take, so each suggested date is measured against your other open deals in the same stage and falls after the deal's own next step date.</p>
+
+  <article class="deal crit">
+    <h4><label><input type="checkbox"> <span class="num">1.</span> <span>Northgate Cold Chain - dock scheduling</span></label></h4>
+    <p class="meta">Contract Sent &middot; $96,000 per year &middot; From pipeline.csv, row 3</p>
+    <p><strong>Close date in the past.</strong> Close date is 2026-11-13, 7 days ago. This is a Commit deal.</p>
+    <p class="sugg">Suggested value</p>
+    <blockquote>Close date: 2026-12-04</blockquote>
+    <p class="why">Your next step, "Chase signature with the signer", is on 2026-11-24, so the new date cannot be earlier than that. Your other two Contract Sent deals are dated 2026-12-04 and 2026-12-11 (rows 2 and 4). The deal stays in this quarter. If the signer gives you a signing date on the 24th, use that instead.</p>
+  </article>
+
+  <article class="deal crit">
+    <h4><label><input type="checkbox"> <span class="num">2.</span> <span>Brightwater Haulage - dock scheduling</span></label></h4>
+    <p class="meta">Proposal &middot; $64,000 per year &middot; From pipeline.csv, row 10</p>
+    <p><strong>Close date in the past.</strong> Close date is 2026-10-30, 21 days ago.</p>
+    <p class="sugg">Suggested value</p>
+    <blockquote>Close date: 2027-01-15</blockquote>
+    <p class="why">Your next step, "Follow up on the proposal", is on 2026-11-26. Your four other Proposal deals are dated 2026-12-18 to 2027-02-12, with the median in mid-January (rows 9, 11, 12 and 13). This date takes $64,000 out of this quarter, because a deal counts toward the quarter only when its close date is on or before 2026-12-31 (from company-facts.md, "Forecast categories"). If the follow-up gets you a signer and a December signing date, use that instead.</p>
+  </article>
+
+  <article class="deal crit">
+    <h4><label><input type="checkbox"> <span class="num">3.</span> <span>Oakhurst Pallet - dock scheduling</span></label></h4>
+    <p class="meta">Evaluation &middot; $64,000 per year &middot; From pipeline.csv, row 14</p>
+    <p><strong>Close date in the past.</strong> Close date is 2026-11-06, 14 days ago.</p>
+    <p class="sugg">Suggested value</p>
+    <blockquote>Close date: 2027-01-15</blockquote>
+    <p class="why">Your next step, "Second demo for the night shift lead", is on 2026-11-25, and Proposal, Negotiation and Contract Sent are still ahead of this deal. 2027-01-15 is the median close date of your five other Evaluation deals (rows 15 to 19). This date also takes $64,000 out of this quarter.</p>
+  </article>
+
+  <h3>Critical: amount blank (1)</h3>
+
+  <article class="deal crit">
+    <h4><label><input type="checkbox"> <span class="num">4.</span> <span>Silverline Freightways - dock scheduling</span></label></h4>
+    <p class="meta">Evaluation &middot; Amount blank &middot; From pipeline.csv, row 16</p>
+    <p><strong>Amount blank.</strong> Amount (USD per year) is blank. The close date is 2026-12-19, so the deal sits in this quarter at $0.</p>
+    <p class="sugg">Suggested value</p>
+    <blockquote>Amount (USD per year): 64000</blockquote>
+    <p class="why">This is a floor, not a forecast: two sites at your $32,000 list price. Your ideal customer has at least two sites, and your next step is "Scope the number of sites" on 2026-11-27. Replace it with the number of sites &times; 32,000 once you have the count. From company-facts.md, "What we sell" and "Ideal customer".</p>
+  </article>
+
+  <h3>Attention: no next step (2)</h3>
+  <p class="src">Your rule is a next step with a date on every open deal (from company-facts.md, "Pipeline hygiene"). The suggestions are written the way your export writes them: a short next step, with the date in its own field.</p>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">5.</span> <span>Maplecrest Distribution - dock scheduling</span></label></h4>
+    <p class="meta">Proposal &middot; $128,000 per year &middot; From pipeline.csv, row 11</p>
+    <p><strong>No next step.</strong> Next step and Next step date are both blank. Close date is 2026-12-29, inside this quarter. Last activity date is 2026-11-13.</p>
+    <p class="sugg">Suggested values</p>
+    <blockquote>Next step: Confirm pricing and name the signer with the VP Operations<br>Next step date: 2026-11-24</blockquote>
+    <p class="why">Built from your rule for leaving Proposal ("pricing is sent and the signer is named") and the main contact's title. No email or call notes were used, so overwrite it with whatever was agreed on 2026-11-13; the date is a placeholder. From company-facts.md, "Stages and what must be true to leave each one".</p>
+  </article>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">6.</span> <span>Zennor Cold Storage - dock scheduling</span></label></h4>
+    <p class="meta">Discovery &middot; $64,000 per year &middot; From pipeline.csv, row 22</p>
+    <p><strong>No next step.</strong> Next step and Next step date are both blank. Last activity date is 2026-11-13.</p>
+    <p class="sugg">Suggested values</p>
+    <blockquote>Next step: Confirm the problem and book the next meeting with the Director of Operations<br>Next step date: 2026-12-01</blockquote>
+    <p class="why">Built from your rule for leaving Discovery ("a buyer title has confirmed the problem, and the next meeting is booked") and the main contact's title, not from email or call notes. Overwrite it with whatever was agreed on 2026-11-13; the date is a placeholder. From company-facts.md, "Stages and what must be true to leave each one".</p>
+  </article>
+
+  <h3>Attention: no activity in the last 30 days (4)</h3>
+  <p class="src">Your rule is activity in the last 30 days on every open deal (from company-facts.md, "Pipeline hygiene"). There is no field value to paste here: the fix is to log a touch that happened, or to make one.</p>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">7.</span> <span>Corvell Storage - dock scheduling</span></label></h4>
+    <p class="meta">Contract Sent &middot; $64,000 per year &middot; From pipeline.csv, row 4</p>
+    <p><strong>No activity in 30 days.</strong> Last activity date is 2026-10-09, 42 days ago. This is a Commit deal with a 2026-12-11 close date.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Log the latest call, email or meeting with Corvell Storage, if there has been one since 2026-10-09.</blockquote>
+    <p class="why">If there has been none, the first thing that will clear this flag is your next step, "Confirm signing date", on 2026-11-27. That would be 49 days after the last touch on a deal you are committing, so it is worth bringing forward.</p>
+  </article>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">8.</span> <span>Arden Wharf 3PL - dock scheduling</span></label></h4>
+    <p class="meta">Negotiation &middot; $96,000 per year &middot; From pipeline.csv, row 6</p>
+    <p><strong>No activity in 30 days.</strong> Last activity date is 2026-10-02, 49 days ago. Close date is 2026-12-15.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Log the latest call, email or meeting with Arden Wharf 3PL, if there has been one since 2026-10-02.</blockquote>
+    <p class="why">If there has been none, the first thing that will clear this flag is your next step, "Send revised terms", on 2026-11-25, 54 days after the last touch.</p>
+  </article>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">9.</span> <span>Redfern Cross-Dock - dock scheduling</span></label></h4>
+    <p class="meta">Evaluation &middot; $96,000 per year &middot; From pipeline.csv, row 15</p>
+    <p><strong>No activity in 30 days.</strong> Last activity date is 2026-09-24, 57 days ago. Close date is 2026-12-30.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Log the latest call, email or meeting with Redfern Cross-Dock, if there has been one since 2026-09-24.</blockquote>
+    <p class="why">If there has been none, the first thing that will clear this flag is your next step, "Technical deep dive", on 2026-12-01, 68 days after the last touch. If that meeting is not confirmed, the 2026-12-30 close date needs a second look as well.</p>
+  </article>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">10.</span> <span>Yarrow Supply Chain - dock scheduling</span></label></h4>
+    <p class="meta">Discovery &middot; $96,000 per year &middot; From pipeline.csv, row 21</p>
+    <p><strong>No activity in 30 days.</strong> Last activity date is 2026-10-12, 39 days ago. Close date is 2027-01-30.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Log a short check-in with Yarrow Supply Chain, or the latest touch since 2026-10-12 if one went unlogged.</blockquote>
+    <p class="why">The gap looks planned: your next step is "Reconnect after their peak season" on 2026-12-07. Your 30-day rule makes no exception for that, so the deal stays flagged until then, 56 days after the last touch, unless something is logged sooner.</p>
+  </article>
+
+  <h3>Attention: single contact (5)</h3>
+  <p class="src">Your rule is that a deal with one contact is single-threaded (from company-facts.md, "Pipeline hygiene"). The export carries a contact count and the main contact's title, not names or roles, so these are roles to fill, not named people.</p>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">11.</span> <span>Sable Ridge Supply - dock scheduling</span></label></h4>
+    <p class="meta">Negotiation &middot; $64,000 per year &middot; From pipeline.csv, row 7</p>
+    <p><strong>Single contact.</strong> Contacts on the deal: 1. Main contact title: Director of Operations.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Add contact: their IT lead<br>Add contact: the signer, if that is not the Director of Operations</blockquote>
+    <p class="why">Your next step is "Security review with their IT lead" on 2026-11-30, so that person is already part of the deal. And a deal leaves Proposal only once the signer is named, so in Negotiation the signer belongs on the record. From company-facts.md, "Stages and what must be true to leave each one".</p>
+  </article>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">12.</span> <span>Ironbridge Logistics - dock scheduling</span></label></h4>
+    <p class="meta">Proposal &middot; $96,000 per year &middot; From pipeline.csv, row 12</p>
+    <p><strong>Single contact.</strong> Contacts on the deal: 1. Main contact title: Director of Operations.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Add contact: the signer<br>Add contact: the technical owner, if that is not the Director of Operations</blockquote>
+    <p class="why">Your next step is "Present to the signer" on 2026-12-08. And a deal leaves Evaluation only once a technical owner is named, so in Proposal that person belongs on the record too. From company-facts.md, "Stages and what must be true to leave each one".</p>
+  </article>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">13.</span> <span>Thistle &amp; Marsh - dock scheduling</span></label></h4>
+    <p class="meta">Evaluation &middot; $128,000 per year &middot; From pipeline.csv, row 17</p>
+    <p><strong>Single contact, and the stage is ahead of what the record shows.</strong> Contacts on the deal: 1. Main contact title: IT Manager, which is not one of your buyer titles. A deal leaves Discovery only once a buyer title has confirmed the problem, and no buyer title is on this deal.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Add contact: the buyer-title contact who confirmed the problem<br>Stage: Discovery (only if no buyer title has confirmed the problem yet)</blockquote>
+    <p class="why">Your buyer titles are VP or Director of Operations, Head of Warehousing or Fulfillment, and COO. From company-facts.md, "Ideal customer" and "Stages and what must be true to leave each one".</p>
+  </article>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">14.</span> <span>Underhill Wholesale - dock scheduling</span></label></h4>
+    <p class="meta">Evaluation &middot; $64,000 per year &middot; From pipeline.csv, row 18</p>
+    <p><strong>Single contact.</strong> Contacts on the deal: 1. Main contact title: Director of Operations.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Add contact: the technical owner</blockquote>
+    <p class="why">A technical owner has to be named before the deal can leave Evaluation (from company-facts.md, "Stages and what must be true to leave each one"). Your next step is "Send the integration overview" on 2026-11-24; if it is going to anyone besides the Director of Operations, add them.</p>
+  </article>
+
+  <article class="deal attn">
+    <h4><label><input type="checkbox"> <span class="num">15.</span> <span>Kestrel Park Logistics - dock scheduling</span></label></h4>
+    <p class="meta">Discovery &middot; $128,000 per year &middot; From pipeline.csv, row 23</p>
+    <p><strong>Single contact.</strong> Contacts on the deal: 1. Main contact title: Head of Fulfillment.</p>
+    <p class="sugg">Suggested fix</p>
+    <blockquote>Add contact: a second person at Kestrel Park Logistics</blockquote>
+    <p class="why">Your next step is "Map their sites and dock counts" on 2026-12-02; whoever supplies those numbers is a natural second contact.</p>
+  </article>
+</section>
+
+<section aria-labelledby="bulk">
+  <h2 id="bulk">Bulk actions</h2>
+  <ul>
+    <li><strong>3 deals need the close date moved:</strong> Northgate Cold Chain, Brightwater Haulage, Oakhurst Pallet (fixes 1 to 3)</li>
+    <li><strong>1 deal needs an amount:</strong> Silverline Freightways (fix 4)</li>
+    <li><strong>2 deals need a next step and a next step date:</strong> Maplecrest Distribution, Zennor Cold Storage (fixes 5 and 6)</li>
+    <li><strong>4 deals need activity logged:</strong> Corvell Storage, Arden Wharf 3PL, Redfern Cross-Dock, Yarrow Supply Chain (fixes 7 to 10)</li>
+    <li><strong>5 deals need a second contact:</strong> Sable Ridge Supply, Ironbridge Logistics, Thistle &amp; Marsh, Underhill Wholesale, Kestrel Park Logistics (fixes 11 to 15)</li>
+  </ul>
+</section>
+
+<section aria-labelledby="clean">
+  <h2 id="clean">Clean deals (9)</h2>
+  <p>Each of these has an amount, a close date in the future, a next step with a date, activity in the last 30 days and at least two contacts.</p>
+  <ul>
+    <li>Pellman Distribution (row 2)</li>
+    <li>Quillon Freight (row 5)</li>
+    <li>Tamarind Fulfillment (row 8)</li>
+    <li>Harbor &amp; Vane Logistics (row 9)</li>
+    <li>Fennick &amp; Lowe (row 13)</li>
+    <li>Vantage Row 3PL (row 19)</li>
+    <li>Westmere Depot (row 20)</li>
+    <li>Juniper Dockside (row 24)</li>
+    <li>Halvering Group (row 25)</li>
+  </ul>
+  <p class="src">From pipeline.csv, the rows named above.</p>
+</section>
+
+<section aria-labelledby="notrun">
+  <h2 id="notrun">Checks this export could not support</h2>
+  <ul>
+    <li><strong>Close date unchanged since the deal was created</strong> (the sign of a placeholder date). Needs each deal's created date and field history, which are not in the export. The nearest thing it shows: two Discovery deals are dated inside the next five weeks, Halvering Group (2026-12-16, row 25) and Westmere Depot (2026-12-23, row 20), while your other four Discovery deals are dated 2027-01-30 to 2027-03-26. Neither is flagged, but if those dates are placeholders they are holding $160,000 in this quarter.</li>
+    <li><strong>Next step unchanged in 14 or more days.</strong> Needs field history, which is not in the export. All 22 next step dates that are filled in are in the future (the earliest is 2026-11-23), so none is overdue.</li>
+    <li><strong>Stuck in stage.</strong> Needs the date each deal entered its current stage, which is not in the export.</li>
+    <li><strong>Stage criteria against documents</strong> (for example, a proposal on file for a Proposal deal). No documents tool is connected, so this was skipped. From the export alone I compared each deal's main contact title and next step with your stage rules; the one mismatch is Thistle &amp; Marsh (fix 13).</li>
+    <li><strong>Contact roles.</strong> The export has a contact count and one title per deal, so "single contact" here means a count of 1. No deal has zero contacts.</li>
+    <li><strong>Competitor.</strong> Blank on 18 of the 24 deals. It is not one of your hygiene rules, so it is not flagged.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="assumed">
+  <h2 id="assumed">What I assumed</h2>
+  <ul>
+    <li><strong>Scope.</strong> All 24 rows of pipeline.csv. Every row has Dana Okafor as Owner.</li>
+    <li><strong>Today.</strong> Friday, November 20, 2026, the date you gave. The export is from the same morning, and its latest activity date is 2026-11-19.</li>
+    <li><strong>Thresholds.</strong> Activity within 30 days, and one contact counting as single-threaded, both come from your company facts. I used 30 days in place of this check's usual 14. At 14 days, Brightwater Haulage (15 days) and Oakhurst Pallet (18 days) would also be flagged for activity; both are already on the list for their close dates.</li>
+    <li><strong>Suggested close dates.</strong> With no deal history to work from, "realistic" means in line with your other open deals in the same stage and after the deal's own next step date.</li>
+    <li><strong>Suggested next steps.</strong> No email, calendar or call notes are connected, so the two suggested next steps come from your stage rules, not from anything said on those accounts.</li>
+    <li><strong>Formats.</strong> Dates and amounts are written the way the export writes them: YYYY-MM-DD, and whole dollars per year.</li>
+    <li><strong>Files.</strong> I used the two files you named. The folder also holds inbox.md, leads.csv and a calls folder; you did not point me at those, so I did not open them. If you would like the next steps for Maplecrest Distribution and Zennor Cold Storage drawn from what is in them, say so and I will read them.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="apply">
+  <h2 id="apply">Applying the fixes</h2>
+  <p>Everything here is a recommendation until you pick what to apply. No CRM is connected, so for now the changes are yours to make by hand. Once your CRM is connected, tell me which fixes you accept, for example "apply fixes 1 to 6", and I will make them with update-opportunity.</p>
+</section>
+
+</main>
+
+<script>
+  // Remember which deals are ticked off, where the browser allows it. The page works the same without this.
+  (function () {
+    var key = 'crm-hygiene-check-2026-11-20';
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) {}
+    document.querySelectorAll('.deal input[type="checkbox"]').forEach(function (box, i) {
+      box.checked = !!saved[i];
+      box.addEventListener('change', function () {
+        saved[i] = box.checked;
+        try { localStorage.setItem(key, JSON.stringify(saved)); } catch (e) {}
+      });
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+name: Report a correction
+description: A correction to a finding already in the register
+title: "Correction: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Corrections follow the same route as findings: Claude checks the source, and Nathan Fierley decides. When a company sends a correction to its own figure, he opens the source himself. A corrected row carries the date. This issue is public.
+  - type: input
+    id: record
+    attributes:
+      label: Which finding
+      description: The record's number in Appendix A, or the organization and the first words of the finding
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong
+    validations:
+      required: true
+  - type: textarea
+    id: correct
+    attributes:
+      label: What it should say
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: A link to the original document that supports the correction
+    validations:
+      required: true
+  - type: input
+    id: proposed_by
+    attributes:
+      label: Proposed by
+      description: Your name, and your organization if the figure is its own. For an agent, the model and the person or organization it is acting for
+    validations:
+      required: true

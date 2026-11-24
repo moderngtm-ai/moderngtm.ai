@@ -1,0 +1,88 @@
+# -*- coding: utf-8 -*-
+"""Fixtures for the model test: one invented company, its files, and an answer key computed from the same data.
+
+    python3 make_fixtures.py   -> fixtures/ (what the model sees) and key/key.json (what the grader sees)
+
+Everything here is invented. Items are planted so that a reply can be checked against known answers.
+"""
+import csv, json, os
+from datetime import date
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+FX = os.path.join(HERE, "fixtures")
+KEY = os.path.join(HERE, "key")
+TODAY = date(2026, 11, 20)            # the test's "today": Friday, November 20, 2026
+QEND = date(2026, 12, 31)
+QUOTA, WON = 600000, 310000
+
+# account, stage, amount, close, last activity, next step, next step date, contacts, title of main contact, competitor
+D = [
+ ("Pellman Distribution",      "Contract Sent", 128000, "2026-12-04", "2026-11-18", "Legal returns redlines",                "2026-11-23", 4, "COO", ""),
+ ("Northgate Cold Chain",      "Contract Sent",  96000, "2026-11-13", "2026-11-12", "Chase signature with the signer",       "2026-11-24", 3, "VP Operations", ""),
+ ("Corvell Storage",           "Contract Sent",  64000, "2026-12-11", "2026-10-09", "Confirm signing date",                  "2026-11-27", 2, "Director of Operations", "Slotwise"),
+ ("Quillon Freight",           "Negotiation",   160000, "2026-12-18", "2026-11-19", "Pricing call with procurement",         "2026-11-24", 5, "VP Operations", "Slotwise"),
+ ("Arden Wharf 3PL",           "Negotiation",    96000, "2026-12-15", "2026-10-02", "Send revised terms",                    "2026-11-25", 3, "Head of Warehousing", ""),
+ ("Sable Ridge Supply",        "Negotiation",    64000, "2026-12-22", "2026-11-10", "Security review with their IT lead",    "2026-11-30", 1, "Director of Operations", ""),
+ ("Tamarind Fulfillment",      "Negotiation",   128000, "2027-01-22", "2026-11-17", "Redlines call",                         "2026-12-01", 4, "COO", "DockPilot"),
+ ("Harbor & Vane Logistics",   "Proposal",       96000, "2026-12-18", "2026-11-18", "On-site workshop",                      "2026-12-02", 3, "Director of Operations", "Slotwise"),
+ ("Brightwater Haulage",       "Proposal",       64000, "2026-10-30", "2026-11-05", "Follow up on the proposal",             "2026-11-26", 2, "Head of Fulfillment", ""),
+ ("Maplecrest Distribution",   "Proposal",      128000, "2026-12-29", "2026-11-13", "",                                      "",           3, "VP Operations", ""),
+ ("Ironbridge Logistics",      "Proposal",       96000, "2027-02-12", "2026-11-16", "Present to the signer",                 "2026-12-08", 1, "Director of Operations", ""),
+ ("Fennick & Lowe",            "Proposal",       64000, "2027-01-29", "2026-11-11", "Reference call",                        "2026-12-03", 2, "Head of Warehousing", "DockPilot"),
+ ("Oakhurst Pallet",           "Evaluation",     64000, "2026-11-06", "2026-11-02", "Second demo for the night shift lead",  "2026-11-25", 2, "Director of Operations", ""),
+ ("Redfern Cross-Dock",        "Evaluation",     96000, "2026-12-30", "2026-09-24", "Technical deep dive",                   "2026-12-01", 2, "Head of Fulfillment", ""),
+ ("Silverline Freightways",    "Evaluation",        "", "2026-12-19", "2026-11-14", "Scope the number of sites",             "2026-11-27", 3, "VP Operations", ""),
+ ("Thistle & Marsh",           "Evaluation",    128000, "2027-02-26", "2026-11-09", "Demo with the technical owner",         "2026-12-04", 1, "IT Manager", ""),
+ ("Underhill Wholesale",       "Evaluation",     64000, "2027-01-15", "2026-11-12", "Send the integration overview",         "2026-11-24", 1, "Director of Operations", "Slotwise"),
+ ("Vantage Row 3PL",           "Evaluation",     96000, "2027-03-05", "2026-11-18", "Pilot plan review",                     "2026-12-09", 4, "COO", ""),
+ ("Westmere Depot",            "Discovery",      64000, "2026-12-23", "2026-11-17", "Discovery call with the operations lead","2026-11-25", 2, "Head of Warehousing", ""),
+ ("Yarrow Supply Chain",       "Discovery",      96000, "2027-01-30", "2026-10-12", "Reconnect after their peak season",     "2026-12-07", 2, "VP Operations", ""),
+ ("Zennor Cold Storage",       "Discovery",      64000, "2027-02-19", "2026-11-13", "",                                      "",           2, "Director of Operations", ""),
+ ("Kestrel Park Logistics",    "Discovery",     128000, "2027-03-12", "2026-11-16", "Map their sites and dock counts",       "2026-12-02", 1, "Head of Fulfillment", ""),
+ ("Juniper Dockside",          "Discovery",      64000, "2027-03-26", "2026-11-19", "Intro call with the COO",               "2026-11-30", 3, "Operations Manager", ""),
+ ("Halvering Group",           "Discovery",      96000, "2026-12-16", "2026-11-18", "Confirm the problem with a buyer title", "2026-11-26", 2, "Procurement Lead", ""),
+]
+CAT = {"Contract Sent": "Commit", "Proposal": "Best case", "Negotiation": "Best case", "Discovery": "Pipeline", "Evaluation": "Pipeline"}
+
+def d(s): return date.fromisoformat(s)
+
+def main():
+    os.makedirs(os.path.join(FX, "calls"), exist_ok=True)
+    os.makedirs(KEY, exist_ok=True)
+    with open(os.path.join(FX, "pipeline.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["Deal", "Account", "Owner", "Stage", "Amount (USD per year)", "Close date", "Last activity date", "Next step", "Next step date", "Contacts on the deal", "Main contact title", "Competitor"])
+        for a, st, amt, close, last, ns, nsd, n, title, comp in D:
+            w.writerow([a + " - dock scheduling", a, "Dana Okafor", st, amt, close, last, ns, nsd, n, title, comp])
+    q4 = [r for r in D if d(r[3]) <= QEND]
+    tot = lambda rows: sum(r[2] or 0 for r in rows)
+    key = {
+        "today": "Friday, November 20, 2026",
+        "pipeline": {
+            "open_deals": len(D),
+            "open_total": tot(D),
+            "by_stage_count": {s: sum(1 for r in D if r[1] == s) for s in ["Discovery", "Evaluation", "Proposal", "Negotiation", "Contract Sent"]},
+            "by_stage_amount": {s: tot([r for r in D if r[1] == s]) for s in ["Discovery", "Evaluation", "Proposal", "Negotiation", "Contract Sent"]},
+            "past_close_date": [r[0] for r in D if d(r[3]) < TODAY],
+            "no_activity_30_days": [r[0] for r in D if (TODAY - d(r[4])).days > 30],
+            "single_threaded": [r[0] for r in D if r[7] == 1],
+            "no_next_step": [r[0] for r in D if not r[5]],
+            "missing_amount": [r[0] for r in D if r[2] == ""],
+            "q4_open_total": tot(q4),
+            "quota": QUOTA, "closed_won": WON, "remaining": QUOTA - WON,
+            "coverage_q4_open_over_remaining": round(tot(q4) / (QUOTA - WON), 2),
+        },
+        "forecast": {
+            "commit_q4": tot([r for r in q4 if CAT[r[1]] == "Commit"]),
+            "commit_deals": [r[0] for r in q4 if CAT[r[1]] == "Commit"],
+            "best_case_q4": tot([r for r in q4 if CAT[r[1]] == "Best case"]),
+            "pipeline_q4": tot([r for r in q4 if CAT[r[1]] == "Pipeline"]),
+            "gap_after_commit": QUOTA - WON - tot([r for r in q4 if CAT[r[1]] == "Commit"]),
+            "commit_at_risk": {"Northgate Cold Chain": "close date of November 13 has passed", "Corvell Storage": "no activity since October 9"},
+        },
+    }
+    json.dump(key, open(os.path.join(KEY, "numbers.json"), "w"), indent=1)
+    print(json.dumps(key, indent=0))
+
+if __name__ == "__main__":
+    main()

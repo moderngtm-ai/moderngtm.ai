@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline review: Dana Okafor, fourth quarter 2026</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f5f1;
+    --card: #ffffff;
+    --ink: #1c2430;
+    --muted: #5b6675;
+    --line: #e3e1da;
+    --head: #f2f0ea;
+    --accent: #0f6b6b;
+    --accent-soft: #e4f1f0;
+    --sev-ink: #9a2c1b;
+    --sev-bg: #fbe9e5;
+    --warn-ink: #7a5000;
+    --warn-bg: #fcf1d8;
+    --clean-bg: #0f6b6b;
+    --clean-ink: #ffffff;
+    --risk-a: #f1d596;
+    --risk-b: #f7e4b8;
+    --risk-ink: #4d3300;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171b;
+      --card: #1c2026;
+      --ink: #e8eaed;
+      --muted: #a3acb8;
+      --line: #2e343c;
+      --head: #232830;
+      --accent: #62c9c2;
+      --accent-soft: #1d3334;
+      --sev-ink: #ffb8ab;
+      --sev-bg: #4a1f17;
+      --warn-ink: #f3d281;
+      --warn-bg: #40300a;
+      --clean-bg: #2f9c95;
+      --clean-ink: #06201f;
+      --risk-a: #6a5113;
+      --risk-b: #57420f;
+      --risk-ink: #fbe9bd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 1120px; margin: 0 auto; padding: 32px 20px 72px; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 20px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -0.005em; }
+  h3 { font-size: 15.5px; line-height: 1.35; margin: 0 0 6px; }
+  p { margin: 0 0 12px; }
+  .lede { font-size: 16px; color: var(--muted); margin-bottom: 6px; }
+  .src { font-size: 12.5px; color: var(--muted); }
+  section { margin-top: 36px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+  .bottom-line { font-size: 17px; line-height: 1.5; max-width: 62em; margin-bottom: 18px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 0 0 10px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 15px; }
+  .tile dt { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .tile dd { margin: 0; }
+  .tile .v { font-size: 26px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .tile .s { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+  .tile.alert .v { color: var(--sev-ink); }
+
+  .cover { margin: 22px 0 0; }
+  .cover h3 { margin-bottom: 2px; }
+  .cover-scale { position: relative; margin-top: 34px; }
+  .bar { display: flex; height: 36px; border-radius: 7px; overflow: hidden; }
+  .seg { display: flex; align-items: center; padding: 0 12px; font-size: 13px; font-weight: 650; white-space: nowrap; overflow: hidden; }
+  .seg.clean { background: var(--clean-bg); color: var(--clean-ink); }
+  .seg.risk { background: repeating-linear-gradient(135deg, var(--risk-a) 0 9px, var(--risk-b) 9px 18px); color: var(--risk-ink); }
+  .mark { position: absolute; top: -7px; bottom: -7px; width: 0; border-left: 2px solid var(--ink); }
+  .mark span { position: absolute; bottom: 100%; left: 0; transform: translateX(-50%); white-space: nowrap; font-size: 12.5px; font-weight: 650; padding-bottom: 3px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 16px 0 6px; padding: 0; list-style: none; font-size: 13.5px; }
+  .legend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 7px; }
+  .legend .sw.clean { background: var(--clean-bg); }
+  .legend .sw.risk { background: repeating-linear-gradient(135deg, var(--risk-a) 0 4px, var(--risk-b) 4px 8px); border: 1px solid var(--line); }
+  @media (max-width: 640px) { .seg { font-size: 0; padding: 0; } }
+
+  .focus { list-style: none; counter-reset: f; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .focus > li { counter-increment: f; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; padding: 16px 20px 14px 58px; position: relative; }
+  .focus > li::before { content: counter(f); position: absolute; left: 18px; top: 15px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .focus p { margin-bottom: 8px; max-width: 64em; }
+  .focus ul { margin: 0 0 8px; padding-left: 18px; max-width: 64em; }
+  .focus ul li { margin-bottom: 6px; }
+  .note { background: var(--accent-soft); border-radius: 10px; padding: 12px 16px; margin-top: 12px; font-size: 14px; }
+  .note p:last-child { margin-bottom: 0; }
+
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  caption { text-align: left; padding: 12px 14px 10px; font-size: 13px; color: var(--muted); caption-side: top; }
+  th, td { padding: 10px 14px; text-align: left; vertical-align: top; border-top: 1px solid var(--line); }
+  thead th { font-size: 12.5px; font-weight: 650; color: var(--muted); background: var(--head); vertical-align: bottom; line-height: 1.3; }
+  tbody th { font-weight: 650; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.num { white-space: nowrap; }
+  .nowrap { white-space: nowrap; }
+  tr.group th { background: var(--accent-soft); font-size: 13px; font-weight: 650; }
+  tr.total th, tr.total td { font-weight: 700; background: var(--head); }
+  .sub { display: block; font-size: 12.5px; font-weight: 400; color: var(--muted); }
+  .missing { color: var(--muted); font-style: italic; text-align: center; vertical-align: middle; font-size: 13px; min-width: 150px; }
+  .wide { min-width: 940px; }
+  .deals thead th:nth-child(1) { width: 15%; }
+  .deals thead th:nth-child(6) { width: 36%; }
+  .deals thead th:nth-child(7) { width: 12%; }
+  .deals.clean thead th:nth-child(5) { width: 23%; }
+  .deals.clean thead th:nth-child(6) { width: 27%; }
+  @media (max-width: 860px) {
+    .deals { min-width: 0; display: block; }
+    .deals caption { display: block; }
+    .deals thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .deals tbody { display: block; }
+    .deals tr { display: grid; grid-template-columns: 1fr auto; gap: 3px 14px; padding: 13px 14px; border-top: 1px solid var(--line); }
+    .deals tr.group { display: block; padding: 0; }
+    .deals tr.group th { display: block; padding: 9px 14px; }
+    .deals tr:not(.group) > * { display: block; border: 0; padding: 0; width: auto; }
+    .deals tr:not(.group) > :nth-child(1) { grid-area: 1 / 1; }
+    .deals tr:not(.group) > :nth-child(3) { grid-area: 1 / 2; font-weight: 650; }
+    .deals tr:not(.group) > :nth-child(2) { grid-area: 2 / 1; color: var(--muted); }
+    .deals tr:not(.group) > :nth-child(4) { grid-area: 2 / 2; color: var(--muted); text-align: right; }
+    .deals tr:not(.group) > :nth-child(4)::before { content: "Close date "; }
+    .deals tr:not(.group) > :nth-child(5) { grid-area: 3 / 1 / 4 / 3; margin-top: 5px; }
+    .deals tr:not(.group) > :nth-child(6) { grid-area: 4 / 1 / 5 / 3; }
+    .deals tr:not(.group) > :nth-child(7) { grid-area: 5 / 1 / 6 / 3; margin-top: 2px; }
+    .deals.clean tr:not(.group) > :nth-child(5)::before { content: "Next step: "; font-weight: 650; }
+  }
+  .flag { display: inline-block; font-size: 12.5px; font-weight: 650; line-height: 1.35; padding: 2px 9px; border-radius: 999px; margin: 0 4px 4px 0; white-space: nowrap; }
+  .flag.sev { color: var(--sev-ink); background: var(--sev-bg); }
+  .flag.warn { color: var(--warn-ink); background: var(--warn-bg); }
+  .after { margin-top: 12px; font-size: 14px; max-width: 70em; }
+  .after li { margin-bottom: 6px; }
+  dl.defs { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0 0 14px; font-size: 14px; }
+  dl.defs dt { font-weight: 650; }
+  dl.defs dd { margin: 0; }
+  @media (max-width: 640px) { dl.defs { grid-template-columns: 1fr; gap: 2px; } dl.defs dd { margin-bottom: 8px; } }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
+  .cols ul { margin: 0; padding-left: 18px; font-size: 14px; }
+  .cols li { margin-bottom: 7px; }
+  @media print {
+    body { background: #fff; }
+    main { padding: 0; max-width: none; }
+    .card, .tile, .focus > li, tr { break-inside: avoid; }
+    .scroll { overflow: visible; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Pipeline review</h1>
+  <p class="lede">Dana Okafor, Larkspur Systems. Fourth quarter of 2026, as of Friday, November 20, 2026.</p>
+  <p class="src">From pipeline.csv (24 open deals, rows 2 to 25, exported the morning of November 20) and company-facts.md. No CRM, email or calendar was connected, so nothing else was read and nothing was changed.</p>
+</header>
+
+<section aria-labelledby="h-summary">
+  <h2 id="h-summary">Summary</h2>
+  <p class="bottom-line">You need $290,000 more to reach your $600,000 quota, with 41 days left in the quarter. On paper that gap is covered 4.2 times, above your 3x target. But 9 of the 14 deals closing this quarter are at risk, and on the 5 deals with no flags coverage is 1.9 times. Even if all three Contract Sent deals sign, you reach $598,000, which is $2,000 short of quota.</p>
+
+  <dl class="tiles">
+    <div class="tile">
+      <dt>Open pipeline</dt>
+      <dd class="v">$2,144,000</dd>
+      <dd class="s">24 deals. One amount is blank (Silverline Freightways).</dd>
+    </div>
+    <div class="tile">
+      <dt>Closing this quarter</dt>
+      <dd class="v">$1,216,000</dd>
+      <dd class="s">14 deals with a close date on or before December 31, 2026.</dd>
+    </div>
+    <div class="tile">
+      <dt>Weighted, this quarter</dt>
+      <dd class="v">$699,200</dd>
+      <dd class="s">Uses assumed stage weights, not Larkspur's own. All open deals: $982,400.</dd>
+    </div>
+    <div class="tile">
+      <dt>Coverage this quarter</dt>
+      <dd class="v">4.2x</dd>
+      <dd class="s">Of the $290,000 gap. Target is 3x, or $870,000. On deals with no flags: 1.9x.</dd>
+    </div>
+    <div class="tile alert">
+      <dt>At risk</dt>
+      <dd class="v">15 deals</dd>
+      <dd class="s">$1,248,000. Of these, 9 close this quarter: $672,000.</dd>
+    </div>
+  </dl>
+  <p class="src">From pipeline.csv, rows 2 to 25. Quota ($600,000), closed won so far ($310,000) and the 3x target are from company-facts.md, Quota and coverage.</p>
+
+  <div class="card cover">
+    <h3>Pipeline closing by December 31, 2026: $1,216,000</h3>
+    <p class="src">The part with no flags stops well short of the 3x target.</p>
+    <div class="cover-scale" role="img" aria-label="Of the $1,216,000 closing this quarter, $544,000 is on deals with no flags and $672,000 is on at-risk deals. The remaining gap is $290,000 and the 3x target is $870,000.">
+      <div class="bar">
+        <div class="seg clean" style="width:44.74%">No flags $544,000</div>
+        <div class="seg risk" style="width:55.26%">At risk $672,000</div>
+      </div>
+      <div class="mark" style="left:23.85%"><span>Gap $290,000</span></div>
+      <div class="mark" style="left:71.55%"><span>3x target $870,000</span></div>
+    </div>
+    <ul class="legend">
+      <li><span class="sw clean"></span>No flags: 5 deals, $544,000, 1.9x the gap</li>
+      <li><span class="sw risk"></span>At risk: 9 deals, $672,000</li>
+      <li>Vertical lines: the $290,000 gap and the $870,000 target</li>
+    </ul>
+  </div>
+</section>
+
+<section aria-labelledby="h-focus">
+  <h2 id="h-focus">Recommended focus</h2>
+  <ol class="focus">
+    <li>
+      <h3>Coverage: secure the three Contract Sent deals first</h3>
+      <p>Coverage is above the 3x target on paper ($1,216,000 against $870,000) and under it on deals with no flags ($544,000). Contract Sent totals $288,000, which is $2,000 less than the gap. No two deals closing this quarter add up to $290,000 either: the largest, Quillon Freight at $160,000, plus Pellman Distribution or Maplecrest Distribution at $128,000, makes $288,000. You need at least three signatures by December 31.</p>
+      <ul>
+        <li><strong>Northgate Cold Chain, $96,000.</strong> The close date of November 13 has passed. Use the November 24 step, "Chase signature with the signer", to get a signing date, then reset the close date to it. <span class="src">From pipeline.csv, row 3.</span></li>
+        <li><strong>Corvell Storage, $64,000.</strong> No activity since October 9, which is 42 days, and Slotwise is on the deal. Make contact now instead of waiting for "Confirm signing date" on November 27. <span class="src">From pipeline.csv, row 4.</span></li>
+        <li><strong>Pellman Distribution, $128,000.</strong> No flags, but the next step is "Legal returns redlines" on November 23, which leaves 11 days to the December 4 close date. <span class="src">From pipeline.csv, row 2.</span></li>
+        <li><strong>Quillon Freight, $160,000.</strong> No flags, and your largest deal. The November 24 pricing call with procurement is the biggest single step toward the number. Slotwise is on the deal. <span class="src">From pipeline.csv, row 5.</span></li>
+      </ul>
+    </li>
+    <li>
+      <h3>Highest-value at-risk deal: Maplecrest Distribution, $128,000</h3>
+      <p>Proposal, close date December 29, 2026. The next step and its date are blank; last activity was November 13. Add a dated next step this week. To leave Proposal, pricing must be sent and the signer named, so book whichever of those is still open.</p>
+      <p>Two other at-risk deals are also $128,000 (Thistle &amp; Marsh and Kestrel Park Logistics). Maplecrest comes first because it is the one that counts toward this quarter. <span class="src">From pipeline.csv, row 11.</span></p>
+    </li>
+    <li>
+      <h3>Stage with the most at-risk deals: Evaluation, 5 of 6</h3>
+      <p>The export cannot show which deals are stuck in a stage, because it has no stage-entry dates. This is the stage with the most at-risk deals instead. Oakhurst Pallet is 14 days past its close date with a second demo still to come. Redfern Cross-Dock has had no activity for 57 days. Silverline Freightways has no amount. Thistle &amp; Marsh and Underhill Wholesale have one contact each.</p>
+      <p>Reset the close dates on Oakhurst and Redfern to what you now expect. If both move past December 31, $160,000 leaves this quarter's coverage. <span class="src">From pipeline.csv, rows 14 to 18.</span></p>
+    </li>
+  </ol>
+  <div class="note">
+    <p><strong>Calendar check.</strong> Four next steps are dated November 26 or 27: Brightwater Haulage and Halvering Group on the 26th, Corvell Storage and Silverline Freightways on the 27th. November 26 is Thanksgiving in the United States. The export does not say where these accounts are based; if they are US accounts, move those steps earlier. <span class="src">From pipeline.csv, rows 4, 10, 16 and 25.</span></p>
+  </div>
+</section>
+
+<section aria-labelledby="h-coverage">
+  <h2 id="h-coverage">Coverage check</h2>
+  <p>Quota of $600,000, less $310,000 closed won, leaves a gap of $290,000. Your coverage target is 3 times the gap: $870,000. <span class="src">From company-facts.md, Quota and coverage.</span></p>
+
+  <div class="scroll">
+    <table>
+      <caption>Open pipeline closing by December 31, 2026, against the gap and the target. From pipeline.csv, the 14 rows with a close date on or before that day.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Pipeline counted</th>
+          <th scope="col" class="num">Deals</th>
+          <th scope="col" class="num">Amount</th>
+          <th scope="col" class="num">Times the $290,000 gap</th>
+          <th scope="col" class="num">Against the $870,000 target</th>
+          <th scope="col" class="num">Weighted (assumed weights)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">All open deals closing this quarter</th>
+          <td class="num">14</td>
+          <td class="num">$1,216,000</td>
+          <td class="num">4.2x</td>
+          <td class="num">$346,000 over</td>
+          <td class="num">$699,200</td>
+        </tr>
+        <tr>
+          <th scope="row">Only deals with no flags</th>
+          <td class="num">5</td>
+          <td class="num">$544,000</td>
+          <td class="num">1.9x</td>
+          <td class="num">$326,000 under</td>
+          <td class="num">$299,200</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="scroll" style="margin-top:12px">
+    <table>
+      <caption>The same 14 deals by forecast category, as company-facts.md defines the categories</caption>
+      <thead>
+        <tr>
+          <th scope="col">Forecast category</th>
+          <th scope="col">Stages</th>
+          <th scope="col" class="num">Deals</th>
+          <th scope="col" class="num">Amount</th>
+          <th scope="col" class="num">On at-risk deals</th>
+          <th scope="col" class="num">On deals with no flags</th>
+          <th scope="col">Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Commit</th>
+          <td>Contract Sent</td>
+          <td class="num">3</td>
+          <td class="num">$288,000</td>
+          <td class="num">$160,000 (2 deals)</td>
+          <td class="num">$128,000 (1 deal)</td>
+          <td class="src nowrap">Rows 2 to 4</td>
+        </tr>
+        <tr>
+          <th scope="row">Best case</th>
+          <td>Negotiation, Proposal</td>
+          <td class="num">6</td>
+          <td class="num">$608,000</td>
+          <td class="num">$352,000 (4 deals)</td>
+          <td class="num">$256,000 (2 deals)</td>
+          <td class="src nowrap">Rows 5 to 7, 9 to 11</td>
+        </tr>
+        <tr>
+          <th scope="row">Pipeline</th>
+          <td>Evaluation, Discovery</td>
+          <td class="num">5</td>
+          <td class="num">$320,000</td>
+          <td class="num">$160,000 (3 deals)</td>
+          <td class="num">$160,000 (2 deals)</td>
+          <td class="src nowrap">Rows 14 to 16, 20, 25</td>
+        </tr>
+        <tr class="total">
+          <th scope="row">Total</th>
+          <td></td>
+          <td class="num">14</td>
+          <td class="num">$1,216,000</td>
+          <td class="num">$672,000 (9 deals)</td>
+          <td class="num">$544,000 (5 deals)</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="after">
+    <li><strong>Weighted figure.</strong> I had no stage probabilities for Larkspur, so I used generic ones: Contract Sent 90%, Negotiation 75%, Proposal 50%, Evaluation 25%, Discovery 10%. The sum is $288,000 &times; 90% + $320,000 &times; 75% + $288,000 &times; 50% + $160,000 &times; 25% + $160,000 &times; 10% = $699,200. Treat it as a rough guide.</li>
+    <li><strong>Past close dates still count.</strong> Northgate Cold Chain, Brightwater Haulage and Oakhurst Pallet ($224,000 together) have close dates that have already passed. Under your rule they count toward this quarter, because the dates are on or before December 31. <span class="src">From pipeline.csv, rows 3, 10 and 14.</span></li>
+    <li><strong>Two no-flag deals are still in Discovery.</strong> Halvering Group (close date December 16) and Westmere Depot (December 23) add $160,000. I have no cycle-length history to test those dates, so they are not flagged. Without them, the no-flag figure is $384,000, or 1.3 times the gap. <span class="src">From pipeline.csv, rows 25 and 20.</span></li>
+    <li><strong>Silverline Freightways</strong> counts as one deal and adds $0, because its amount is blank. <span class="src">From pipeline.csv, row 16.</span></li>
+  </ul>
+</section>
+
+<section aria-labelledby="h-stage">
+  <h2 id="h-stage">By stage</h2>
+  <div class="scroll">
+    <table class="wide">
+      <caption>All 24 open deals, in your stage names. Days without activity run from Last activity date to November 20, 2026.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Stage</th>
+          <th scope="col" class="num">Deals</th>
+          <th scope="col" class="num">Amount</th>
+          <th scope="col" class="num">Closing this quarter</th>
+          <th scope="col">Average age in stage</th>
+          <th scope="col" class="num">No activity for 14+ days</th>
+          <th scope="col" class="num">Of those, 30+ days</th>
+          <th scope="col" class="num">Blank next step</th>
+          <th scope="col" class="num">At risk</th>
+          <th scope="col">Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Contract Sent <span class="sub">Commit</span></th>
+          <td class="num">3</td>
+          <td class="num">$288,000</td>
+          <td class="num">3 deals, $288,000</td>
+          <td class="missing" rowspan="5">Not in the export: it has no created date and no stage-entry date.</td>
+          <td class="num">1</td>
+          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">2 of 3</td>
+          <td class="src nowrap">Rows 2 to 4</td>
+        </tr>
+        <tr>
+          <th scope="row">Negotiation <span class="sub">Best case</span></th>
+          <td class="num">4</td>
+          <td class="num">$448,000</td>
+          <td class="num">3 deals, $320,000</td>
+          <td class="num">1</td>
+          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">2 of 4</td>
+          <td class="src nowrap">Rows 5 to 8</td>
+        </tr>
+        <tr>
+          <th scope="row">Proposal <span class="sub">Best case</span></th>
+          <td class="num">5</td>
+          <td class="num">$448,000</td>
+          <td class="num">3 deals, $288,000</td>
+          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">1</td>
+          <td class="num">3 of 5</td>
+          <td class="src nowrap">Rows 9 to 13</td>
+        </tr>
+        <tr>
+          <th scope="row">Evaluation <span class="sub">Pipeline</span></th>
+          <td class="num">6</td>
+          <td class="num">$448,000 <span class="sub">one amount blank</span></td>
+          <td class="num">3 deals, $160,000</td>
+          <td class="num">2</td>
+          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">5 of 6</td>
+          <td class="src nowrap">Rows 14 to 19</td>
+        </tr>
+        <tr>
+          <th scope="row">Discovery <span class="sub">Pipeline</span></th>
+          <td class="num">6</td>
+          <td class="num">$512,000</td>
+          <td class="num">2 deals, $160,000</td>
+          <td class="num">1</td>
+          <td class="num">1</td>
+          <td class="num">1</td>
+          <td class="num">3 of 6</td>
+          <td class="src nowrap">Rows 20 to 25</td>
+        </tr>
+        <tr class="total">
+          <th scope="row">Total</th>
+          <td class="num">24</td>
+          <td class="num">$2,144,000</td>
+          <td class="num">14 deals, $1,216,000</td>
+          <td></td>
+          <td class="num">6</td>
+          <td class="num">4</td>
+          <td class="num">2</td>
+          <td class="num">15 of 24</td>
+          <td class="src nowrap">Rows 2 to 25</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="after">
+    <li><strong>Average age in stage is missing.</strong> The export has neither a stage-entry date nor a created date, so I could not work out how long deals have sat in each stage. Add either column to the next export and this column fills in.</li>
+    <li><strong>Two lines for inactivity.</strong> Your hygiene rule is activity in the last 30 days; four deals break it. The 14-day line is the usual early warning; two more deals sit between 14 and 29 days (Brightwater Haulage at 15 and Oakhurst Pallet at 18). <span class="src">From pipeline.csv, rows 10 and 14.</span></li>
+  </ul>
+</section>
+
+<section aria-labelledby="h-risk">
+  <h2 id="h-risk">At-risk deals: 15 deals, $1,248,000</h2>
+  <dl class="defs">
+    <dt><span class="flag sev">Slipping</span></dt>
+    <dd>The close date has passed. The flag shows by how many days. 3 deals, $224,000.</dd>
+    <dt><span class="flag sev">Stale</span></dt>
+    <dd>No activity for 30 days or more, which breaks your hygiene rule. The flag shows days since the last activity. 4 deals, $352,000.</dd>
+    <dt><span class="flag warn">Quiet</span></dt>
+    <dd>No activity for 14 to 29 days: the usual early warning. 2 deals, both already slipping, so it adds none to the count.</dd>
+    <dt><span class="flag warn">Blank next step</span></dt>
+    <dd>Your rule asks for a next step with a date on every open deal. 2 deals, $192,000.</dd>
+    <dt><span class="flag warn">Blank amount</span></dt>
+    <dd>Your rule asks for an amount on every open deal. 1 deal.</dd>
+    <dt><span class="flag warn">Single-threaded</span></dt>
+    <dd>One contact on the deal, by your definition. 5 deals, $480,000.</dd>
+    <dt><span class="flag warn">No buyer title</span></dt>
+    <dd>The deal has left Discovery and its only contact does not hold one of your buyer titles. 1 deal.</dd>
+  </dl>
+  <p class="src">Two checks could not run. Stuck (twice the usual time in a stage) needs stage-entry dates. Close date moved out twice or more needs the close-date history or an earlier export. Neither is in pipeline.csv.</p>
+
+  <div class="scroll">
+    <table class="wide deals">
+      <caption>Ordered by stage, then close date. Values are as they appear in the export.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Account</th>
+          <th scope="col">Stage</th>
+          <th scope="col" class="num">Amount</th>
+          <th scope="col">Close date</th>
+          <th scope="col">Flags</th>
+          <th scope="col">Suggested action</th>
+          <th scope="col">Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group"><th colspan="7" scope="rowgroup">Closing this quarter: 9 deals, $672,000</th></tr>
+        <tr>
+          <th scope="row">Northgate Cold Chain</th>
+          <td>Contract Sent</td>
+          <td class="num">$96,000</td>
+          <td class="nowrap">Nov 13, 2026</td>
+          <td><span class="flag sev">Slipping: 7 days</span></td>
+          <td>Get a signing date on the Nov 24 step, "Chase signature with the signer", then reset the close date to it. Last activity was Nov 12.</td>
+          <td class="src">From pipeline.csv, row 3</td>
+        </tr>
+        <tr>
+          <th scope="row">Corvell Storage</th>
+          <td>Contract Sent</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Dec 11, 2026</td>
+          <td><span class="flag sev">Stale: 42 days</span></td>
+          <td>Make contact now instead of waiting for "Confirm signing date" on Nov 27. Nothing is logged since Oct 9, and Slotwise is on the deal.</td>
+          <td class="src">From pipeline.csv, row 4</td>
+        </tr>
+        <tr>
+          <th scope="row">Arden Wharf 3PL</th>
+          <td>Negotiation</td>
+          <td class="num">$96,000</td>
+          <td class="nowrap">Dec 15, 2026</td>
+          <td><span class="flag sev">Stale: 49 days</span></td>
+          <td>Send the revised terms now rather than Nov 25, and get a reply. Nothing is logged since Oct 2. If they stay quiet, move the Dec 15 close date.</td>
+          <td class="src">From pipeline.csv, row 6</td>
+        </tr>
+        <tr>
+          <th scope="row">Sable Ridge Supply</th>
+          <td>Negotiation</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Dec 22, 2026</td>
+          <td><span class="flag warn">Single-threaded</span></td>
+          <td>Add their IT lead to the deal before the Nov 30 security review, and confirm who the signer is. The Director of Operations is the only contact.</td>
+          <td class="src">From pipeline.csv, row 7</td>
+        </tr>
+        <tr>
+          <th scope="row">Brightwater Haulage</th>
+          <td>Proposal</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Oct 30, 2026</td>
+          <td><span class="flag sev">Slipping: 21 days</span> <span class="flag warn">Quiet: 15 days</span></td>
+          <td>Follow up on the proposal now rather than Nov 26, then reset the close date. If the new date falls after Dec 31, the deal leaves this quarter.</td>
+          <td class="src">From pipeline.csv, row 10</td>
+        </tr>
+        <tr>
+          <th scope="row">Maplecrest Distribution</th>
+          <td>Proposal</td>
+          <td class="num">$128,000</td>
+          <td class="nowrap">Dec 29, 2026</td>
+          <td><span class="flag warn">Blank next step</span></td>
+          <td>Add a next step with a date. To leave Proposal, pricing must be sent and the signer named, so book whichever is still open. Last activity was Nov 13.</td>
+          <td class="src">From pipeline.csv, row 11</td>
+        </tr>
+        <tr>
+          <th scope="row">Oakhurst Pallet</th>
+          <td>Evaluation</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Nov 6, 2026</td>
+          <td><span class="flag sev">Slipping: 14 days</span> <span class="flag warn">Quiet: 18 days</span></td>
+          <td>Reset the close date after the Nov 25 second demo. The deal is still in Evaluation, so check whether it belongs in this quarter at all.</td>
+          <td class="src">From pipeline.csv, row 14</td>
+        </tr>
+        <tr>
+          <th scope="row">Silverline Freightways</th>
+          <td>Evaluation</td>
+          <td class="num">blank</td>
+          <td class="nowrap">Dec 19, 2026</td>
+          <td><span class="flag warn">Blank amount</span></td>
+          <td>Enter the amount once the Nov 27 step, "Scope the number of sites", is done. List price is $32,000 per site per year. Until then the deal adds $0 to coverage.</td>
+          <td class="src">From pipeline.csv, row 16</td>
+        </tr>
+        <tr>
+          <th scope="row">Redfern Cross-Dock</th>
+          <td>Evaluation</td>
+          <td class="num">$96,000</td>
+          <td class="nowrap">Dec 30, 2026</td>
+          <td><span class="flag sev">Stale: 57 days</span></td>
+          <td>Confirm the Dec 1 technical deep dive is really booked. Nothing is logged since Sep 24. If you cannot reach them, move the Dec 30 close date out of this quarter.</td>
+          <td class="src">From pipeline.csv, row 15</td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr class="group"><th colspan="7" scope="rowgroup">Closing next quarter: 6 deals, $576,000</th></tr>
+        <tr>
+          <th scope="row">Ironbridge Logistics</th>
+          <td>Proposal</td>
+          <td class="num">$96,000</td>
+          <td class="nowrap">Feb 12, 2027</td>
+          <td><span class="flag warn">Single-threaded</span></td>
+          <td>Add the signer to the deal before you present to them on Dec 8. The Director of Operations is the only contact.</td>
+          <td class="src">From pipeline.csv, row 12</td>
+        </tr>
+        <tr>
+          <th scope="row">Underhill Wholesale</th>
+          <td>Evaluation</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Jan 15, 2027</td>
+          <td><span class="flag warn">Single-threaded</span></td>
+          <td>When you send the integration overview on Nov 24, ask the Director of Operations who the technical owner is, and add them. Slotwise is on the deal.</td>
+          <td class="src">From pipeline.csv, row 18</td>
+        </tr>
+        <tr>
+          <th scope="row">Thistle &amp; Marsh</th>
+          <td>Evaluation</td>
+          <td class="num">$128,000</td>
+          <td class="nowrap">Feb 26, 2027</td>
+          <td><span class="flag warn">Single-threaded</span> <span class="flag warn">No buyer title</span></td>
+          <td>The only contact is an IT Manager. Bring in a buyer title (VP or Director of Operations, Head of Warehousing or Fulfillment, or COO) before the Dec 4 demo.</td>
+          <td class="src">From pipeline.csv, row 17</td>
+        </tr>
+        <tr>
+          <th scope="row">Yarrow Supply Chain</th>
+          <td>Discovery</td>
+          <td class="num">$96,000</td>
+          <td class="nowrap">Jan 30, 2027</td>
+          <td><span class="flag sev">Stale: 39 days</span></td>
+          <td>This reads as a planned pause: the next step is "Reconnect after their peak season" on Dec 7. Keep that date, and move the Jan 30 close date if the reconnect slips.</td>
+          <td class="src">From pipeline.csv, row 21</td>
+        </tr>
+        <tr>
+          <th scope="row">Zennor Cold Storage</th>
+          <td>Discovery</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Feb 19, 2027</td>
+          <td><span class="flag warn">Blank next step</span></td>
+          <td>Book the next meeting and record it with a date. Leaving Discovery requires it. Last activity was Nov 13.</td>
+          <td class="src">From pipeline.csv, row 22</td>
+        </tr>
+        <tr>
+          <th scope="row">Kestrel Park Logistics</th>
+          <td>Discovery</td>
+          <td class="num">$128,000</td>
+          <td class="nowrap">Mar 12, 2027</td>
+          <td><span class="flag warn">Single-threaded</span></td>
+          <td>Add a second contact while you map their sites and dock counts on Dec 2.</td>
+          <td class="src">From pipeline.csv, row 23</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">
+    <p><strong>Applying these.</strong> This review only reads; nothing was changed anywhere. To act on a suggestion, tell me the deal and the change, for example "Update Northgate Cold Chain with a new close date". With no CRM connected, I will write the change out for you to paste in.</p>
+  </div>
+</section>
+
+<section aria-labelledby="h-clean">
+  <h2 id="h-clean">Deals with no flags: 9 deals, $896,000</h2>
+  <div class="scroll">
+    <table class="wide deals clean">
+      <caption>Ordered by stage, then close date. Together with the at-risk table, this accounts for all 24 deals.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Account</th>
+          <th scope="col">Stage</th>
+          <th scope="col" class="num">Amount</th>
+          <th scope="col">Close date</th>
+          <th scope="col">Next step</th>
+          <th scope="col">Worth knowing</th>
+          <th scope="col">Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group"><th colspan="7" scope="rowgroup">Closing this quarter: 5 deals, $544,000</th></tr>
+        <tr>
+          <th scope="row">Pellman Distribution</th>
+          <td>Contract Sent</td>
+          <td class="num">$128,000</td>
+          <td class="nowrap">Dec 4, 2026</td>
+          <td>Legal returns redlines, Nov 23</td>
+          <td>Redlines are still out, with 11 days between their return and the close date.</td>
+          <td class="src">From pipeline.csv, row 2</td>
+        </tr>
+        <tr>
+          <th scope="row">Quillon Freight</th>
+          <td>Negotiation</td>
+          <td class="num">$160,000</td>
+          <td class="nowrap">Dec 18, 2026</td>
+          <td>Pricing call with procurement, Nov 24</td>
+          <td>Your largest deal. 5 contacts. Slotwise is on the deal.</td>
+          <td class="src">From pipeline.csv, row 5</td>
+        </tr>
+        <tr>
+          <th scope="row">Harbor &amp; Vane Logistics</th>
+          <td>Proposal</td>
+          <td class="num">$96,000</td>
+          <td class="nowrap">Dec 18, 2026</td>
+          <td>On-site workshop, Dec 2</td>
+          <td>16 days from the workshop to the close date. Slotwise is on the deal.</td>
+          <td class="src">From pipeline.csv, row 9</td>
+        </tr>
+        <tr>
+          <th scope="row">Halvering Group</th>
+          <td>Discovery</td>
+          <td class="num">$96,000</td>
+          <td class="nowrap">Dec 16, 2026</td>
+          <td>Confirm the problem with a buyer title, Nov 26</td>
+          <td>Still in Discovery, 26 days before its close date. The main contact is a Procurement Lead, which is not a buyer title.</td>
+          <td class="src">From pipeline.csv, row 25</td>
+        </tr>
+        <tr>
+          <th scope="row">Westmere Depot</th>
+          <td>Discovery</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Dec 23, 2026</td>
+          <td>Discovery call with the operations lead, Nov 25</td>
+          <td>Still in Discovery, 33 days before its close date.</td>
+          <td class="src">From pipeline.csv, row 20</td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr class="group"><th colspan="7" scope="rowgroup">Closing next quarter: 4 deals, $352,000</th></tr>
+        <tr>
+          <th scope="row">Tamarind Fulfillment</th>
+          <td>Negotiation</td>
+          <td class="num">$128,000</td>
+          <td class="nowrap">Jan 22, 2027</td>
+          <td>Redlines call, Dec 1</td>
+          <td>4 contacts. DockPilot is on the deal.</td>
+          <td class="src">From pipeline.csv, row 8</td>
+        </tr>
+        <tr>
+          <th scope="row">Fennick &amp; Lowe</th>
+          <td>Proposal</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Jan 29, 2027</td>
+          <td>Reference call, Dec 3</td>
+          <td>DockPilot is on the deal.</td>
+          <td class="src">From pipeline.csv, row 13</td>
+        </tr>
+        <tr>
+          <th scope="row">Vantage Row 3PL</th>
+          <td>Evaluation</td>
+          <td class="num">$96,000</td>
+          <td class="nowrap">Mar 5, 2027</td>
+          <td>Pilot plan review, Dec 9</td>
+          <td>4 contacts, led by the COO.</td>
+          <td class="src">From pipeline.csv, row 19</td>
+        </tr>
+        <tr>
+          <th scope="row">Juniper Dockside</th>
+          <td>Discovery</td>
+          <td class="num">$64,000</td>
+          <td class="nowrap">Mar 26, 2027</td>
+          <td>Intro call with the COO, Nov 30</td>
+          <td>The main contact is an Operations Manager, which is not a buyer title. The COO call addresses that.</td>
+          <td class="src">From pipeline.csv, row 24</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="h-conv">
+  <h2 id="h-conv">Conversion signal</h2>
+  <div class="card">
+    <p><strong>Not available from these files.</strong> Stage-to-stage conversion, win rate and median cycle length come from won and lost deals over the last two quarters. The export holds open deals only.</p>
+    <p>The one closed figure I have is the $310,000 closed won this quarter, from company-facts.md, with no deal count or dates behind it. That is not enough to work out a rate, so I have not estimated one.</p>
+    <p style="margin-bottom:0">To fill this in, export your closed won and closed lost deals for the last two quarters with stage, amount, created date and close date. That would also replace my assumed stage weights with your real ones.</p>
+  </div>
+</section>
+
+<section aria-labelledby="h-basis">
+  <h2 id="h-basis">What this is based on</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>What I used</h3>
+      <ul>
+        <li><strong>pipeline.csv.</strong> 24 open deals, all owned by Dana Okafor. Row numbers count the header as row 1, so the first deal, Pellman Distribution, is row 2.</li>
+        <li><strong>company-facts.md.</strong> Stage names and what must be true to leave each stage, forecast categories, quota, closed won, the 3x coverage target, hygiene rules, buyer titles and list price.</li>
+        <li>I did not open the other files in the folder (inbox.md, leads.csv, calls). You pointed me to these two, and a pipeline review reads deal records.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>What was missing</h3>
+      <ul>
+        <li><strong>No CRM, email or calendar.</strong> There are no record links, so each line names its row in the export instead.</li>
+        <li><strong>Created date and stage-entry dates.</strong> Without them there is no age in stage and no stuck check.</li>
+        <li><strong>Close-date history.</strong> Without it I cannot see deals pushed out twice or more. An earlier export would do.</li>
+        <li><strong>Contact names and roles.</strong> Single-threaded uses the "Contacts on the deal" count, not who has been active.</li>
+        <li><strong>Closed deals.</strong> Without them there is no conversion, win rate or cycle length.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>What I assumed</h3>
+      <ul>
+        <li><strong>Today is Friday, November 20, 2026</strong>, as you said. Every day count runs from that date.</li>
+        <li><strong>This quarter</strong> means a close date on or before December 31, 2026, your rule.</li>
+        <li><strong>Stage weights</strong> are generic: Contract Sent 90%, Negotiation 75%, Proposal 50%, Evaluation 25%, Discovery 10%. If Larkspur has agreed probabilities, add them to company-facts.md and I will use those.</li>
+        <li><strong>Coverage</strong> compares unweighted open pipeline closing this quarter with 3 times the remaining gap.</li>
+        <li><strong>Quota and amounts match.</strong> The export gives amounts in USD per year; I assumed quota is counted the same way.</li>
+        <li><strong>Stale</strong> uses your 30-day rule instead of the usual 14 days. Both are shown.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+</body>
+</html>

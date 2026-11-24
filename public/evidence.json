@@ -1,0 +1,2176 @@
+{
+ "name": "Modern GTM evidence register",
+ "as_of": "2026-11-23",
+ "note": "Grade says what a finding can prove; basis says how it was produced. Neither means a figure was independently verified, and nothing here has been peer reviewed. A forecast or a target is graded C whatever its units. Vendor sources are flagged in the basis. Each finding credits who spotted it, who compiled it, who checked it against the source it links to, who rechecked it and who edited it. A row added or corrected after the recheck of November 20, 2026 does not carry it. Rows marked Context or Not used are not evidence.",
+ "grades": {
+  "A": "The effect is stated in financial terms and has been reported, not forecast",
+  "B": "A quantified operating or labor-market result",
+  "C": "A survey, forecast, target or narrative",
+  "Context": "Context, not used as evidence",
+  "Not used": "Listed as a methods example only"
+ },
+ "findings": [
+  {
+   "organization": "Klarna",
+   "finding": "About $39 million of cost savings from the assistant in 2024",
+   "population_and_period": "Letter to SEC staff, July 16, 2025",
+   "basis": "Self-reported",
+   "grade": "A",
+   "sources": [
+    {
+     "label": "Klarna’s letter to SEC staff",
+     "url": "https://www.sec.gov/Archives/edgar/data/2003292/000162828025034998/filename1.htm"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Klarna",
+   "finding": "About $59 million of cost savings from the assistant in 2025",
+   "population_and_period": "Annual report on Form 20-F for 2025, published February 2026",
+   "basis": "Self-reported",
+   "grade": "A",
+   "sources": [
+    {
+     "label": "Klarna annual report, Form 20-F",
+     "url": "https://www.sec.gov/Archives/edgar/data/2003292/000200329226000007/klar-20251231.htm"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Fiserv",
+   "finding": "Agentic call center built with Sierra: a 5–10x return on token costs",
+   "population_and_period": "Q3 2026 earnings call, November 3, 2026",
+   "basis": "Self-reported",
+   "grade": "A",
+   "sources": [
+    {
+     "label": "Call transcript",
+     "url": "https://singjupost.com/fiserv-fisv-q3-2026-earnings-call-transcript/"
+    },
+    {
+     "label": "Second transcript",
+     "url": "https://stockanalysis.com/stocks/fisv/transcripts/726147-q3-2026/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Andy Jolls, Founder, Roxology, LLC",
+    "spotted_by_website": "https://roxology.com",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Vercel",
+   "finding": "Lead agent costs about $5,000 a year to run and returns 32 times its running cost",
+   "population_and_period": "Company post, June 17, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "A",
+   "sources": [
+    {
+     "label": "Vercel, June 17, 2026",
+     "url": "https://vercel.com/blog/introducing-eve"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Fiserv",
+   "finding": "The same call center: a containment rate above 40% and no negative effect on customer NPS; the eligible contacts and the NPS sample are not given",
+   "population_and_period": "Q3 2026 earnings call, November 3, 2026",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Call transcript",
+     "url": "https://singjupost.com/fiserv-fisv-q3-2026-earnings-call-transcript/"
+    },
+    {
+     "label": "Second transcript",
+     "url": "https://stockanalysis.com/stocks/fisv/transcripts/726147-q3-2026/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Andy Jolls, Founder, Roxology, LLC",
+    "spotted_by_website": "https://roxology.com",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Salesforce",
+   "finding": "2.6 million help-site conversations in a year; 63% of questions resolved; satisfaction roughly on par with human agents",
+   "population_and_period": "Company newsroom, January 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Salesforce newsroom",
+     "url": "https://www.salesforce.com/au/news/?p=13046"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Salesforce",
+   "finding": "Salesforce’s help agent has passed 5 million customer conversations, with 64% resolved autonomously, as the company said on August 26, 2026. Its earlier figures, each worded differently: a 77% resolution rate on about 1.4 million to 1.5 million conversations (September 3, 2025), 63% of questions on 2.6 million conversations (January 2026) and 70% of 4.3 million inquiries (June 25, 2026)",
+   "population_and_period": "Salesforce’s own help agent; earnings call, August 26, 2026; period not stated",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Salesforce newsroom, June 25, 2026",
+     "url": "https://www.salesforce.com/news/stories/agentforce-help-agent-announcement/"
+    },
+    {
+     "label": "Call transcript, August 26, 2026 (Motley Fool)",
+     "url": "https://www.fool.com/earnings/call-transcripts/2026/08/31/salesforce-crm-q2-2027-earnings-call-transcript/"
+    },
+    {
+     "label": "Call transcript, September 3, 2025 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/crm/transcripts/351235-q2-2026/"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "corrected_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Salesforce",
+   "finding": "SDR agent contacted 130,000 leads and created 3,200 opportunities in 4 months",
+   "population_and_period": "Agentforce Sales announcement, early 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Salesforce announcement",
+     "url": "https://www.salesforce.com/news/stories/agentforce-sales-announcement/"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Salesforce",
+   "finding": "Support headcount from about 9,000 to about 5,000, as the CEO said in a 2025 interview; in January 2026 the company said the team had shrunk through attrition and redeployment",
+   "population_and_period": "CEO interview reported September 1, 2025; company article, January 15, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "ITPro",
+     "url": "https://www.itpro.com/technology/artificial-intelligence/marc-benioff-says-salesforce-has-already-cut-4-000-customer-support-staff-for-ai-agents-and-workforce-productivity-hasnt-dipped"
+    },
+    {
+     "label": "Salesforce, January 15, 2026",
+     "url": "https://www.salesforce.com/au/news/stories/agentic-enterprise-workforce-evolution/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Klarna",
+   "finding": "2.3 million conversations in the assistant’s first month: two-thirds of chats and the work of 700 full-time agents; 25% fewer repeat inquiries",
+   "population_and_period": "Company release, February 2024",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Klarna release, on PR Newswire",
+     "url": "https://www.prnewswire.com/news-releases/klarna-ai-assistant-handles-two-thirds-of-customer-service-chats-in-its-first-month-302072740.html"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Klarna",
+   "finding": "66% of chats handled in the 12 months to March 31, 2025; about 2 minutes per AI-handled chat against a 12-minute human average",
+   "population_and_period": "Letter to SEC staff, July 16, 2025",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Klarna’s letter to SEC staff",
+     "url": "https://www.sec.gov/Archives/edgar/data/2003292/000162828025034998/filename1.htm"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Klarna",
+   "finding": "80% of customer service chats handled in 2025; work equivalent to more than 850 full-time agents; satisfaction on a par with human agents by Klarna’s own surveys",
+   "population_and_period": "Annual report on Form 20-F for 2025, published February 2026",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Klarna annual report, Form 20-F",
+     "url": "https://www.sec.gov/Archives/edgar/data/2003292/000200329226000007/klar-20251231.htm"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Fiserv",
+   "finding": "Clover risk-hold process: decision times down by two-thirds and false positives down by more than 40% after agents were embedded",
+   "population_and_period": "Q3 2026 earnings call, November 3, 2026",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Call transcript",
+     "url": "https://singjupost.com/fiserv-fisv-q3-2026-earnings-call-transcript/"
+    },
+    {
+     "label": "Second transcript",
+     "url": "https://stockanalysis.com/stocks/fisv/transcripts/726147-q3-2026/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Andy Jolls, Founder, Roxology, LLC",
+    "spotted_by_website": "https://roxology.com",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Citi",
+   "finding": "14,000 engineers use Citi’s main agentic coding tool",
+   "population_and_period": "Citi’s own engineers, not GTM staff; total not stated; earnings call, October 13, 2026",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Citi call transcript",
+     "url": "https://www.citigroup.com/rcs/citigpa/storage/public/Earnings/Q32026/3q26-citigroup-earnings-transcript.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "SAP",
+   "finding": "Using AI tools for prospecting, SAP’s sales teams took almost 40% less time to reach 1,000 prospects than before, with no significant difference in conversion rate between the two approaches. In its pilots, AI tools cut the time to complete many activities by more than 60% on average",
+   "population_and_period": "SAP sales teams selling to small and medium enterprises; a before-and-after measure of 1,000 prospects and earlier pilots, dates not given; figures as given in an HBR article of March 27, 2025",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "HBR, March 27, 2025",
+     "url": "https://hbr.org/2025/03/how-one-company-used-ai-to-broaden-its-customer-base"
+    },
+    {
+     "label": "Authors’ copy at Harvard Business School",
+     "url": "https://www.hbs.edu/ris/Publication%20Files/How%20One%20Company%20Used%20AI%20to%20Broaden%20Its%20Customer%20Base_d2e6fa39-286f-407f-9847-784a63726ec3.pdf"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "SAP",
+   "finding": "SAP uses more than 40 AI tools to serve small and medium enterprises, and its Digital Hubs conduct 90% of the buying journey virtually. The hubs supported more than 22,000 new customer opportunities in 2024, doubled SAP’s pipeline and became the largest source of demand for its core cloud product. Their sales cycle averages 3 to 6 months, against 12 to 18 months for SAP’s in-person selling to large customers, which is not a like-for-like comparison",
+   "population_and_period": "SAP Digital Hubs selling to small and medium enterprises; opportunities and pipeline for 2024; figures as given in an HBR article of March 27, 2025",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "HBR, March 27, 2025",
+     "url": "https://hbr.org/2025/03/how-one-company-used-ai-to-broaden-its-customer-base"
+    },
+    {
+     "label": "Authors’ copy at Harvard Business School",
+     "url": "https://www.hbs.edu/ris/Publication%20Files/How%20One%20Company%20Used%20AI%20to%20Broaden%20Its%20Customer%20Base_d2e6fa39-286f-407f-9847-784a63726ec3.pdf"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "FactSet",
+   "finding": "FactSet says its client assist agent, now rolled out to all clients, resolves more than 30% of all user-initiated requests without a person",
+   "population_and_period": "User-initiated requests from FactSet clients; quarter ended August 31, 2026; count not stated; earnings call, September 30, 2026",
+   "basis": "Self-reported",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Call transcript, September 30, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/fds/transcripts/688920-q4-2026/"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Fin (formerly Intercom; part of Salesforce since September 2026)",
+   "finding": "76% average resolution rate across customers, public by June 9, 2026. Fin then narrowed the denominator: conversations in which it could not answer no longer count, for new workspaces from June 25 and for existing ones from July 1 to 8, 2026. The same 76% is still quoted after the change",
+   "population_and_period": "Company disclosures, June to September 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Fin metrics update",
+     "url": "https://fin.ai/help/en/articles/15600165-update-to-fin-performance-metrics"
+    },
+    {
+     "label": "Intercom, June 9, 2026",
+     "url": "https://www.intercom.com/blog/extending-fin-as-the-most-open-agent-platform"
+    },
+    {
+     "label": "Salesforce, September 10, 2026",
+     "url": "https://www.salesforce.com/news/press-releases/2026/09/10/salesforce-completes-acquisition-of-fin/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Fin (formerly Intercom; part of Salesforce since September 2026)",
+   "finding": "More than 81% of its own customer support volume resolved by Fin; conversation designer role created",
+   "population_and_period": "Company blog, March 13, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Intercom blog",
+     "url": "https://www.intercom.com/blog/automate-customer-service-while-improving-customer-experience/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "HubSpot",
+   "finding": "The average resolution rate HubSpot gives for Customer Agent rose from 55% (August 2025) through the 60s (November 2025) and the mid-60s (February 2026) to 70% (May 2026) and 72% of support tickets without human escalation (August 2026). In May 2026 it also said the rate had gone “from 20% last year”, with no date for the 20%. In November 2026 it gave no rate and said the agent resolved more than 2 million support issues in the quarter. HubSpot does not say which customers or tickets the rate covers. Separately, more than 10,000 customers had adopted Customer Agent by Q2 2026",
+   "population_and_period": "Customers using Customer Agent; the average rate as stated on earnings calls from August 6, 2025 to November 4, 2026; cohort not stated",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "CX Today, Q1 2026",
+     "url": "https://www.cxtoday.com/contact-center/hubspot-customer-agent-resolution-rate/"
+    },
+    {
+     "label": "CX Today, Q2 2026",
+     "url": "https://www.cxtoday.com/ai-automation-in-cx/hubspot-ai-agents-customer-agent-data-agent-cx-results/"
+    },
+    {
+     "label": "Q2 2026 call transcript",
+     "url": "https://hubspot.gcs-web.com/static-files/f868efed-4a81-4a8b-b0c9-a68cde86a345"
+    },
+    {
+     "label": "Call transcript, August 6, 2025 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/hubs/transcripts/344434-q2-2025/"
+    },
+    {
+     "label": "Call transcript, November 5, 2025 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/hubs/transcripts/371480-q3-2025/"
+    },
+    {
+     "label": "Call transcript, February 11, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/hubs/transcripts/402399-q4-2025/"
+    },
+    {
+     "label": "Call transcript, May 7, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/hubs/transcripts/555382-q1-2026/"
+    },
+    {
+     "label": "Call transcript, November 4, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/hubs/transcripts/725295-q3-2026/"
+    }
+   ],
+   "corrected_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "ServiceNow",
+   "finding": "50% of ServiceNow’s net new business comes from pricing that is not by the seat, as the company reports it. The share counts usage-based items such as tokens and also infrastructure, hardware and connectors",
+   "population_and_period": "ServiceNow’s net new business; earnings calls of April 22 and July 22, 2026; dollar base not stated",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Call transcript, April 22, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/now/transcripts/547931-q1-2026/"
+    },
+    {
+     "label": "Call transcript, July 22, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/now/transcripts/653176-q2-2026/"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Vercel",
+   "finding": "Support agent automates 91% of support tickets (October 2026); earlier posts counted 87% of initial questions (February) and 92% of tickets (June)",
+   "population_and_period": "Company posts, February 9, June 17 and October 15, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Vercel, February 9, 2026",
+     "url": "https://vercel.com/blog/anyone-can-build-agents-but-it-takes-a-platform-to-run-them"
+    },
+    {
+     "label": "Vercel, June 17, 2026",
+     "url": "https://vercel.com/blog/introducing-eve"
+    },
+    {
+     "label": "Vercel, October 15, 2026",
+     "url": "https://vercel.com/blog/vercel-ship-2026-recap"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Vercel",
+   "finding": "A later snapshot, from a talk: the support agent handles 93% of total case volume; the lead agent costs under $5,000 a year in infrastructure and tokens and takes about 20% of one engineer’s time",
+   "population_and_period": "Talk by a Vercel executive at SaaStr AI, as reported by SaaStr; autumn 2026, date not confirmed",
+   "basis": "Self-reported (vendor), from coverage of a talk",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "SaaStr write-up of the talk",
+     "url": "https://www.saastr.com/top-5-learnings-from-vercels-coo-10-sdrs-down-to-1-a-5k-a-year-lead-agent-and-93-of-support-cases-handled-by-ai/"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Vercel",
+   "finding": "Lead agent lets one SDR do the work of 10; more than 100 agents in production",
+   "population_and_period": "Company posts, February 9 and June 17, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Vercel, February 9, 2026",
+     "url": "https://vercel.com/blog/anyone-can-build-agents-but-it-takes-a-platform-to-run-them"
+    },
+    {
+     "label": "Vercel, June 17, 2026",
+     "url": "https://vercel.com/blog/introducing-eve"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Brynjolfsson, Li and Raymond (QJE)",
+   "finding": "AI assistance raised issues resolved per hour by 15% on average; less experienced agents gained most, and the most experienced saw small declines in quality",
+   "population_and_period": "Field study of 5,172 support agents at one company",
+   "basis": "Observed (causal)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Quarterly Journal of Economics",
+     "url": "https://doi.org/10.1093/qje/qjae044"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Tannenbaum (arXiv preprint)",
+   "finding": "In a randomized trial on 100 live websites, a sales agent raised revenue per visitor by 10.0% against no agent",
+   "population_and_period": "14.8 million visitors on 100 websites, May 1 to September 30, 2026; submitted October 18, 2026",
+   "basis": "Observed (causal; preprint)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "arXiv 2610.25461",
+     "url": "https://arxiv.org/abs/2610.25461"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Nandi and others (arXiv preprint)",
+   "finding": "Across 13 enterprise-style procedures, coordinated agent designs used 1.4 to 4.7 times the tokens of a single agent with no overall gain in success; one redesigned multi-agent setup beat the baseline, 75.6% against 67.4%",
+   "population_and_period": "13 procedures in eight arms; submitted November 7, 2026",
+   "basis": "Observed (experiment; preprint)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "arXiv 2611.12953",
+     "url": "https://arxiv.org/abs/2611.12953"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Stanford Digital Economy Lab",
+   "finding": "Employment of U.S. workers aged 22 to 25 in highly AI-exposed occupations 19% below the path of less-exposed peers",
+   "population_and_period": "ADP payroll data, August 2026 revision",
+   "basis": "Observed (relative gap)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Stanford Digital Economy Lab",
+     "url": "https://digitaleconomy.stanford.edu/news/canariesaug26/"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Bloomberry",
+   "finding": "GTM engineering and RevOps postings, counted together, up 205% in January to September 2025 against the same months of 2024; SQL and Python each in 38% of GTM-engineer postings",
+   "population_and_period": "About 1,000 GTM-engineering postings; published October 3, 2025, updated November 10, 2026",
+   "basis": "Observed (postings; vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Bloomberry",
+     "url": "https://bloomberry.com/blog/i-analyzed-1000-gtm-engineering-jobs-here-is-what-i-learned/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Instantly",
+   "finding": "3.43% average reply rate, counting all replies over all emails sent, described as stable",
+   "population_and_period": "Platform data, 2026 benchmark",
+   "basis": "Observed (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Instantly",
+     "url": "https://instantly.ai/cold-email-benchmark-report-2026"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gong",
+   "finding": "Win rates and deal length steady in 2025 while reps worked fewer opportunities",
+   "population_and_period": "7.1 million opportunities at 3,613 organizations, 2025",
+   "basis": "Observed (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Gong report",
+     "url": "https://www.gong.io/files/gong-labs-state-of-revenue-ai-2026.pdf"
+    },
+    {
+     "label": "Gong release",
+     "url": "https://www.gong.io/press/new-gong-labs-research-finds-ai-is-now-a-trusted-decision-maker-in-revenue-teams"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gong",
+   "finding": "From platform records: sellers who use AI frequently generate 77% more revenue per rep than those who do not use it",
+   "population_and_period": "7.1 million opportunities at 3,613 organizations, 2024 and 2025",
+   "basis": "Observed (vendor); association",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gong report",
+     "url": "https://www.gong.io/files/gong-labs-state-of-revenue-ai-2026.pdf"
+    },
+    {
+     "label": "Gong release",
+     "url": "https://www.gong.io/press/new-gong-labs-research-finds-ai-is-now-a-trusted-decision-maker-in-revenue-teams"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gong",
+   "finding": "Organizations with AI at the core of their strategy are 65% more likely to have raised win rates than those running limited pilots; leaders’ estimate of reps at quota fell from 52% in 2024 to 46% in 2025",
+   "population_and_period": "Survey of 3,048 revenue leaders; Gong does not say which data the 65% rests on",
+   "basis": "Self-reported and estimated (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gong report",
+     "url": "https://www.gong.io/files/gong-labs-state-of-revenue-ai-2026.pdf"
+    },
+    {
+     "label": "Gong release",
+     "url": "https://www.gong.io/press/new-gong-labs-research-finds-ai-is-now-a-trusted-decision-maker-in-revenue-teams"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Klarna",
+   "finding": "AI assistant expected to drive a $40 million profit improvement in 2024",
+   "population_and_period": "Company release, February 2024",
+   "basis": "Forecast",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Klarna release, on PR Newswire",
+     "url": "https://www.prnewswire.com/news-releases/klarna-ai-assistant-handles-two-thirds-of-customer-service-chats-in-its-first-month-302072740.html"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Fiserv",
+   "finding": "Project Elevate savings target raised to $1 billion from $500 million; management attributed the increase to a portfolio review and to early results from deploying AI; additional savings largely after 2027",
+   "population_and_period": "Q3 2026 release and call",
+   "basis": "Forecast (target)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Fiserv release",
+     "url": "https://fiserv.gcs-web.com/news-releases/news-release-details/fiserv-reports-third-quarter-2026-results"
+    },
+    {
+     "label": "Call transcript",
+     "url": "https://singjupost.com/fiserv-fisv-q3-2026-earnings-call-transcript/"
+    },
+    {
+     "label": "Second transcript",
+     "url": "https://stockanalysis.com/stocks/fisv/transcripts/726147-q3-2026/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Andy Jolls, Founder, Roxology, LLC",
+    "spotted_by_website": "https://roxology.com",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Salesloft",
+   "finding": "All respondents use AI somewhere in the revenue process; 20.6% call it production-ready with measurable outcomes",
+   "population_and_period": "500 U.S. revenue leaders at companies with 200+ employees, May 28–June 10, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Salesloft release",
+     "url": "https://www.salesloft.com/company/newsroom/salesloft-releases-2026-us-revenue-benchmark-report"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "LeanData",
+   "finding": "93% have deployed at least one AI agent; 31% ready, 63% somewhat ready, 5% not ready",
+   "population_and_period": "157 GTM practitioners; LeanData AI GTM Customer Survey, May 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "LeanData report",
+     "url": "https://www.leandata.com/resources/2026-state-of-ai-go-to-market-readiness-report/"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "LeanData",
+   "finding": "70% say poor data quality degrades GTM execution; bad data (45%), undocumented processes (37%) and siloed teams (32%) named as root causes of AI shortfalls",
+   "population_and_period": "Same survey",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "LeanData report",
+     "url": "https://www.leandata.com/resources/2026-state-of-ai-go-to-market-readiness-report/"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "AI saves sellers 4.8 hours a week; 72% of sales organizations report low reinvestment of that time; organizations with moderate to large time savings that reinvest them in high-impact sales work are 2.2 times as likely to exceed customer-growth goals and 3.1 times as likely to exceed lead-to-opportunity conversion goals as those that reinvest less",
+   "population_and_period": "210 CSOs and senior sales leaders, fielded January to February 2026; published May 19, 2026",
+   "basis": "Self-reported; association",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-05-19-gartner-survey-finds-ai-saves-sellers-nearly-five-hours-per-week-yet-seventy-two-percent-of-sales-organizations-fail-to-reinvest-time-in-high-value-activities"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "Sales organizations that give sellers AI next-best actions are 2.6 times as likely to achieve commercial growth; organizations that prioritize upskilling sellers on AI are 2.4 times as likely to report strong revenue growth",
+   "population_and_period": "227 CSOs, fielded August to September 2025, for the upskilling figure; published May 20, 2026",
+   "basis": "Self-reported; association",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-05-20-gartner-survey-finds-sales-organizations-that-provide-ai-enabled-next-best-actions-are-two-point-six-times-more-likely-to-achieve-commercial-growth"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "Agents to outnumber sellers 10 to 1 by 2028; fewer than 40% of sellers to say agents improved their productivity",
+   "population_and_period": "Prediction, July 2026",
+   "basis": "Forecast",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-07-28-gartner-predicts-ai-agents-will-outnumber-sellers-10-to-1-by-2028-yet-fewer-than-40-percent-of-sellers-will-say-agents-improved-productivity"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "CSOs who overhaul data, automation and user experience will be 5 times as likely to gain a return on AI by 2028 as those choosing quick fixes",
+   "population_and_period": "Prediction, published July 28, 2026",
+   "basis": "Forecast",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-07-28-gartner-predicts-ai-agents-will-outnumber-sellers-10-to-1-by-2028-yet-fewer-than-40-percent-of-sellers-will-say-agents-improved-productivity"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "45% of B2B buyers used GenAI in a recent purchase; 69% prefer to validate AI-generated insights with a sales rep; 67% prefer a rep-free experience and 70% a completely digital, self-service one; buyers 39 points more likely to say a rep, rather than GenAI, understood their needs",
+   "population_and_period": "645 and 646 B2B buyers, fielded August to September 2025; published March 9 and May 20, 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner, buyers validating AI",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-05-20-gartner-survey-finds-sixty-nine-percent-of-b-two-b-buyers-turn-to-sales-reps-to-validate-ai-generated-insights"
+    },
+    {
+     "label": "Gartner, next best actions",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-05-20-gartner-survey-finds-sales-organizations-that-provide-ai-enabled-next-best-actions-are-two-point-six-times-more-likely-to-achieve-commercial-growth"
+    },
+    {
+     "label": "Gartner, rep-free buying",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-03-09-gartner-sales-survey-finds-67-percent-of-b2b-buyers-prefer-a-rep-free-experience"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "95% of sellers’ research workflows will begin with AI by 2027",
+   "population_and_period": "Prediction",
+   "basis": "Forecast",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-05-20-gartner-survey-finds-sales-organizations-that-provide-ai-enabled-next-best-actions-are-two-point-six-times-more-likely-to-achieve-commercial-growth"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "21% of service and support leaders reduced agent headcount because of AI. Among other workforce actions, 71% are shifting agents into different roles within service and support and 39% into other business units. The release ties only the headcount cut to AI",
+   "population_and_period": "275 service and support leaders, fielded July and August 2026; published November 5, 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-11-05-gartner-survey-finds-21-percent-of-service-and-support-leaders-have-reduced-human-agent-headcount-because-of-ai"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "Half of companies that cut service staff because of AI will rehire by 2027; no Fortune 500 company will fully eliminate human customer service by 2028",
+   "population_and_period": "Predictions, 2025–2026",
+   "basis": "Forecast",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner, February 2026",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-02-03-gartner-predicts-half-of-companies-that-cut-customer-service-staff-due-to-ai-will-rehire-by-2027"
+    },
+    {
+     "label": "Gartner, September 2025",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2025-09-10-gartner-predicts-none-of-the-fortune-500-companies-will-have-fully-eliminated-human-customer-service-by-2028"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "87% of customers say companies using GenAI in customer service must offer a way to reach a human agent; 27% would try a chatbot again after a bad experience",
+   "population_and_period": "One survey of 3,566 B2B and B2C customers, fielded February and March 2026; published August 4 and September 2, 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner, August 2026",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-08-04-gartner-survey-finds-87-percent-of-customers-say-companies-using-genai-for-customer-service-must-provide-access-to-a-human-agent0"
+    },
+    {
+     "label": "Gartner, September 2026",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-09-02-gartner-finds-only-27-percent-of-customers-would-try-a-chatbot-again-after-a-negative-experience"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "13% of CIOs report significant or transformational value from AI; 31% have rules to stop pilots and 17% to retire low-value AI in production; 4% plan to redesign roles for people and agents. Organizations with each practice are 2.3, 2.6 and 2.4 times as likely to be in Gartner’s top-performing group",
+   "population_and_period": "2,002 CIOs and technology executives, fielded May to July 2026; published October 19, 2026",
+   "basis": "Self-reported; association",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-10-19-gartner-survey-finds-only-13-percent-of-cios-say-their-enterprise-has-realized-significant-or-transformational-value-from-ai"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "CMOs allocate 15.3% of marketing budgets to AI; 30% report mature or fully developed readiness to scale it",
+   "population_and_period": "401 CMOs and marketing leaders, fielded January to March 2026; published May 11, 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-05-11-gartner-2026-cmo-spend-survey-finds-cmos-allocate-15-point-3-percent-of-marketing-budgets-to-ai-but-only-30-percent-are-ready-to-scale-ai-capabilities"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "McKinsey",
+   "finding": "60% of market-share leaders against 21% of laggards grew revenue by double digits; gen AI ranks among the top five channels buyers use to find and evaluate suppliers",
+   "population_and_period": "Nearly 4,000 B2B decision-makers in 13 countries, published May 28, 2026",
+   "basis": "Self-reported; groups defined by outcome",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "McKinsey, B2B growth",
+     "url": "https://www.mckinsey.com/capabilities/growth-marketing-and-sales/our-insights/the-surprising-economics-of-b2b-growth-the-new-survival-threshold-and-what-it-takes-to-thrive"
+    },
+    {
+     "label": "McKinsey, B2B sales",
+     "url": "https://www.mckinsey.com/capabilities/growth-marketing-and-sales/our-insights/the-future-of-b2b-sales-how-growth-champions-rewire-their-playbooks-with-ai"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "BCG",
+   "finding": "Future-built companies, 7.5% of the sample: 2.4 times the revenue growth, 2.3 times the shareholder return and 2.8 times the EBITDA growth of laggards over 2022 to 2025, taken from financial databases; a further 41% scaling and outperforming. From the survey: 5% have all six of BCG’s controls for agents in place, and 42% expect to give agents decision-making authority by 2030",
+   "population_and_period": "1,330 executives surveyed; financial data for 2022 to 2025; published September 30, 2026",
+   "basis": "Observed (financial databases) and self-reported; groups defined by maturity",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "BCG release, 2026",
+     "url": "https://www.bcg.com/press/30september2026-ai-starting-to-pay-off-companies-generate-value"
+    },
+    {
+     "label": "BCG article, 2026",
+     "url": "https://www.bcg.com/publications/2026/the-formula-for-agentic-ai-value"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "BCG",
+   "finding": "Future-built companies had deployed 62% of their AI initiatives, against 12% for laggards",
+   "population_and_period": "1,250 executives, September 2025",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "BCG report, 2025, Exhibit 8",
+     "url": "https://www.bcg.com/assets/2025/the-widening-ai-value-gap.pdf"
+    },
+    {
+     "label": "BCG release, 2025",
+     "url": "https://www.bcg.com/press/30september2025-ai-leaders-outpace-laggards-revenue-growth-cost-savings"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "BCG",
+   "finding": "Agentic AI about 40% of AI value by 2030, from 22% in 2026 and 17% in 2025; dedicated AI roles from 7% of the workforce in 2026 to 22% by 2030; expected workforce reductions of 10–15%, with middle management and frontline leadership the most exposed layers",
+   "population_and_period": "Projections to 2030, published September 30, 2026",
+   "basis": "Forecast",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "BCG release, 2026",
+     "url": "https://www.bcg.com/press/30september2026-ai-starting-to-pay-off-companies-generate-value"
+    },
+    {
+     "label": "BCG article, 2026",
+     "url": "https://www.bcg.com/publications/2026/the-formula-for-agentic-ai-value"
+    },
+    {
+     "label": "BCG release, 2025",
+     "url": "https://www.bcg.com/press/30september2025-ai-leaders-outpace-laggards-revenue-growth-cost-savings"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Bain",
+   "finding": "Winners report twice the AI-attributed revenue growth of laggards",
+   "population_and_period": "1,125 sales and marketing leaders, 2026; winners defined by revenue growth and margins",
+   "basis": "Self-reported; groups defined by outcome",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Bain",
+     "url": "https://www.bain.com/insights/ai-wont-transform-your-go-to-market-until-you-transform-the-work-b2b-growth-agenda-2026/"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Deloitte",
+   "finding": "40% of companies let AI act without human approval to at least a moderate degree. Among 2,372 that run several AI agents in one workflow, half have no formal governance or only basic oversight and 9% say those workflows are fully governed; 23% of all respondents say accountability for a bad outcome is unclear",
+   "population_and_period": "3,500 senior leaders in 25 countries, all at companies with AI in daily use, fielded May to June 2026; published October 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Deloitte summary page",
+     "url": "https://www.deloitte.com/us/state-of-ai"
+    },
+    {
+     "label": "Deloitte report",
+     "url": "https://www.deloitte.com/content/dam/assets-zone3/us/en/docs/services/consulting/2026/the-state-of-ai-in-the-enterprise-2026.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Deloitte",
+   "finding": "71% of companies track total AI inference and API spend, 51% track token volume and 44% track per-unit inference cost",
+   "population_and_period": "3,500 senior leaders in 25 countries, all at companies with AI in daily use, fielded May to June 2026; published October 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Deloitte summary page",
+     "url": "https://www.deloitte.com/us/state-of-ai"
+    },
+    {
+     "label": "Deloitte report",
+     "url": "https://www.deloitte.com/content/dam/assets-zone3/us/en/docs/services/consulting/2026/the-state-of-ai-in-the-enterprise-2026.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Deloitte",
+   "finding": "28% of companies report revenue gains from AI, up from 20% in Deloitte’s January report; 74% report efficiency and productivity gains, 45% cost reductions and 44% better client relationships; 67% expect revenue growth from AI",
+   "population_and_period": "3,500 senior leaders in 25 countries, all at companies with AI in daily use, fielded May to June 2026; published October 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Deloitte summary page",
+     "url": "https://www.deloitte.com/us/state-of-ai"
+    },
+    {
+     "label": "Deloitte report",
+     "url": "https://www.deloitte.com/content/dam/assets-zone3/us/en/docs/services/consulting/2026/the-state-of-ai-in-the-enterprise-2026.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Deloitte",
+   "finding": "81% say AI has sped up decisions and execution, and 25% use it for deep transformation; 60% have redesigned jobs around AI to at least a moderate degree, and 15% call the redesign extensive or complete",
+   "population_and_period": "3,500 senior leaders in 25 countries, all at companies with AI in daily use, fielded May to June 2026; published October 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Deloitte summary page",
+     "url": "https://www.deloitte.com/us/state-of-ai"
+    },
+    {
+     "label": "Deloitte report",
+     "url": "https://www.deloitte.com/content/dam/assets-zone3/us/en/docs/services/consulting/2026/the-state-of-ai-in-the-enterprise-2026.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "ICONIQ",
+   "finding": "At software companies building AI products, 54% of GTM employees have access to AI tools against 71% in R&D, 44% use them daily against 62% and 31% are power users against 39%. Respondents rate their GTM teams’ AI adoption at 3.3 out of 5 against 3.7 for R&D",
+   "population_and_period": "About 305 executives at software companies building AI products, 87% headquartered in North America, surveyed May 2026; published July 2026",
+   "basis": "Estimated (executives)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "ICONIQ report page",
+     "url": "https://www.iconiq.com/growth/reports/state-of-ai-2026"
+    },
+    {
+     "label": "ICONIQ report",
+     "url": "https://cdn.prod.website-files.com/65d0d38fc4ec8ce8a8921654/6a4e6e010db3862dc33eec65_ICONIQ_State_of_AI_2026_The_Builders_Economy.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "ICONIQ",
+   "finding": "Between 40% and 56% of respondents, rising with company revenue, say they are actively deploying agents for internal work, and they put the average productivity effect at 20% to 27%. Asked how often those agents need a person to step in, 46% say on 10–30% of tasks, 39% on 30–60% and 9% on more than 60%; 5% say on fewer than 10%. The failure modes named most often are multi-step workflows breaking down (26%) and missing context or memory (24%)",
+   "population_and_period": "About 305 executives at software companies building AI products, 87% headquartered in North America, surveyed May 2026; published July 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "ICONIQ report page",
+     "url": "https://www.iconiq.com/growth/reports/state-of-ai-2026"
+    },
+    {
+     "label": "ICONIQ report",
+     "url": "https://cdn.prod.website-files.com/65d0d38fc4ec8ce8a8921654/6a4e6e010db3862dc33eec65_ICONIQ_State_of_AI_2026_The_Builders_Economy.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "ICONIQ",
+   "finding": "Over the next 12 to 24 months, 50% of respondents plan to grow sales headcount and 24% to cut it. For customer support, 46% plan cuts and 29% growth. Customer success is 40% growth against 36% cuts, and marketing 34% against 36%. Asked how AI has changed headcount planning, 45% plan a different mix of roles without a net reduction and 33% plan a smaller team than they would otherwise have had",
+   "population_and_period": "About 305 executives at software companies building AI products, 87% headquartered in North America, surveyed May 2026; published July 2026",
+   "basis": "Self-reported (plans)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "ICONIQ report page",
+     "url": "https://www.iconiq.com/growth/reports/state-of-ai-2026"
+    },
+    {
+     "label": "ICONIQ report",
+     "url": "https://cdn.prod.website-files.com/65d0d38fc4ec8ce8a8921654/6a4e6e010db3862dc33eec65_ICONIQ_State_of_AI_2026_The_Builders_Economy.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "ICONIQ",
+   "finding": "Respondents put the average productivity gain from AI at 24% to 25% for sales productivity, 30% to 31% for customer service and 26% to 31% for marketing automation, against 32% to 48% for coding assistance. Each range spans two groups, high-growth companies and the rest",
+   "population_and_period": "About 305 executives at software companies building AI products, 87% headquartered in North America, surveyed May 2026; published July 2026",
+   "basis": "Estimated (executives)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "ICONIQ report page",
+     "url": "https://www.iconiq.com/growth/reports/state-of-ai-2026"
+    },
+    {
+     "label": "ICONIQ report",
+     "url": "https://cdn.prod.website-files.com/65d0d38fc4ec8ce8a8921654/6a4e6e010db3862dc33eec65_ICONIQ_State_of_AI_2026_The_Builders_Economy.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "ICONIQ",
+   "finding": "68% of respondents say the true cost of AI for internal productivity has been very or moderately difficult to predict, and 7% say it has been easy enough to predict. ICONIQ reports token spend as the most common source of overruns once work moved from single calls to multi-step agent pipelines",
+   "population_and_period": "About 305 executives at software companies building AI products, 87% headquartered in North America, surveyed May 2026; published July 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "ICONIQ report page",
+     "url": "https://www.iconiq.com/growth/reports/state-of-ai-2026"
+    },
+    {
+     "label": "ICONIQ report",
+     "url": "https://cdn.prod.website-files.com/65d0d38fc4ec8ce8a8921654/6a4e6e010db3862dc33eec65_ICONIQ_State_of_AI_2026_The_Builders_Economy.pdf"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "BCG",
+   "finding": "90% of sales and revenue leaders report meaningful AI use in sales workflows. Asked for the highest level of agent autonomy in use, 6% say AI completes an end-to-end workflow within set limits, 22% that it runs parts of a workflow with people handling exceptions, 37% that it completes single tasks that a person reviews and 25% that it only recommends or drafts; 10% report no meaningful use",
+   "population_and_period": "398 CROs, sales leaders, chief commercial officers and revenue operations leaders at large companies in 23 countries; fieldwork dates not stated; published October 19, 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "BCG article, October 19, 2026",
+     "url": "https://www.bcg.com/publications/2026/cros-turning-ai-into-sales-growth"
+    },
+    {
+     "label": "BCG release",
+     "url": "https://www.bcg.com/press/19october2026-chief-revenue-officers-do-more-with-more-ai-agenda"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "BCG",
+   "finding": "Asked to rank areas of measurable AI impact, 33% of sales leaders put reduced administrative workload first or second, 22% seller time saved and 18% each better coaching and better forecast accuracy. Commercial results rank lower: 14% put improved conversion first or second, 13% improved win rate and 8% higher quota attainment. BCG’s chart labels these as top-two rankings, while its text words them as shares that report an improvement",
+   "population_and_period": "398 CROs, sales leaders, chief commercial officers and revenue operations leaders at large companies in 23 countries; fieldwork dates not stated; published October 19, 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "BCG article, October 19, 2026",
+     "url": "https://www.bcg.com/publications/2026/cros-turning-ai-into-sales-growth"
+    },
+    {
+     "label": "BCG release",
+     "url": "https://www.bcg.com/press/19october2026-chief-revenue-officers-do-more-with-more-ai-agenda"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "BCG",
+   "finding": "Organizations with more autonomous agents deployed are twice as likely to rank improved conversion among their top areas of AI impact: 23% against 11%. Of them, 69% report double-digit revenue growth, against 42% of the rest. An association between groups: BCG gives no threshold for the group and no group sizes",
+   "population_and_period": "398 CROs, sales leaders, chief commercial officers and revenue operations leaders at large companies in 23 countries; fieldwork dates not stated; published October 19, 2026",
+   "basis": "Self-reported; groups defined by agents deployed",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "BCG article, October 19, 2026",
+     "url": "https://www.bcg.com/publications/2026/cros-turning-ai-into-sales-growth"
+    },
+    {
+     "label": "BCG release",
+     "url": "https://www.bcg.com/press/19october2026-chief-revenue-officers-do-more-with-more-ai-agenda"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "BCG",
+   "finding": "81% of sales and revenue organizations have set goals for AI adoption, and 36% have formal targets and tracking; 45% call their goals informal or directional and 18% have none yet. Among organizations with more autonomous agents deployed, 67% have formal adoption targets, against 23% of the rest",
+   "population_and_period": "398 CROs, sales leaders, chief commercial officers and revenue operations leaders at large companies in 23 countries; fieldwork dates not stated; published October 19, 2026",
+   "basis": "Self-reported",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "BCG article, October 19, 2026",
+     "url": "https://www.bcg.com/publications/2026/cros-turning-ai-into-sales-growth"
+    },
+    {
+     "label": "BCG release",
+     "url": "https://www.bcg.com/press/19october2026-chief-revenue-officers-do-more-with-more-ai-agenda"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "BCG",
+   "finding": "65% of revenue leaders expect headcount in the revenue organization to grow over the next year, 22% expect it to stay flat and 13% to shrink; 22% expect growth of more than 10%. 72% expect sales and revenue budgets to rise, and 91% expect quotas or productivity requirements for each seller to rise",
+   "population_and_period": "398 CROs, sales leaders, chief commercial officers and revenue operations leaders at large companies in 23 countries; fieldwork dates not stated; published October 19, 2026",
+   "basis": "Self-reported (plans)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "BCG article, October 19, 2026",
+     "url": "https://www.bcg.com/publications/2026/cros-turning-ai-into-sales-growth"
+    },
+    {
+     "label": "BCG release",
+     "url": "https://www.bcg.com/press/19october2026-chief-revenue-officers-do-more-with-more-ai-agenda"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "JPMorgan",
+   "finding": "JPMorgan’s finance chief says the benefits of AI are not yet observable in the bank’s quarterly earnings and that he is moving away from quantifying them. The bank gave no dollar value for those benefits on any of the three calls that could be read",
+   "population_and_period": "JPMorgan, company-wide; earnings call of October 13, 2026",
+   "basis": "Self-reported (narrative)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Call transcript, October 13, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/jpm/transcripts/686357-q3-2026/"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Infosys",
+   "finding": "In January 2026 Infosys’s finance chief said he saw no pricing headwind from AI. In July 2026 he described “AI-led deflation” on deals large and small and said new business offset it. Management does not quantify the compression. On the same call the company trimmed the top of its revenue growth guidance for the year from 3.5% to 3%, and the reasons it gave were weaker client spending and a shift to offshore work",
+   "population_and_period": "Infosys, company-wide; earnings calls of January 14 and July 23, 2026",
+   "basis": "Self-reported (narrative)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Call transcript, January 14, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/quote/nse/INFY/transcripts/364520-q3-25-26/"
+    },
+    {
+     "label": "Call transcript, July 23, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/quote/nse/INFY/transcripts/653579-q1-26-27/"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "HCLTech",
+   "finding": "HCLTech expects AI to shrink revenue on existing services by 2% to 3% a year across its portfolio for a few years, and says a traditional outsourcing deal once worth $100 million would be about $80 million today. Management says little of this has reached reported numbers yet",
+   "population_and_period": "HCLTech’s services portfolio; estimate given on the earnings call of April 21, 2026, for fiscal 2027 and after",
+   "basis": "Estimated; forecast",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Call transcript, April 21, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/quote/nse/HCLTECH/transcripts/536486-q4-25-26/"
+    }
+   ],
+   "added_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Salesforce",
+   "finding": "Sellers spend 40% of their time selling; 51% of sales leaders using AI say tech silos delay or limit AI initiatives",
+   "population_and_period": "State of Sales 2026, 4,050 sales professionals",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Salesforce announcement",
+     "url": "https://www.salesforce.com/news/stories/state-of-sales-report-announcement-2026/ai-agents-stats/"
+    },
+    {
+     "label": "Salesforce sales statistics",
+     "url": "https://www.salesforce.com/blog/sales/15-sales-statistics/"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Salesforce",
+   "finding": "Data and analytics leaders estimate that 19% of their company’s data is siloed, inaccessible or otherwise unusable",
+   "population_and_period": "State of Data and Analytics report: 3,800 analytics and IT decision makers in 18 countries, fielded June 27 to August 13, 2025; published November 4, 2025",
+   "basis": "Estimated (data and analytics leaders; vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Salesforce",
+     "url": "https://www.salesforce.com/news/stories/data-analytics-trends-2026/"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Microsoft",
+   "finding": "43% of Frontier Professionals deliberately do some work without AI, against 30% of other AI users; Frontier Professionals are 16% of surveyed AI users",
+   "population_and_period": "Work Trend Index, May 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Microsoft Work Trend Index",
+     "url": "https://microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Microsoft",
+   "finding": "28% of managers considering hiring AI workforce managers",
+   "population_and_period": "Work Trend Index: 31,000 workers in 31 markets; published April 23, 2025",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Microsoft Work Trend Index, 2025",
+     "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/2025-the-year-the-frontier-firm-is-born"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Highspot",
+   "finding": "28% say AI improves revenue-driving sales performance",
+   "population_and_period": "463 senior sales and revenue leaders, fielded June 5 to 26, 2025; published September 9, 2025",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Highspot",
+     "url": "https://www.highspot.com/blog/highspot-study-finds-ai-failing-sales-teams/"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Seismic",
+   "finding": "56% cite poor integration with existing tools as a top obstacle to using current platforms fully",
+   "population_and_period": "353 senior leaders, fielded March 19–April 8, 2026; published June 8, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Seismic release",
+     "url": "https://www.seismic.com/newsroom/press-releases/speed-to-revenue-gtm-priority/"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Apollo",
+   "finding": "6% of sales and marketing leaders, as Apollo describes its respondents, believe AI will replace members of their team",
+   "population_and_period": "328 GTM professionals, fielded June 2026; published August 11, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Apollo",
+     "url": "https://www.apollo.io/newsroom/announcements/only-6-of-go-to-market-leaders-think-ai-will-replace-their-teams-apollo-report-finds"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Klarna",
+   "finding": "CEO said cost had weighed too heavily and quality suffered; Klarna later told SEC staff the remarks concerned a pilot of freelance consultants",
+   "population_and_period": "Bloomberg interview, May 2025; letter to SEC staff, July 16, 2025",
+   "basis": "Self-reported; disputed",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "eMarketer",
+     "url": "https://www.emarketer.com/content/klarna-backtracks-ai-customer-service-plans"
+    },
+    {
+     "label": "Klarna’s letter to SEC staff",
+     "url": "https://www.sec.gov/Archives/edgar/data/2003292/000162828025034998/filename1.htm"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Shopify",
+   "finding": "Teams must show why AI cannot do the work before asking for more headcount and resources",
+   "population_and_period": "CEO email to staff, March 2025",
+   "basis": "Self-reported (policy)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Shopify",
+     "url": "https://www.shopify.com/careers/candidate-guide/ai-usage"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Zapier",
+   "finding": "AI fluency required of every new hire, assessed on a four-level rubric",
+   "population_and_period": "Company blog, May 2025 and March 2026",
+   "basis": "Self-reported (policy)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Zapier, 2025",
+     "url": "https://zapier.com/blog/zapier-ai-first-hiring-leaning"
+    },
+    {
+     "label": "Zapier, 2026",
+     "url": "https://zapier.com/blog/raising-ai-fluency-bar-in-hiring"
+    }
+   ],
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "ChurnZero",
+   "finding": "81% of customer success leaders say AI reduces the time they spend on manual tasks; net revenue retention was flat from 2024 through 2026 in the same study",
+   "population_and_period": "Almost 580 customer success leaders, 2026 Customer Success Leadership Study; published October 23, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "ChurnZero, October 23, 2026",
+     "url": "https://churnzero.com/blog/ai-time-savings-nrr/"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "HubSpot",
+   "finding": "Free trials of its AI agents and pricing tied to value have lengthened customer buying cycles and hurt near-term revenue growth, by HubSpot’s own account",
+   "population_and_period": "Form 10-Q for the quarter ended September 30, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "HubSpot Form 10-Q",
+     "url": "https://www.sec.gov/Archives/edgar/data/0001404655/000119312526447363/hubs-20260930.htm"
+    }
+   ],
+   "added_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Fiserv",
+   "finding": "One Fiserv transformation program expenses of $158 million (Q3) and $487 million (9 months) excluded from adjusted results; a company-wide expense, not an AI effect",
+   "population_and_period": "Q3 2026 release",
+   "basis": "Observed (reported)",
+   "grade": "Context",
+   "sources": [
+    {
+     "label": "Fiserv release",
+     "url": "https://fiserv.gcs-web.com/news-releases/news-release-details/fiserv-reports-third-quarter-2026-results"
+    }
+   ],
+   "corrected_on": "2026-11-20",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "rechecked_by": "GPT-6.2 Astra (AI model, OpenAI)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "HubSpot",
+   "finding": "Net revenue retention was 103% in Q3 2025 and 101% in Q3 2026, with 105% in Q4 2025 in between. Management says retention dips in the first quarter and builds through the year, so the like-for-like change is a fall of 2 points. In February 2026 it expected a rise of 1 to 2 points for 2026, and in November 2026 a fall of about 2 points; it cited budget sensitivity and weaker upgrades",
+   "population_and_period": "Company-wide, by quarter, Q3 2025 to Q3 2026; earnings calls through November 4, 2026",
+   "basis": "Observed (reported)",
+   "grade": "Context",
+   "sources": [
+    {
+     "label": "Earnings Whispers",
+     "url": "https://www.earningswhispers.com/article/HUBS/r1532"
+    },
+    {
+     "label": "Call transcript, November 5, 2025 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/hubs/transcripts/371480-q3-2025/"
+    },
+    {
+     "label": "Call transcript, February 11, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/hubs/transcripts/402399-q4-2025/"
+    },
+    {
+     "label": "Call transcript, November 4, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/hubs/transcripts/725295-q3-2026/"
+    }
+   ],
+   "corrected_on": "2026-11-22",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Carta",
+   "finding": "In Q3 2026, 57.7% of fund managers on Carta had made a payment to Anthropic or OpenAI in the prior 12 months",
+   "population_and_period": "Management companies of Carta’s U.S.-based fund administration customers, VC and PE firms; payments in the 12 months to Q3 2026",
+   "basis": "Observed (vendor)",
+   "grade": "Not used",
+   "sources": [
+    {
+     "label": "Carta",
+     "url": "https://carta.com/data/ai-adoption-private-capital/"
+    }
+   ],
+   "corrected_on": "2026-11-24",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Lowe’s",
+   "finding": "Lowe’s says online customers who use its AI assistant convert at 3 times the rate of those who do not. The call compares customers who use it with those who do not, and describes no assignment or adjustment. The assistant has supported more than 25 million questions from customers and store staff since launch",
+   "population_and_period": "Online customers of Lowe’s, a consumer retailer; earnings call of August 19, 2026; period and sample not stated",
+   "basis": "Self-reported; association",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Call transcript, August 19, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/low/transcripts/654348-q2-2027/"
+    }
+   ],
+   "added_on": "2026-11-23",
+   "corrected_on": "2026-11-23",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Walmart",
+   "finding": "Walmart says customers and members who use its AI shopping assistant spend 40% more per order than those who do not. The call compares customers who use it with those who do not, and describes no assignment or adjustment",
+   "population_and_period": "Customers and members of Walmart, a consumer retailer; earnings call of August 20, 2026; period and sample not stated",
+   "basis": "Self-reported; association",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Call transcript, August 20, 2026 (Stock Analysis)",
+     "url": "https://stockanalysis.com/stocks/wmt/transcripts/647936-q2-2027/"
+    }
+   ],
+   "added_on": "2026-11-23",
+   "corrected_on": "2026-11-23",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Fin (formerly Intercom; part of Salesforce since September 2026)",
+   "finding": "Fin says it takes part in half of incoming queries on Salesforce’s English-language help portal and resolves 62% of the chats it takes on without a support engineer, with more than 21,000 conversations resolved in its first full month there. The register’s latest figure for Salesforce’s own help agent is 64% of conversations resolved autonomously (August 26, 2026), and neither company says how the two agents relate",
+   "population_and_period": "Support chats on Salesforce’s English-language help portal, which takes about 2.5 million conversations a year; Fin took part in half of incoming queries when its page was written, within about 7 weeks of launch, and the page says Fin was to handle every conversation there from November 18; count and period of the 62% not stated; Fin’s page undated, Salesforce’s post published November 9, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Fin customer story, undated",
+     "url": "https://fin.ai/customers/salesforce"
+    },
+    {
+     "label": "Salesforce blog, November 9, 2026",
+     "url": "https://www.salesforce.com/blog/meet-fin-customer-agent/"
+    },
+    {
+     "label": "Call transcript, August 26, 2026 (Motley Fool)",
+     "url": "https://www.fool.com/earnings/call-transcripts/2026/08/31/salesforce-crm-q2-2027-earnings-call-transcript/"
+    }
+   ],
+   "added_on": "2026-11-23",
+   "corrected_on": "2026-11-23",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Microsoft",
+   "finding": "Microsoft says an internal study of its own sales team shows a reduction of more than 25% in seller effort on account planning, customer meeting preparation and proposal building, and deal closure velocity 9% higher. The post sets the figures beside its Sales plugin for Copilot and does not say which product was measured or against what",
+   "population_and_period": "Microsoft’s own sales team; by its footnote, internal telemetry from a controlled environment and CRM data on opportunities; number of sellers and deals, period and baseline not stated; published November 17, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Microsoft Dynamics 365 blog, November 17, 2026",
+     "url": "https://www.microsoft.com/en-us/dynamics-365/blog/business-leader/2026/11/17/microsoft-ignite-2026-introducing-dynamics-365-in-copilot/"
+    }
+   ],
+   "added_on": "2026-11-23",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Richardson",
+   "finding": "Richardson reports that 62% of sales leaders whose organizations met or exceeded quota say AI has given a positive financial return, against 39% of leaders below 90% of quota. Of the leaders surveyed, 70% say people outperform AI on the activities that matter most in complex deals and 4% say AI does",
+   "population_and_period": "1,105 senior sales leaders at vice president level or above, based in North America or Europe, at organizations with at least $750 million in annual revenue; 497 at or above quota and 338 below 90% of quota, by their own report, with the other 270 in neither group; fielded October 12 to 20, 2026; published November 17, 2026",
+   "basis": "Self-reported (vendor); groups defined by outcome",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Richardson report page",
+     "url": "https://www.richardson.com/sales-resources/the-revenue-edge-research-report/"
+    },
+    {
+     "label": "Richardson release, November 17, 2026 (CNW)",
+     "url": "https://www.newswire.ca/news-releases/the-revenue-edge-survey-of-1-105-sales-leaders-finds-top-performers-are-pulling-ahead-with-ai-even-as-the-playing-field-levels-890809859.html"
+    }
+   ],
+   "added_on": "2026-11-23",
+   "corrected_on": "2026-11-23",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "SnapLogic",
+   "finding": "SnapLogic reports that 54% of the IT decision-makers it surveyed agree their organization has abandoned agentic AI projects in the past because the business value was unclear, and 36% disagree. In the same survey 85% say they have adopted agentic AI at scale or are fully prepared to, 89% of those who answered report some level of overspend on AI agents and 48% say they struggle or would struggle to measure the return",
+   "population_and_period": "1,000 IT decision-makers at enterprises in the United States, United Kingdom and Germany, surveyed by 3GEM for SnapLogic; fielded July 21 to August 4, 2026; published November 17, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "SnapLogic report page",
+     "url": "https://www.snaplogic.com/resources/research/agentic-enterprise-readiness-index"
+    },
+    {
+     "label": "SnapLogic release, November 17, 2026 (GlobeNewswire)",
+     "url": "https://www.globenewswire.com/news-release/2026/11/17/3404301/0/en/new-research-reveals-54-of-enterprises-have-abandoned-agentic-ai-projects-due-to-unclear-business-value.html"
+    }
+   ],
+   "added_on": "2026-11-23",
+   "corrected_on": "2026-11-23",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Gartner",
+   "finding": "91% of C-level executives expect AI to perform at least 25% of the chief marketing officer’s responsibilities within 2 years, and 20% of respondents expect it to perform 50% to 74% of them",
+   "population_and_period": "282 senior executive leaders; their roles and countries not stated; fielded September to October 2026; published November 19, 2026",
+   "basis": "Self-reported (expectations)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Gartner release, November 19, 2026",
+     "url": "https://www.gartner.com/en/newsroom/press-releases/2026-11-19-gartner-survey-finds-91-percent-of-c-level-executives-expect-ai-to-perform-at-least-25-percent-of-cmo-responsibilities-within-two-years1"
+    }
+   ],
+   "added_on": "2026-11-23",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Zendesk",
+   "finding": "Zendesk reports that 81% of the business leaders it surveyed count AI agents as part of their workforce, 78% say coordinating several specialized AI agents on one customer issue is already their biggest operational challenge and 85% say AI vendors should price on verified outcomes. In its consumer survey, 88% still want to talk to a person when needed",
+   "population_and_period": "Over 4,400 business respondents, 74% of them business leaders in customer experience, IT and contact centers and 26% human agents, and over 3,100 consumers, in 10 countries; surveyed July and August 2026; published November 17, 2026",
+   "basis": "Self-reported (vendor)",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Zendesk CX Trends 2027 report",
+     "url": "https://web-assets.zendesk.com/zendesk/pages/cx-trends/report-pdfs/CX-Trends-2027-Global-report.pdf"
+    },
+    {
+     "label": "Zendesk release, November 17, 2026",
+     "url": "https://www.zendesk.com/newsroom/press-releases/ai-is-reshaping-service-74-of-business-leaders-surveyed-expect-ai-agents-to-outnumber-people-interactions-within-two-years/"
+    }
+   ],
+   "added_on": "2026-11-23",
+   "corrected_on": "2026-11-23",
+   "credit": {
+    "spotted_by": "Claude (AI model, Anthropic)",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  }
+ ]
+}

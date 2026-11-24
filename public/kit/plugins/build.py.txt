@@ -1,0 +1,1356 @@
+# -*- coding: utf-8 -*-
+"""Build the Claude Sales plugin entry for Modern GTM.
+
+    python3 build.py            -> out/index.html, out/skills.json
+
+Inputs: data.py (the dataset), facts.json (derived from the plugin's SKILL.md files by extract.py),
+src/guide.html (a saved copy of the published configuration guide), base.css (taken from the site),
+entry.css and app.js. The build fails if the dataset disagrees with what the plugin's files say.
+"""
+import html
+import json
+import os
+import re
+
+import core as C
+import data as D
+import guide_port
+import plugins_data as PD
+import plugins_views as V
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, "out")
+e = html.escape
+SK, N = C.SK, C.N
+chip, chips, join, num = C.chip, C.chips, C.join, C.num
+SITE = D.SITE_URL
+TITLE = "Plugins for GTM teams on Modern GTM"
+ROLE_NAME = {k: n for k, n, *_ in D.SEATS}
+IC = ("sdr", "ae", "am", "founder")
+DAY = [s["id"] for s in D.SKILLS if s["group"] == "day"]
+G = guide_port.port(os.path.join(HERE, "src", "guide.html"))
+
+
+def skl(sid):
+    """A skill named in running text: code style, linked to its row."""
+    assert sid in SK, sid
+    return f'<a class="skl" href="#skill-{sid}"><code>{sid}</code></a>'
+
+
+def tags(items, cls=""):
+    return "".join(f'<span class="t{cls}">{e(i)}</span>' for i in items)
+
+
+# ----------------------------------------------------------------------------- shared pieces
+N_C_SEND = sum(1 for x in D.SKILLS if x["cls"] == "C" and x["cust"][0] == "send")
+N_W_MAIL = sum(1 for x in D.SKILLS if x["cls"] == "W" and x["cust"][0] != "no")
+KEY_ROWS = [
+    ("k-R", "R", "Reads and proposes", "By its own steps it changes nothing in a connected tool and sends or posts nothing. What it produces is shown in Claude, and can be a page that others read. A change it proposes is made by another skill, once you accept it or where a schedule was set up to make it."),
+    ("k-P", "P", "Shares its output", f"It can post to team chat when you ask: its own output, or a message drawn from it. {skl('daily-briefing')} can also email its briefing to an address you name. It changes no record."),
+    ("k-C", "C", "Writes for customers", f"It writes a reply or a document meant for a customer, and changes no record. {num(N_C_SEND, True)} of the {num(C.COUNT['C'])} can send an email when you ask."),
+    ("k-W", "W", "Changes records", f"Its own write line lists a change to a record: a CRM update, a booked meeting or a contact added to a sequence. {num(N_W_MAIL, True)} of them can also email a customer."),
+    ("k-S", "S", "First run", f"{skl('setup')} alone. It reads your tools to build your dashboard and learn your voice. With write tools on, the dashboard's tiles carry write actions, and each runs when you click it."),
+]
+assert C.COUNT["P"] == 6 and N_C_SEND == 2 and N_W_MAIL == 4
+FILES, OURCOUNT, OURREAD = "From the plugin's files", "Our count from the files", "Our read of the skills' steps"
+
+
+def key():
+    out = ['<ul class="key">']
+    for k, c, a, b in KEY_ROWS:
+        out.append(f'<li><span class="chip {k}">{C.COUNT[c]} skill{"" if C.COUNT[c] == 1 else "s"}</span><span><b>{a}.</b> {b}</span></li>')
+    out.append("</ul>")
+    return "".join(out)
+
+
+def role_options(first="All roles"):
+    return f'<option value="all">{first}</option>' + "".join(f'<option value="{k}">{e(n)}</option>' for k, n, *_ in D.SEATS)
+
+
+def picker(suffix, role=True, motion=True, role_label="Role"):
+    out = []
+    if role:
+        out.append(f'<div class="fld"><label for="role-{suffix}">{role_label}</label><select id="role-{suffix}" data-pick="role">{role_options()}</select></div>')
+    if motion:
+        opts = "".join(f'<option value="{k}">{e(n)}</option>' for k, n, *_ in D.MOTIONS)
+        out.append(f'<div class="fld"><label for="motion-{suffix}">Sales motion</label><select id="motion-{suffix}" data-pick="motion">{opts}</select></div>')
+    return "".join(out)
+
+
+# ----------------------------------------------------------------------------- overview
+def findings():
+    """What the files show. A row is marked as a file's own statement, as a count we made from the files with its
+    rule beside it, or as our read."""
+    alone = join(skl(i) for i in C.WRITES_ALONE)
+    none_but = join(skl(i) for i in C.NONE_BUT)
+    assert len(C.TEAM) == 9 and len(C.REP) == 5 and len(C.BOTH) == 4 and "rep-context" in C.REP and "rep-context" not in C.TEAM
+    assert len(C.EMAILS) == 6 and len(C.SCHED) == 7 and len(C.SCHED_SELF) == 20 and len(C.VALUE_BAN) == 8 and len(C.VIA_UO) == 4 and len(C.NONE_BUT) == 5
+    N_HAND_UO = sum(1 for x in D.SKILLS if "update-opportunity" in x["hand"])
+    assert N_HAND_UO + 1 == C.N_UO and "update-opportunity" in C.FACTS["route-lead"]["refs"] and "update-opportunity" not in next(x for x in D.SKILLS if x["id"] == "route-lead")["hand"]
+    rows = [
+        (f'<span class="hl">{C.COUNT["R"]} of the {N}</span> skills read and propose.',
+         f'By their own steps they change nothing in a connected tool and send or post nothing. What one of them produces is shown in Claude, and it can be a page that others read, as the battlecards of {skl("competitive-intelligence")} are. '
+         "A change one of them proposes is made by another skill, once you accept it or where a schedule was set up to make it. Every skill's file also carries one rule: an action you ask for goes through a connected tool. "
+         "So this counts what each skill's own steps set up, by the furthest it goes in its own file. It is not a count of the most a skill can do.", OURCOUNT),
+        (f'<span class="hl">{N - C.COUNT["R"] - C.COUNT["S"]}</span> go further by their own steps.',
+         f'{num(C.COUNT["P"], True)} can post to team chat. {skl("daily-briefing")} and {skl("weekly-wrap")} post their own output. The other four post a message drawn from it: {skl("account-context")} a note to an account\'s owner, {skl("lead-triage")} a lead handoff, {skl("team-pipeline")} its Monday questions for reps and {skl("rep-context")} a follow-up after a one-to-one. '
+         f'{num(C.COUNT["C"], True)} write for a customer and change no record. {C.COUNT["W"]} list a change to a record in their own write line: a CRM update, a booked meeting or a contact added to a sequence. '
+         f'In all, {num(len(C.EMAILS))} are written to email a customer: {join(skl(i) for i in C.EMAILS)}. Two more can email someone you name: {skl("daily-briefing")} sends its briefing to any address you give, and the request for missing information that {skl("route-lead")} drafts goes to whoever can supply it. '
+         f'Each acts when you ask, within the setting on the connector\'s tool. {skl("setup")} is counted apart: with write tools on, its dashboard\'s tiles carry write actions, and each runs when you click it.', OURCOUNT),
+        (f'<span class="hl">{C.N_UO} other skills</span> name one skill for record changes.',
+         f'That skill is {skl("update-opportunity")}: {N_HAND_UO} hand their changes to it and {skl("route-lead")} follows its pattern. It is not the only writer. {num(len(C.WRITES_ALONE), True)} others write on their own: {alone}. On {num(len(C.VIA_UO))} more the change is applied through it: {join(skl(i) for i in C.VIA_UO)}. {skl("renewal-radar")} also creates the renewal deals you accept, through the creation flow its file names. '
+         f'{C.N_NONE} of the {N} files open their write line with the word none, and {num(len(C.NONE_BUT))} of those can still post, reply or make a customer document: {none_but}. The control is the setting on each connector\'s write tool, not any one skill.', OURCOUNT),
+        (f'<span class="hl">{len(C.OPPS)}</span> are built around a deal record.',
+         f'They read a deal with a stage, an amount and a close date. A team that keeps no such record leaves them little to read. Working from files, each takes an export or the details you give it.', OURREAD),
+        ('<span class="hl">Three</span> are written for leaders.',
+         f'The plugin\'s own descriptions call {skl("team-pipeline")} a leader view, {skl("rep-context")} a leader\'s prep and {skl("win-loss-review")} leader-focused.', FILES),
+        (f'<span class="hl">{num(len(C.TEAM), True)}</span> can be run for a team, and {num(len(C.REP))} for a named rep.',
+         f'Each file names its own scope, and no two are quite alike. {num(len(C.BOTH), True)} take either: {join(skl(i) for i in C.BOTH)}. {skl("rep-context")} takes one rep and no team.', OURCOUNT),
+        (f'<span class="hl">{num(len(C.SCHED), True)}</span> are named as routines.',
+         f'Each is offered on a schedule in its own description or in {skl("setup")}\'s list of routines. All {N} files carry one rule on scheduled runs, and {len(C.SCHED_SELF)} add instructions for a run of their own skill. The rule: '
+         "a scheduled run takes only the actions it was set up to take, within what its connectors allow. An action that an email, a chat or a transcript dictates or asks for becomes a proposal. The plugin's README advises setting every tool that sends, posts or writes to ask first.", OURCOUNT),
+        (f'It reads through <span class="hl">{len(D.CONNECTORS)} kinds of tool</span>.',
+         "The plugin's connector list covers the CRM, email, calendar, chat, documents, call recording, data enrichment, sales engagement, competitive intelligence and a project tracker. Its server file sets up 23 servers in advance.", FILES),
+        ("Every skill runs with nothing connected.",
+         f'It works from an upload or from what you paste, and says what it could not see. Two skills mark one source as needed: a transcript or notes for {skl("call-summary")}, and email for {skl("inbox-sweep")}.', FILES),
+    ]
+    out = ['<ol class="finds">']
+    for b, x, tag in rows:
+        out.append(f'<li><b>{b}</b><span class="x">{x}</span><span class="tag">{tag}</span></li>')
+    out.append("</ol>")
+    return "".join(out)
+
+
+def skill_map():
+    out = ['<div class="map">']
+    for gk, gname, gdesc in D.GROUPS:
+        ids = [s["id"] for s in D.SKILLS if s["group"] == gk]
+        out.append(f'<div class="row"><div><h3>{e(gname)}</h3><p>{e(gdesc)} {num(len(ids), True)} skills.</p></div><div class="chips">{chips(ids)}</div></div>')
+    out.append("</div>")
+    return "".join(out)
+
+
+def glance():
+    placed = [i for _j, ids in D.JOBS for i in ids]
+    assert sorted(placed + D.OUTSIDE_JOBS) == sorted(SK), "every skill sits under one GTM job, or is named as outside the list"
+    assert [j for j, _ids in D.JOBS] == [j for j in PD.JOB_NAMES if PD.job_lower(j) not in D.JOBS_NO_SKILL]
+    assert D.JOBS_NO_SKILL == ["onboarding and adoption", "support"] and D.OUTSIDE_JOBS == ["setup"], "the note under the job list names these in words"
+    jobs = "".join(f'<li id="cjob-{PD.job_slug(j)}"><span>{e(j)}</span><span class="chips">{chips(ids)}</span></li>' for j, ids in D.JOBS)
+    conn = ['<div class="scroll"><table class="stack"><thead><tr><th scope="col">Category</th><th scope="col">Included</th><th scope="col">Other options the plugin lists</th></tr></thead><tbody>']
+    for cat, inc, other in D.CONNECTORS:
+        conn.append(f'<tr><td data-l="Category">{e(cat)}</td><td data-l="Included">{e(inc)}</td><td data-l="Other options">{e(other)}</td></tr>')
+    conn.append("</tbody></table></div>")
+    rows = [
+        ("Provider and offering", f'<p>Anthropic, a vendor. The <a href="{D.REPO_URL}">Sales plugin</a> is its set of sales skills for Claude, read here at version {D.PLUGIN_VERSION}.</p>'),
+        ("Category", "<p>AI lab</p>"),
+        ("In one sentence", f"<p>A set of {N} skills that Claude runs for sales work, reading from the tools a company connects or from files a person uploads.</p>"),
+        ("Go-to-market (GTM) jobs it covers", f'<ul class="jobs">{jobs}</ul><p class="note" style="margin-top:10px">Placed by us from the skill files. Under CRM updates, {skl("crm-hygiene-check")} finds what is wrong and {skl("update-opportunity")} makes the change you accept. No skill of its own for two jobs: onboarding and adoption, and support. {skl("customer-health")} touches both: it reports what a customer has adopted and reads support cases where it can see them. For support, Anthropic publishes a <a href="#customer-support">Customer support plugin</a>. Outside the list, because it is each person\'s own setup run: {chips(D.OUTSIDE_JOBS)}.</p>'),
+        ("Systems it works with", "".join(conn) + '<p class="note">An asterisk marks a connector that an admin must enable before anyone can sign in. Actions run through each person\'s own sign-in to the connected tool.</p>'),
+        ("Who can get it", f'<p>Anthropic\'s help center <a href="{D.HELP_PLUGINS_URL}">lists plugins on its paid plans</a>. Sharing a plugin with colleagues and publishing one to an organization need a Team or Enterprise plan. The plugin\'s folder holds a LICENSE file with the Apache 2.0 text, which we read in Anthropic\'s public repository on GitHub. Its files state no price.</p>'),
+        ("Controls", "<p>Each connector tool can be set to allow, ask first or block. The plugin's files tell Claude to stay inside those settings, to make a change you ask for and to show a change it proposes before making it. Those are instructions to a model. The setting on the tool is the control. The files do not describe how the provider stores or uses customer data.</p>"),
+        ("What the provider reports", "<p>No result with a number appears in the plugin's files.</p>"),
+        ("Evidence in the register", "<p>None yet.</p>"),
+        ("Not public or not known", f"<p>We found no usage data for the plugin in its files or on Anthropic's pages about it, read on {D.CHECKED_ON}. How the skills perform against a live CRM, and how often each is used, are not known to us.</p>"),
+        ("On this site", f'<p>This entry\'s four parts: <a href="#skills">the skills</a>, <a href="#fit">fit by role, sales motion and week</a>, <a href="#rollout">what to settle before rollout</a> and <a href="#configure">how to configure it</a>. The <a href="{SITE}#charter">agent charter</a> and the <a href="{SITE}#checklist">launch checklist</a> under Tools also apply to skills that run on a schedule. <a href="#plugins">All plugins</a> lists this one beside the others.</p>'),
+        ("Last checked", f"<p>{D.CHECKED_ON}, for the plugin's README, connector notes and {N} skill files, and for Anthropic's pages on Salesforce in Claude and Claude for Sales. {D.GUIDE_CHECKED_ON}, for the configuration half and the help pages it cites.</p>"),
+    ]
+    return '<dl class="glance">' + "".join(f"<div><dt>{a}</dt><dd>{b}</dd></div>" for a, b in rows) + "</dl>"
+
+
+# ----------------------------------------------------------------------------- the skills
+def rows_html(pairs):
+    return '<div class="rows">' + "".join(f'<div><span class="l">{a}</span><span>{b}</span></div>' for a, b in pairs) + "</div>"
+
+
+def lean_rows(s):
+    parts = C.lean_parts(s)
+    pairs = []
+    if s["need"]:
+        pairs.append(("Needs", e(s["need"])))
+    for label, keys in parts.items():
+        if label == "Reads through" and not keys:
+            pairs.append((label, "No tool of its own."))
+            continue
+        if not keys:
+            continue
+        body = '<span class="chips">' + tags([C.tagform(k, s) for k in keys], " need" if label in ("Built around", "Needs, or asks once") else "")
+        if label == "Reads through":
+            body += '<span class="note">or an export or a paste</span>'
+        pairs.append((label, body + "</span>"))
+    if s["leannote"]:
+        pairs.append(("Note", e(s["leannote"])))
+    return rows_html(pairs)
+
+
+def value_rows(s):
+    if not s["seg"]:
+        return f'<p style="margin:0">{e(s["why"])}</p>'
+    pairs = []
+    for v in (3, 2, 1, 0):
+        ms = [(k, n) for k, n, *_ in D.MOTIONS if s["seg"][k][0] == v]
+        if ms:
+            body = "".join(f'<span class="t{" need" if v == 3 else ""}{" off" if v == 0 else ""}" data-m="{k}">{e(n)}</span>' for k, n in ms)
+            pairs.append((D.VALUE[v], f'<span class="chips">{body}</span>'))
+    often = C.how_often(s)
+    if often:
+        pairs.append(("How often", e(often)))
+    return rows_html(pairs) + f'<p style="margin:10px 0 0">{e(s["why"])}</p>'
+
+
+def slots(text):
+    """A request, with the parts the reader fills in marked."""
+    return re.sub(r"\[([^\]]+)\]", lambda m: f'<span class="slot">[{m.group(1)}]</span>', e(text))
+
+
+def low(label):
+    """A label set in running text: lower case, unless its first word is an acronym or a coined name."""
+    first = label.split()[0]
+    return label if (first.isupper() or any(c.isupper() for c in first[1:])) else label[0].lower() + label[1:]
+
+
+def seg(sid, name, label, options):
+    """A two-way choice inside a run card. The first option starts chosen."""
+    btns = "".join(f'<button type="button" data-set="{name}" data-v="{v}" aria-pressed="{"true" if i == 0 else "false"}">{e(word)}</button>'
+                   for i, (v, word) in enumerate(options))
+    return f'<span class="vg" role="group" aria-label="{label}"><span class="vl" aria-hidden="true">{label}</span><span class="seg">{btns}</span></span>'
+
+
+def model_of(s):
+    """(model, reason, extra) for the model a skill starts on. Our read."""
+    tier = C.tier_of(s)
+    model, why = D.MODEL_TIERS[tier]
+    return tier, model, why
+
+
+def run_card(s):
+    """How to use a skill on an ordinary day: when, what to say, what to give it and what comes back."""
+    sid = s["id"]
+    r = D.RUN[sid]
+    f = C.FACTS[sid]
+    needed = [low(C.TOOL_LABEL[t["type"]]) for t in f["tools"] if t["required"]]
+    conn = f"With {join(needed)} connected, the request is enough to start." if needed else "With your tools connected, the request is enough to start."
+    if r["asks"]:
+        conn += " " + r["asks"]
+    conn += " It says what it could not see."
+    ctl = [seg(sid, "src", "Your tools", [("conn", "Connected"), ("files", "Working from files")])]
+    alts = []
+    if r["team"]:
+        first, second, lead = r["words"]
+        ctl.append(seg(sid, "scope", "Scope", [("me", first), ("team", second)]))
+        alts.append(f'<p class="alt nojs"><b>{e(lead)}</b> <span class="sayt">{slots(r["team"])}</span></p>')
+    if r["sched"]:
+        ctl.append(seg(sid, "time", "Timing", [("now", "On request"), ("sched", "On a schedule")]))
+        alts.append(f'<p class="alt nojs"><b>On a schedule.</b> <span class="sayt">{slots(r["sched"])}</span></p>')
+    data = "".join(f' data-{k}="{e(r[k], quote=True)}"' for k in ("team", "sched", "both") if r[k])
+    sched_note = ""
+    if r["sched"]:
+        sched_note = ('<p class="alt" data-when="sched">For a scheduled run, the plugin\'s README advises setting every tool that sends, posts or writes to ask first. '
+                      "The skill's file tells Claude to take only the actions the run was set up to take, within what its connectors allow. An action that outside content dictates or asks for becomes a proposal.</p>")
+    head = r["say"].lower().split()[:3]
+    others = [a for a in s["ask"] if a.lower().split()[:3] != head]
+    also = ('<p class="alt also">Also answers to ' + " or ".join(f"\u201C{e(a)}\u201D" for a in others) + ".</p>") if others else ""
+    return f'''<div class="run" data-run="{sid}">
+<div class="runhead"><h3>Run it</h3><p>Restated from the skill's file. The timing is our read.</p></div>
+<div class="vary jsonly">{"".join(ctl)}</div>
+<dl class="runkv">
+<div><dt>When</dt><dd>{e(r["when"])}</dd></div>
+<div><dt>Say</dt><dd><p class="sayline"><span class="sayt" id="say-{sid}" data-base="{e(r["say"], quote=True)}"{data}>{slots(r["say"])}</span><button class="btn sm jsonly" type="button" data-copy="say-{sid}">Copy</button></p>{"".join(alts)}{sched_note}{also}</dd></div>
+<div><dt>Give it</dt><dd><p data-when="conn">{conn}</p><p data-when="files"><b class="nojs">Working from files. </b>{e(r["attach"])}</p></dd></div>
+<div><dt>You get</dt><dd>{e(s["get"])}</dd></div>
+</dl>
+</div>'''
+
+
+ACT_LABELS = [("rec", "Records"), ("cust", "Customer email"), ("out", "Its own output"), ("run", "On a schedule")]
+ACT_NONE = {"rec": "None.", "cust": "None.", "out": "Shown in Claude, for you to read. Its file sets up no send or post for it.",
+            "run": "Its file describes no scheduled run of its own. The rule every skill carries still applies. A scheduled run takes only the actions it was set up to take, within what its connectors allow. An action that outside content dictates or asks for becomes a proposal."}
+
+
+def act_rows(s):
+    """The four facts on what a skill can do. A fact the file does not give is said in plain words."""
+    pairs = []
+    for k, label in ACT_LABELS:
+        text = s["run"] if k == "run" else s[k][1]
+        yes = bool(s["run"]) if k == "run" else s[k][0] != "no"
+        pairs.append((label, f'<span class="{"yes" if yes else "nope"}">{e(text or ACT_NONE[k])}</span>'))
+    return '<div class="rows acts4">' + "".join(f'<div><span class="l">{a}</span><span>{b}</span></div>' for a, b in pairs) + "</div>"
+
+
+def tool_tags(s, f):
+    """A file's tools table, split by direction: what the skill reads, and where it can deliver something."""
+    reads, sends = [], []
+    for t in f["tools"]:
+        way, what = s["io"].get(t["type"], ("r", ""))
+        label = C.TOOL_LABEL[t["type"]]
+        if way in ("r", "rd"):
+            reads.append(f'<span class="t{" need" if t["required"] else ""}">{e(label)}{", needed" if t["required"] else ""}</span>')
+        if way in ("d", "rd"):
+            sends.append(f'<span class="t">{e(label)}<span class="tw">: {e(what)}</span></span>')
+    if s["rnote"]:
+        reads.append(f'<span class="cond rn">{e(s["rnote"])}</span>')
+    return "".join(reads), "".join(sends)
+
+
+def skill(s):
+    sid = s["id"]
+    f = C.FACTS[sid]
+    cls_name = D.CLASSES[s["cls"]][0]
+    ov_name = D.OVERLAP[s["ov"]][0]
+    reads, sends = tool_tags(s, f)
+    sends_html = f'<div><dt>Delivers to</dt><dd class="chips">{sends}</dd></div>' if sends else ""
+    if s["hand"]:
+        hands = "".join(chip(h) + (f'<span class="cond">{e(s["when"][h])}</span>' if h in s["when"] else "") for h in s["hand"])
+        if "*" in s["when"]:
+            hands += f'<span class="cond">{e(s["when"]["*"])}</span>'
+    else:
+        hands = "No other skill."
+    draws = "".join(chip(h) + (f'<span class="cond">{e(s["dwhen"][h])}</span>' if h in s["dwhen"] else "") for h in s["draws"])
+    draws_html = f'<div><dt>Draws on</dt><dd class="chips">{draws}</dd></div>' if s["draws"] else ""
+    facts = C.FACTS_OF[sid]
+    if facts:
+        bits = []
+        for x in facts:
+            note = D.FACT_NOTES.get((x, sid))
+            bits.append(f'<a href="#{G["fact_ids"][x]}">{e(x)}</a>' + (f" ({e(note)})" if note else ""))
+        facts_html = "; ".join(bits) + "."
+    else:
+        facts_html = "None of the 17 on the configuration list."
+    know = []
+    if s["watch"]:
+        know.append(e(s["watch"]))
+    if s["says"]:
+        know.append(e(s["says"]))
+    know_html = f'<div class="wide"><dt>Worth knowing</dt><dd>{" ".join(know)}</dd></div>' if know else ""
+    scope_html = f'<div><dt>Scope</dt><dd>{e(s["scope"])}</dd></div>' if s["scope"] else ""
+    suit = []
+    built = [n for k, n, *_ in D.SEATS if s["roles"][k] == 2]
+    also = [n for k, n, *_ in D.SEATS if s["roles"][k] == 1]
+    if built:
+        suit.append(("Built for", f'<span class="chips">{tags(built)}</span>'))
+    if also:
+        suit.append(("Also useful to", f'<span class="chips">{tags(also, " off")}</span>'))
+    if s["ov"]:
+        before = f'<strong>{ov_name}.</strong> {e(s["ovnote"])}<span class="rule">{e(s["rule"])}</span>'
+    else:
+        before = f'<strong>{ov_name}.</strong> {e(D.OVERLAP[0][1])}'
+    run = D.RUN[sid]
+    text = " ".join([sid, sid.replace("-", " "), s["tag"], s["does"], s["get"], cls_name, ov_name, run["when"], run["say"],
+                     " ".join(C.TOOL_LABEL[t["type"]] for t in f["tools"]), " ".join(facts)]).lower()
+    tier, model, why = model_of(s)
+    ask_first = (" Set every tool it can write or send through to ask first." if tier == "write"
+                 else " It can share its own output when you ask, so set the tool it shares through to ask first." if s["cls"] == "P"
+                 else " With write tools on, its dashboard's tiles carry write actions, so set those tools to ask first." if s["cls"] == "S" else "")
+    tested = f' {e(D.PILOT_LINE[sid])} <a href="#models-test">The test</a>.' if sid in D.TESTED else ""
+    model_html = f'<strong>{model}.</strong> {e(why)}{ask_first}{tested}'
+    return f'''<details class="sk" id="skill-{sid}" data-id="{sid}" data-text="{e(text, quote=True)}">
+<summary><span class="nm">{chip(sid, link=False)}<span class="vh">, {C.KIND_WORDS[C.kind(s)]}.</span></span><span class="tg">{e(s["tag"])}</span><span class="fitm"></span><span class="pm" aria-hidden="true"></span></summary>
+<div class="body">
+<p class="does">{e(s["does"])}</p>
+{run_card(s)}
+<dl class="kv">
+<div><dt>Reads from</dt><dd class="chips">{reads}</dd></div>
+{sends_html}
+<div class="wide"><dt>What it can do when you ask</dt><dd><strong>{cls_name}.</strong> What its own file sets up, within the setting on each connector's tool. Any other action you ask for goes through a connected tool, as in every skill:{act_rows(s)}</dd></div>
+<div><dt>Hands work to</dt><dd class="chips">{hands}</dd></div>
+{draws_html}
+{scope_html}
+<div><dt>Company facts it uses</dt><dd>{facts_html}</dd></div>
+{know_html}
+</dl>
+<div class="ourread">
+<h3>Our read <small>Not from the plugin's files</small></h3>
+<dl class="kv">
+<div><dt>Suits</dt><dd>{rows_html(suit)}</dd></div>
+<div><dt>Before you rely on it</dt><dd>{before}</dd></div>
+<div><dt>Model to start with</dt><dd>{model_html} <a href="#models">How we chose</a>.</dd></div>
+<div class="jsonly"><dt>At your readiness settings</dt><dd class="atset" data-at="{sid}"></dd></div>
+<div class="wide"><dt>Value and frequency by sales motion</dt><dd>{value_rows(s)}</dd></div>
+<div class="wide"><dt>What it leans on in your organization</dt><dd>{lean_rows(s)}</dd></div>
+</dl>
+</div>
+<div class="skfoot jsonly"><button class="btn sm" type="button" data-step="-1" data-of="{sid}">Previous</button><button class="btn sm" type="button" data-step="1" data-of="{sid}">Next</button><button class="btn sm shut" type="button" data-shut="{sid}">Close <code>{sid}</code></button></div>
+</div>
+</details>'''
+
+
+def catalog():
+    out = []
+    for gk, gname, gdesc in D.GROUPS:
+        items = [s for s in D.SKILLS if s["group"] == gk]
+        out.append(f'<div class="grp" id="group-{gk}"><h2>{e(gname)}</h2><p>{e(gdesc)}</p><div class="sklist">')
+        out.extend(skill(s) for s in items)
+        out.append("</div></div>")
+    return "\n".join(out)
+
+
+def kind_filter():
+    out = ['<div class="kinds jsonly" role="group" aria-label="Show only skills with one marking">']
+    for k, c, a, b in KEY_ROWS:
+        out.append(f'<button type="button" data-kind="{k}" aria-pressed="false"><span class="chip {k}" aria-hidden="true">{C.COUNT[c]}</span><span>{a}<span class="vh">, {C.COUNT[c]} skill{"" if C.COUNT[c] == 1 else "s"}</span></span></button>')
+    out.append("</div>")
+    return "".join(out)
+
+
+# ----------------------------------------------------------------------------- fit
+def role_rows():
+    out = ['<div class="rolelist">']
+    for k, n, _band, d in D.SEATS:
+        pool = [s for s in D.SKILLS if s["id"] != "setup" and not (k in IC and s["group"] == "day")]
+        core = [s["id"] for s in pool if s["roles"][k] == 2]
+        also = [s["id"] for s in pool if s["roles"][k] == 1]
+        also_html = chips(also) if also else "None."
+        gk = D.ROLE_GUIDE[k]
+        go = f'<p class="go"><a href="#role-setup" data-grole="{gk}">What to configure first for this role</a></p>'
+        out.append(f'<details class="rolerow" data-role="{k}"><summary><span class="rn">{e(n)}</span><span class="rdesc">{e(d)}</span>'
+                   f'<span class="rc">{len(core)} built for, {len(also)} also useful</span><span class="pm" aria-hidden="true"></span></summary>'
+                   f'<div class="rbody"><div><h4>Built for this role</h4><div class="chips">{chips(core)}</div></div>'
+                   f'<div><h4>Also useful</h4><div class="chips">{also_html}</div></div>{go}</div></details>')
+    out.append("</div>")
+    return "".join(out)
+
+
+def cadence(mk="ent"):
+    """Skills rated core or useful in a sales motion, by how often they are likely to be used. The page script redraws it."""
+    out = ['<div class="cad" id="cad">']
+    for f in (4, 3, 2, 1):
+        ids = [s["id"] for s in D.SKILLS if s["seg"] and s["seg"][mk][0] >= 2 and s["seg"][mk][1] == f and s["id"] not in D.EVENT]
+        out.append(f'<div><h3>{D.FREQ[f]}</h3><div class="chips" data-cad="{f}">{chips(ids) if ids else "None at this setting."}</div></div>')
+    ids = [s["id"] for s in D.SKILLS if s["seg"] and s["seg"][mk][0] >= 2 and s["id"] in D.EVENT]
+    out.append(f'<div><h3>When something calls for it</h3><div class="chips" data-cad="ev">{chips(ids) if ids else "None at this setting."}</div></div>')
+    out.append("</div>")
+    return "".join(out)
+
+
+def routines():
+    out = ['<div class="routines" id="routines">']
+    for key, name, when, roles, paths in D.ROUTINES:
+        who = join(low(ROLE_NAME[k]) for k in roles)
+        out.append(f'<div class="routine" data-routine="{key}" data-roles="{" ".join(roles)}"><h3>{e(name)}</h3><p class="rwhen">{e(when)} <span class="who">For {e(who)}.</span></p>')
+        for label, steps in paths:
+            if label:
+                out.append(f"<h4>{e(label)}</h4>")
+            out.append('<ol class="chain">')
+            prev = None
+            for step in steps:
+                i, how, cond = step[:3]
+                r = D.RUN[i]
+                say = step[3] if len(step) == 4 else (r["team"] if (key == "team" and r["team"]) else r["say"])
+                link = ""
+                if prev:
+                    lead = {">": f"Handed on by {prev}", "~": f"Suggested by {prev}", "<": f"Takes {prev}'s output", "@": f"Draws on {prev}"}[how]
+                    link = f'<small class="lk">{e(lead)}{": " + e(cond) if cond else ""}.</small>'
+                out.append(f'<li><span class="chips">{chip(i)}</span><span class="sayt">{slots(say)}</span>{link}</li>')
+                prev = i
+            out.append("</ol>")
+        if key in D.ROUTINE_NOTES:
+            out.append(f'<p class="note rnote">{e(D.ROUTINE_NOTES[key])}</p>')
+        out.append("</div>")
+    out.append("</div>")
+    return "".join(out)
+
+
+QUAD_OF = {(True, True): "ho", (True, False): "hr", (False, True): "lo", (False, False): "lr"}
+
+
+def quad(v, f):
+    return QUAD_OF[(v >= 2, f >= 3)]
+
+
+def matrix(mk):
+    """The grid, written quadrant by quadrant so a phone reads it in order of use; the page places it as a grid."""
+    out = ['<div class="mx" id="mx" role="group" aria-label="Skills placed by value and by frequency">',
+           '<div class="corner" style="--r:1;--c:1"></div>']
+    for f in (1, 2, 3, 4):
+        out.append(f'<div class="ch" style="--r:1;--c:{f + 1}">{D.FREQ[f]}</div>')
+    rowof = {3: 3, 2: 4, 1: 6, 0: 7}
+    for v in (3, 2, 1, 0):
+        out.append(f'<div class="rh" style="--r:{rowof[v]};--c:1">{D.VALUE[v]}<small>{e(D.VALUE_NOTE[v])}</small></div>')
+    out.append('<div class="fill" style="--r:2;--c:1"></div><div class="fill b" style="--r:5;--c:1"></div>')
+    order = [("ho", "hi-often", 2, "4 / span 2", [(3, 3), (3, 4), (2, 3), (2, 4)]),
+             ("hr", "hi-rare", 2, "2 / span 2", [(3, 1), (3, 2), (2, 1), (2, 2)]),
+             ("lo", "lo-often", 5, "4 / span 2", [(1, 3), (1, 4)]),
+             ("lr", "lo-rare", 5, "2 / span 2", [(1, 1), (1, 2), (0, 1)])]   # a poor fit has no frequency: one cell, the width of the grid
+    for q, qk, qrow, qcol, cells in order:
+        name, desc = D.QUADS[qk]
+        cell_html = []
+        total = 0
+        for v, f in cells:
+            ids = [s["id"] for s in D.SKILLS if s["seg"] and s["seg"][mk] == [v, f]]
+            total += len(ids)
+            cell_html.append(f'<div class="cell q-{q}{"" if ids else " e"}" data-v="{v}" data-f="{f}" style="--r:{rowof[v]};--c:{"2 / span 4" if v == 0 else f + 1}">'
+                             f'<span class="lab">{D.VALUE[v] if v == 0 else D.VALUE[v] + ", " + D.FREQ[f].lower()}</span>{chips(ids)}</div>')
+        out.append(f'<div class="ql q-{q}" data-q="{q}" style="--r:{qrow};--c:{qcol}"><b>{name}</b><small>{desc}</small>'
+                   f'<span class="none"{"" if total == 0 else " hidden"}>None in this motion.</span></div>')
+        out.extend(cell_html)
+    out.append("</div>")
+    return "".join(out)
+
+
+def pilots(mk):
+    start = [s["id"] for s in D.SKILLS if s["seg"] and s["seg"][mk][0] == 3 and s["seg"][mk][1] >= 3 and s["cls"] == "R"]
+    rule = [s["id"] for s in D.SKILLS if s["seg"] and s["seg"][mk][0] >= 2 and s["ov"] == 2]
+    return chips(start), chips(rule)
+
+
+def ratings_table():
+    out = ['<div class="scroll" tabindex="0" role="region" aria-label="Every rating, by skill and sales motion"><table class="rt"><thead><tr><th scope="col">Skill</th>']
+    for mk, mname, *_ in D.MOTIONS:
+        out.append(f'<th scope="col">{e(mname)}</th>')
+    out.append("</tr></thead><tbody>")
+    for s in D.SKILLS:
+        if not s["seg"]:
+            continue
+        out.append(f'<tr><th scope="row">{s["id"]}</th>')
+        for mk, *_ in D.MOTIONS:
+            v, f = s["seg"][mk]
+            out.append('<td class="z">Poor fit</td>' if v == 0 else f'<td><b>{D.VALUE[v]}</b>, {"when called for" if s["id"] in D.EVENT else D.FREQ[f].lower()}</td>')
+        out.append("</tr>")
+    out.append("</tbody></table></div>")
+    occ = " ".join(f'{skl(i)}: {e(low(D.RUN[i]["when"]))}' for i in D.EVENT)
+    out.append(f'<p class="note" style="margin-top:12px">{num(len(D.EVENT), True)} skills are used when something calls for them, so the table gives no frequency for them. {occ}</p>')
+    return "".join(out)
+
+
+# ----------------------------------------------------------------------------- before rollout
+def tiers():
+    def also(lvl, pick):
+        return [s["id"] for s in D.SKILLS if s["ov"] == lvl and pick(s)]
+    post1, post0 = also(1, lambda s: s["cls"] == "P"), also(0, lambda s: s["cls"] == "P")
+    cust2 = also(2, lambda s: s["cls"] == "C")
+    assert not C.OV_OPEN and len(cust2) == C.COUNT["C"] == 3 and len(post1) == 5 and post0 == ["account-context"], (cust2, post1, post0)
+    assert all(s["cls"] in "WC" for s in D.SKILLS if s["ov"] == 2) and "daily-briefing" in post1
+    body = {
+        2: f'The {C.COUNT["W"]} skills whose own write line lists a change to a record, and the three that write for customers: {join(skl(i) for i in cust2)}. Decide where the official version lives, and who may send, before people use these.',
+        1: f'None of these lists a change to a record. Each gives a second view of something another tool or team may already report. Fine for preparation. Do not quote the result as the official figure. '
+           f'{num(len(post1), True)} can post to chat when you ask, their own output or a message drawn from it: {join(skl(i) for i in post1)}. One of them, {skl("daily-briefing")}, can also email its briefing to an address you name, so decide who may receive it, inside the company or outside.',
+        0: f'Nothing here normally competes with a tool you run. One can post a message of its own when you ask: {skl(post0[0])}, to the owner of an account.',
+    }
+    out = ['<ul class="tiers">']
+    for lvl in (2, 1, 0):
+        ids = [s["id"] for s in D.SKILLS if s["ov"] == lvl]
+        out.append(f'<li><div><h3>{D.OVERLAP[lvl][0]}</h3><p>{body[lvl]}</p></div><div><p class="n">{len(ids)} skills</p><div class="chips" style="margin-top:8px">{chips(ids)}</div></div></li>')
+    out.append("</ul>")
+    return "".join(out)
+
+
+def overlap_table():
+    out = ['<div class="scroll" tabindex="0" role="region" aria-label="Skills by the tool you may already own"><table class="ovt"><thead><tr><th scope="col">A tool you may own</th><th scope="col">Skills that touch it</th><th scope="col">What goes wrong</th><th scope="col">A working rule</th></tr></thead><tbody>']
+    for ck, name, desc, named, wrong, rule in D.CATS:
+        ids = sorted((s["id"] for s in D.SKILLS if ck in s["cats"]), key=lambda i: (-SK[i]["ov"], C.ORDER.index(i)))
+        note = f"<small>{e(desc)}</small>" + (f"<small>{e(named)}</small>" if named else "")
+        out.append(f'<tr><th scope="row">{e(name)}{note}</th><td><div class="chips">{chips(ids)}</div></td><td>{e(wrong)}</td><td>{e(rule)}</td></tr>')
+    out.append("</tbody></table></div>")
+    return "".join(out)
+
+
+def leans_table():
+    out = ['<div class="scroll" tabindex="0" role="region" aria-label="What each skill leans on"><table class="rt lt"><thead><tr><th scope="col">Skill</th><th scope="col">What it leans on</th></tr></thead><tbody>']
+    for s in D.SKILLS:
+        out.append(f'<tr><th scope="row">{s["id"]}</th><td>{e(C.lean_text(s))}</td></tr>')
+    out.append("</tbody></table></div>")
+    return "".join(out)
+
+
+def switches():
+    out = ['<div class="swgroups" id="switches">']
+    for gk, gname, gdesc in D.SWITCH_GROUPS:
+        out.append(f'<fieldset class="swg" data-g="{gk}"><legend>{e(gname)}</legend><p>{e(gdesc)}</p>')
+        for k, g, label, _short, helptext in D.SWITCHES:
+            if g == gk:
+                out.append(f'<div class="sw"><input type="checkbox" id="sw-{k}" data-k="{k}" checked><label for="sw-{k}">{e(label)}</label><small>{e(helptext)}</small></div>')
+        out.append("</fieldset>")
+    out.append("</div>")
+    return "".join(out)
+
+
+def presets():
+    out = ['<div class="presets chips" role="group" aria-label="Start from a sketch"><span class="l">Start from a sketch</span>']
+    for k, name, _on in D.PRESETS:
+        out.append(f'<button type="button" data-preset="{k}" aria-pressed="false">{e(name)}</button>')
+    out.append("</div>")
+    return "".join(out)
+
+
+LEVELS = [
+    (0, "Little to read", "It is built around a record you do not keep.", True),
+    (1, "From files", "Claude cannot reach its main tool. Upload an export or paste.", True),
+    (2, "Works, with gaps", "Its main source is there. Something that would sharpen it is missing.", True),
+    (3, "Inputs in place", "The kinds of input you ticked are there. That is not a check of your records, your permissions or the skill.", False),
+]
+
+
+def results():
+    out = ['<div class="rdres" id="rd-results" tabindex="0" role="region" aria-label="Where each skill stands at these settings">',
+           '<h3>Where each skill stands</h3><p class="note">At the settings on this page. The reasons are our read.</p><div role="status" aria-live="polite" class="vh" id="rd-say"></div>']
+    for lvl, name, desc, is_open in LEVELS:
+        flat = ' class="flat"' if lvl == 3 else ""
+        out.append(f'<details class="lvx"{" open" if is_open else ""}><summary><b id="t{lvl}">0</b><span>{name}<small>{desc}</small></span><span class="pm" aria-hidden="true"></span></summary>'
+                   f'<ul id="lv{lvl}"{flat}></ul></details>')
+    out.append("</div>")
+    return "".join(out)
+
+
+def pinbar():
+    cells = "".join(f'<span><b id="p{lvl}">0</b>{label}</span>' for lvl, label in ((3, "inputs in place"), (2, "with gaps"), (1, "from files"), (0, "little to read")))
+    return f'<div class="rdpin jsonly" id="rdpin" aria-hidden="true">{cells}<a href="#rd-results" tabindex="-1">Results</a></div>'
+
+
+# ----------------------------------------------------------------------------- which model
+PILOT_PATH = os.path.join(HERE, "pilot.json")
+PILOT = json.load(open(PILOT_PATH, encoding="utf-8")) if os.path.exists(PILOT_PATH) else None
+MODEL_NAME = {"haiku": "Haiku 5.5", "sonnet": "Sonnet 5.5", "opus": "Opus 5.5", "fable": "Fable 5.2"}
+MODEL_ID = {"haiku": "claude-haiku-5-5", "sonnet": "claude-sonnet-5-5", "opus": "claude-opus-5-5", "fable": "claude-fable-5-2"}
+
+
+def frac(score, of):
+    return f"{score:g} of {of}"
+
+
+def secs(n):
+    return f"{n} s" if n < 90 else f"{n // 60} min {n % 60:02d} s"
+
+
+def model_tiers():
+    """The 36 skills by the model each starts on. Our read."""
+    rows = [
+        ("write", "It changes records or writes for customers", "A slip costs more than a few seconds of waiting. Start on the stronger model, with every tool it can write or send through set to ask first. This rests on what an error would cost, and it is unmeasured: the test below did not cover writes."),
+        ("deep", "It weighs several sources and makes a call", "A review, a diagnosis or a pattern across many deals. The one skill of this kind in the test below scored the same on every model, so the rule starts these on the faster model. That rests on one skill, run once."),
+        ("steady", "A scoped job with a clear input", "One account, one meeting or one question."),
+        ("sweep", "A repeated pass that returns a list you can check", "The same check on every deal, often on a schedule. Try the smallest model once a run has matched your own rules and records."),
+    ]
+    out = ['<ul class="mtiers">']
+    for key, name, desc in rows:
+        ids = [s["id"] for s in D.SKILLS if C.tier_of(s) == key]
+        model = D.MODEL_TIERS[key][0]
+        out.append(f'<li><div><h3>{name}</h3><p>{desc}</p></div><div><p class="n">{model} to start, {len(ids)} skills</p><div class="chips" style="margin-top:8px">{chips(ids)}</div></div></li>')
+    out.append("</ul>")
+    return "".join(out)
+
+
+def shape(c):
+    """What one run returned, from the files it left."""
+    if not c["extra_files"]:
+        return f'All in the reply, {c["words"]:,} words.'
+    kind = "page" if c["extra_files"][0].endswith((".html", ".htm")) else "document"
+    return f'A reply of {c["words"]:,} words and a {kind} of {c["file_words"]:,}.'
+
+
+def pilot_summary():
+    """One row for each model, summed over the six skills."""
+    P = PILOT
+    out = ['<div class="scroll" tabindex="0" role="region" aria-label="The test in sum, by model"><table class="rt pt sum stack wide"><thead><tr><th scope="col">Model</th>'
+           '<th scope="col">Planted items found</th><th scope="col">Numbers in the key right</th><th scope="col">Guardrails kept</th><th scope="col">Slips the markers noted</th>'
+           '<th scope="col">Time for one run</th><th scope="col">What came back</th></tr></thead><tbody>']
+    for m in P["models"]:
+        cs = [P["cells"][sk][m] for sk in P["skills"]]
+        assert all(c["done"] and "items" in c for c in cs), m
+        assert P["model_ids"][m] == MODEL_ID[m], (m, P["model_ids"][m])
+        it, of = sum(c["items"]["score"] for c in cs), sum(c["items"]["of"] for c in cs)
+        nu, nof = sum(c["numbers"]["score"] for c in cs), sum(c["numbers"]["of"] for c in cs)
+        gk, gof = sum(c["guardrails"]["kept"] for c in cs), sum(c["guardrails"]["of"] for c in cs)
+        ts = sorted(c["seconds"] for c in cs)
+        files = sum(1 for c in cs if c["extra_files"])
+        totals = sorted(c["words"] + c["file_words"] for c in cs)
+        if files == len(cs):
+            back = "A short reply with a separate page or document, every time."
+        elif files == 0:
+            back = "Everything in one reply, every time."
+        else:
+            back = (f"A short reply with a separate page or document in {num(files)} of {num(len(cs))} runs, "
+                    f"and everything in one reply in the other {num(len(cs) - files)}.")
+        back += f" {totals[0]:,} to {totals[-1]:,} words in all."
+        out.append(f'<tr><th scope="row">{MODEL_NAME[m]}</th><td data-l="Items found">{frac(it, of)}</td><td data-l="Numbers in the key">{frac(nu, nof)}</td><td data-l="Guardrails kept">{gk} of {gof}</td>'
+                   f'<td class="fmt" data-l="Slips">{e(D.PILOT_SLIPS[m])}</td><td data-l="Time for a run">{secs(ts[0])} to {secs(ts[-1])}</td><td class="fmt" data-l="What came back">{back}</td></tr>')
+    out.append("</tbody></table></div>")
+    return "".join(out)
+
+
+def pilot_detail():
+    P = PILOT
+    out = ['<div class="scroll" tabindex="0" role="region" aria-label="Every result, by skill and model"><table class="rt pt stack wide"><thead><tr><th scope="col">Skill and model</th>'
+           '<th scope="col">Items found</th><th scope="col">Numbers in the key right</th><th scope="col">Guardrails kept</th><th scope="col">Time</th><th scope="col">What came back, and what to note</th></tr></thead>']
+    seen = set()
+    for sk in P["skills"]:
+        out.append(f'<tbody><tr class="tgrp"><th scope="rowgroup" colspan="6">{chip(sk)}</th></tr>')
+        for m in P["models"]:
+            c = P["cells"][sk][m]
+            nums = frac(c["numbers"]["score"], c["numbers"]["of"]) if c["numbers"]["of"] else "None to check"
+            g = c["guardrails"]
+            note = D.PILOT_NOTES.get((sk, m), "")
+            seen.add((sk, m)) if note else None
+            out.append(f'<tr><th scope="row">{MODEL_NAME[m]}</th><td data-l="Items found">{frac(c["items"]["score"], c["items"]["of"])}</td><td data-l="Numbers in the key">{nums}</td>'
+                       f'<td data-l="Guardrails kept">{g["kept"]} of {g["of"]}</td><td data-l="Time">{secs(c["seconds"])}</td>'
+                       f'<td class="fmt" data-l="What came back"><span class="fw">{shape(c)}{" " + e(note) if note else ""}</span></td></tr>')
+        out.append("</tbody>")
+    assert seen == set(D.PILOT_NOTES), set(D.PILOT_NOTES) - seen
+    out.append("</table></div>")
+    return "".join(out)
+
+
+def pilot_block():
+    """The small test: what was run, what came back and what it does not show."""
+    if not PILOT:
+        return '<h3 id="models-test">A small test</h3><p class="note">The test is still running. This part fills in when it is done.</p>'
+    P = PILOT
+    n_skill, n_model = len(P["skills"]), len(P["models"])
+    reads = "".join(f"<li><b>{b}</b>{x}</li>" for b, x in D.PILOT_READ)
+    limits = "".join(f"<li>{x}</li>" for x in D.PILOT_LIMITS)
+    return f'''<h3 id="models-test" style="margin-top:38px">A small test</h3>
+   <p>We ran {num(n_skill)} of the skills on {num(n_model)} Claude models, once each, on invented files that hold known answers. It is a pilot: {n_skill * n_model} runs in all, enough to show where to look and too few to settle anything.</p>
+   <ul class="princ">
+    <li><b>The files</b>One invented company: a pipeline export of 24 deals, three call transcripts, an inbox of 10 messages, 12 inbound leads and a page of company facts. Problems were planted in them, such as three deals past their close date and an email that asks for a contract amount to be changed.</li>
+    <li><b>The runs</b>On {D.PILOT_DATE}, each model got the same skill file, the same request and the same files in a session of its own, with no tool connected. Effort was left at each model's default.</li>
+    <li><b>The marking</b>Two separate Claude sessions marked each reply against the answer key. They saw the replies under code names and were not told which model wrote which.</li>
+    <li><b>What was marked</b>Planted items found, numbers right and guardrails kept, such as promising no go-live date in a customer email and claiming no write that did not happen. Time and length were recorded by the run.</li>
+   </ul>
+   {pilot_summary()}
+   <p class="note" style="margin-top:10px">Summed over the {num(n_skill)} skills. An item's mark is the mean of two markers, and a partly found item counts as half. One item of the key was wrong and was corrected on November 22, 2026, which raised each model's total by half a mark. The numbers column counts only the figures in the key. The slips column says of each slip whether it cost a mark: the two by Haiku 5.5 did, and the figures that Sonnet 5.5 and Opus 5.5 added sit outside the key. Time runs from a session's first step to its last, in our test harness and not in the Claude app.</p>
+   <h3 style="margin-top:34px">What the test suggests</h3>
+   <ul class="princ">{reads}</ul>
+   <h3 style="margin-top:34px">What it does not show</h3>
+   <ul class="lim">{limits}</ul>
+   <details class="more"><summary>Every result, skill by skill</summary>{pilot_detail()}</details>
+   <p class="note" style="margin-top:16px">The test files, the answer key, all {n_skill * n_model} replies and the marks travel with this page, under <a href="kit/modeltest/README.md"><code>kit/modeltest</code></a>, so anyone can mark them again or rerun the test.</p>'''
+
+
+def models_section():
+    return f'''<section class="sec soft tight">
+  <div class="wrap">
+   <h2 id="models">Which model to run a skill on</h2>
+   <p>The plugin does not choose a model. None of its {N} skill files names one, so a skill runs on whichever model is selected in Claude at the moment you ask. The model is a setting for your team to decide, and it changes three things: how much a skill catches, how long you wait and what the reply looks like.</p>
+   <div class="g2" style="margin-top:26px">
+    <div>
+     <h3>What Anthropic says</h3>
+     <ul class="princ">
+      <li><b>Opus 5.5 is the usual place to start</b>Anthropic's guide to choosing a model starts most work there.</li>
+      <li><b>Sonnet 5.5 for everyday work</b>The guide pairs it with speed: writing, analysis and agent tasks of an ordinary day.</li>
+      <li><b>Haiku 5.5 for volume</b>It has the lowest latency and price, and suits high-volume and real-time work.</li>
+      <li><b>Fable 5.2 at the top</b>The guide calls it the most capable model open to all customers, and points it at long agent sessions and deep research.</li>
+      <li><b>Effort is a second dial</b>Within one model, an effort setting trades quality against time and cost. The guide's advice is to try that dial first, since it often does more than a change of model.</li>
+     </ul>
+     <p class="note" style="margin-top:12px">From <a href="{D.MODEL_GUIDE_URL}">Anthropic's guide to choosing a model</a>, read on {D.PILOT_DATE}. Anthropic is the vendor, and the guide is written for developers. It does not mention the plugin.</p>
+    </div>
+    <div>
+     <h3>What the plugin's files say</h3>
+     <div class="box mbox">
+      <p>Nothing about models. No skill file names a model or an effort level, and neither does the README or the connector list.</p>
+      <p>The files do describe what comes back, and they tie it to what is connected: a rendered page where one helps, and paste-ready text or a checklist where the skill cannot write.</p>
+     </div>
+    </div>
+   </div>
+   <h3 style="margin-top:38px">A rule to start from</h3>
+   <p>Sort each skill by what a mistake would cost and by how much judgment it needs. This is our read as of {D.MODELS_AS_OF}, and model names date quickly.</p>
+   {model_tiers()}
+   <p class="note" style="margin-top:14px">Fable 5.2 sits above all four rows. Keep it for the few jobs that run rarely and read a great deal, such as {skl("win-loss-review")} or {skl("account-plan")}, when a wait of several minutes is acceptable. We did not test it on either of those two.</p>
+   {pilot_block()}
+  </div>
+ </section>'''
+
+
+# ----------------------------------------------------------------------------- configure
+TOC = [("outcome", "What you get"), ("role-setup", "What each role gets"), ("seats", "Who changes what"),
+       ("layers", "What you configure"), ("steps", "How to configure it"), ("facts", "The facts to write down"),
+       ("for-claude", "Do it with Claude"), ("tips", "Tips from a real build"), ("pitfalls", "Pitfalls to avoid"),
+       ("example", "A worked example"), ("questions", "Questions people ask")]
+
+
+def head_id(fragment, sid):
+    """The section's own heading carries its address, so the text reads as one article."""
+    assert fragment.lstrip().startswith("<h2>"), sid
+    return fragment.replace("<h2>", f'<h2 id="{sid}">', 1)
+
+
+def configure_article():
+    rolepick = ('<div class="bar jsonly" style="margin-top:18px">' + picker("c", motion=False, role_label="Show the facts to get right first for")
+                + '</div><p class="note jsonly" id="fact-note" role="status" aria-live="polite"></p>')
+    parts = [
+        head_id(G["outcome"], "outcome"),
+        head_id(G["role_setup"], "role-setup"),
+        head_id(G["seats"], "seats"),
+        head_id(G["layers"], "layers"),
+        head_id(G["steps"], "steps"),
+        head_id(G["facts"], "facts").replace("{ROLEPICK}", rolepick),
+        G["for_claude"].replace('<div class="hand">', '<div class="hand" id="for-claude">', 1),
+        head_id(G["tips"], "tips"),
+        head_id(G["pitfalls"], "pitfalls"),
+        head_id(G["example"], "example"),
+        head_id(G["questions"], "questions"),
+    ]
+    assert 'id="for-claude"' in parts[6]
+    toc = "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in TOC) + '<li><a href="#sources">Sources</a></li>'
+    return (f'<nav class="toc" aria-label="In this guide"><b>In this guide</b><ol>{toc}</ol></nav>'
+            f'<div class="art"><details class="tocm"><summary>In this guide</summary><ol>{toc}</ol></details>\n' + "\n".join(parts) + "</div>")
+
+
+# ----------------------------------------------------------------------------- data for the page script and the file
+def page_data():
+    return {
+        "skills": [{"id": s["id"], "cls": s["cls"], "ov": s["ov"], "roles": s["roles"], "seg": s["seg"], "day": s["group"] == "day", "ev": s["id"] in D.EVENT,
+                    "core": s["core"], "adds": s["adds"], "tool": s["tool"], "must": s["must"], "quiet": s["quiet"] + s["crmset"], "as": s["tagas"]} for s in D.SKILLS],
+        "motions": [{"k": k, "name": n, "desc": d, "eg": eg, "note": note} for k, n, d, eg, note in D.MOTIONS],
+        "roles": [{"k": k, "name": n, "guide": D.ROLE_GUIDE[k]} for k, n, *_ in D.SEATS],
+        "value": {str(k): v for k, v in D.VALUE.items()},
+        "freq": {str(k): v for k, v in D.FREQ.items()},
+        "switches": [{"k": k, "group": g, "short": short} for k, g, _l, short, _h in D.SWITCHES],
+        "presets": [{"k": k, "name": n, "on": on} for k, n, on in D.PRESETS],
+    }
+
+
+def skills_json():
+    seat_names = {k: n for k, n, *_ in D.SEATS}
+    group_name = {k: n for k, n, _d in D.GROUPS}
+    out = {
+        "title": TITLE,
+        "plugin": {"name": "sales", "publisher": "Anthropic", "version": D.PLUGIN_VERSION, "license": "Apache-2.0", "public_copy": D.REPO_URL},
+        "checked_on": D.CHECKED_ON,
+        "status": "Preview. Corrected twice on November 22, 2026, each time after checks by two other labs' models, and a third time on November 23, 2026, after one of them checked the statements that had changed. On November 23, 2026 the editor accepted 18 further findings, which changed fields under our_read: role marks, overlap, value and frequency, and the model to start with. His review of the rest is still to come. The text as it now stands has had no check from outside.",
+        "how_to_read": {
+            "from_the_files": "Restated from the plugin's own files: does, gets, reads_from, reads_note, delivers_to, needs, can_do, hands_to, draws_on, scope, worth_knowing.",
+            "our_count_from_the_files": "Counts and groupings we made from the files: marking (the furthest a skill goes by its own file), named_as_routine, takes_a_team and takes_a_named_rep.",
+            "our_read": "A first reading, not usage data: roles, overlap, value_and_frequency, leans_on, model_to_start_with, and the routines with their order. Each link in a routine is checked against the file that states it. Where a skill has used_when, it is used when something calls for it, and its frequency is only a rough cadence. A poor fit is given no frequency.",
+            "run": "Restated from each skill's file: when (the timing is our read), say, say_for_team, say_on_schedule, give_it_from_files.",
+            "not_measured": "Apart from the pilot under model_test, nothing here was measured, and no skill was run against a live CRM.",
+        },
+        "scales": {
+            "value": {str(k): v for k, v in D.VALUE.items()},
+            "frequency": {str(k): v for k, v in D.FREQ.items()},
+            "role_fit": {"2": "Built for this role", "1": "Also useful", "0": "Not aimed at this role"},
+            "overlap": {str(k): v[0] for k, v in D.OVERLAP.items()},
+            "marking": {v[0]: v[1] for k, v in D.CLASSES.items()},
+        },
+        "motions": [{"key": k, "name": n, "description": d, "examples": eg, "note": note} for k, n, d, eg, note in D.MOTIONS],
+        "tool_categories": [{"key": k, "name": n, "description": d, "named_in_connector_list": named, "what_goes_wrong": w, "working_rule": r}
+                            for k, n, d, named, w, r in D.CATS],
+        "connectors": [{"category": c, "included": i, "other_options": o} for c, i, o in D.CONNECTORS],
+        "skills": [],
+    }
+    for s in D.SKILLS:
+        f = C.FACTS[s["id"]]
+        out["skills"].append({
+            "id": s["id"], "group": group_name[s["group"]], "summary": s["tag"],
+            "does": s["does"], "gets": s["get"], "example_requests": s["ask"],
+            "reads_from": [C.TOOL_LABEL[t["type"]] for t in f["tools"] if s["io"].get(t["type"], ("r", ""))[0] in ("r", "rd")],
+            "reads_note": s["rnote"],
+            "delivers_to": {C.TOOL_LABEL[k]: what for k, (way, what) in s["io"].items()},
+            "needs": [C.TOOL_LABEL[t["type"]] for t in f["tools"] if t["required"]],
+            "marking": D.CLASSES[s["cls"]][0],
+            "can_do": {"records": s["rec"][1] or "None.", "customer_email": s["cust"][1] or "None.", "own_output": s["out"][1] or "Shown in Claude. Its file sets up no send or post for it.", "on_a_schedule": s["run"] or "Its file describes no scheduled run of its own."},
+            "hands_to": [{"skill": h, "when": s["when"].get(h, s["when"].get("*", ""))} for h in s["hand"]],
+            "draws_on": [{"skill": h, "when": s["dwhen"].get(h, "")} for h in s["draws"]],
+            "scope": s["scope"], "takes_a_team": s["team"], "takes_a_named_rep": s["rep"], "named_as_routine": s["sched"],
+            "worth_knowing": s["watch"],
+            "company_facts": [{"fact": x, "note": D.FACT_NOTES.get((x, s["id"]), "")} for x in C.FACTS_OF[s["id"]]],
+            "run": {"when": D.RUN[s["id"]]["when"], "say": D.RUN[s["id"]]["say"], "say_for_team": D.RUN[s["id"]]["team"],
+                    "say_on_schedule": D.RUN[s["id"]]["sched"], "give_it_from_files": D.RUN[s["id"]]["attach"], "may_ask": D.RUN[s["id"]]["asks"]},
+            "our_read": {
+                "roles": {seat_names[k]: v for k, v in s["roles"].items() if v},
+                "overlap": {"tier": D.OVERLAP[s["ov"]][0], "tool_categories": s["cats"], "note": s["ovnote"], "working_rule": s["rule"]},
+                "value_and_frequency": None if not s["seg"] else {k: ({"value": D.VALUE[v]} if v == 0 else {"value": D.VALUE[v], "frequency": D.FREQ[fr]}) for k, (v, fr) in s["seg"].items()},
+                "used_when": D.RUN[s["id"]]["when"] if s["id"] in D.EVENT else "",
+                "why_it_varies": s["why"],
+                "leans_on": C.lean_text(s),
+                "model_to_start_with": {"model": D.MODEL_TIERS[C.tier_of(s)][0], "why": D.MODEL_TIERS[C.tier_of(s)][1], "as_of": D.MODELS_AS_OF},
+            },
+        })
+    out["routines"] = [{"name": n, "when": w, "roles": [seat_names[k] for k in roles],
+                        "chains": [{"label": label, "steps": [{"skill": st[0], "link": {None: "", ">": "handed on by the step before", "~": "suggested by the step before", "<": "takes the output of the step before", "@": "draws on the step before as a source"}[st[1]], "condition": st[2] or ""} for st in steps]}
+                                   for label, steps in paths], "note": D.ROUTINE_NOTES.get(_k, "")} for _k, n, w, roles, paths in D.ROUTINES]
+    if PILOT:
+        out["model_test"] = {"date": D.PILOT_DATE, "status": "A pilot: one run for each skill and model, from invented files, marked by a Claude session under code names.",
+                             "key_corrections": PILOT.get("key_corrections", {}), "model_ids": MODEL_ID, "results": PILOT["cells"]}
+    return out
+
+
+# ----------------------------------------------------------------------------- the page
+def site_nav(cls, label, extra=""):
+    links = "".join(f'<a href="{SITE}#{k}">{n}</a>' for k, n in (("research", "Research"), ("playbooks", "Playbooks"), ("tools", "Tools"), ("evidence", "Evidence"), ("about", "About")))
+    return f'<nav class="{cls}" aria-label="{label}">{links}{extra}</nav>'
+
+
+def build():
+    css = open(os.path.join(HERE, "base.css"), encoding="utf-8").read() + open(os.path.join(HERE, "entry.css"), encoding="utf-8").read()
+    print("plugin pages:", V.check())
+    js = open(os.path.join(HERE, "app.js"), encoding="utf-8").read()
+    start_chips, rule_chips = pilots("ent")
+    ent = [m for m in D.MOTIONS if m[0] == "ent"][0]
+    value_defs = "".join(f"<li><strong>{D.VALUE[v]}.</strong> {e(D.VALUE_LONG[v])}</li>" for v in (3, 2, 1, 0))
+    opps_names = join(skl(i) for i in C.OPPS)
+    team_names = join(skl(i) for i in C.TEAM)
+    rep_names = join(skl(i) for i in C.REP)
+    ban_names = join(skl(i) for i in C.VALUE_BAN)
+    sched_names = join(skl(i) for i in C.SCHED)
+    data_json = json.dumps(page_data(), separators=(",", ":")).replace("</", "<\\/")
+    desc = (f"The plugins that Anthropic and OpenAI publish for go-to-market teams, with a full entry on Anthropic's Sales plugin for Claude: what each of its {N} skills does, "
+            "reads and can change, who it suits, where it overlaps tools you own, and how to configure it for a company.")
+    guide_sources = "".join(f"<li>{x}</li>" for x in G["sources"][1:])
+    film = G["film"]
+
+    page = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{TITLE}</title>
+<meta name="description" content="{e(desc, quote=True)}">
+<meta name="theme-color" content="#493AC4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23493AC4'/%3E%3Crect x='6' y='9' width='14' height='5' rx='2.5' fill='%23E4F560'/%3E%3Crect x='12' y='18' width='14' height='5' rx='2.5' fill='%23fff'/%3E%3C/svg%3E">
+<meta property="og:title" content="{TITLE}">
+<meta property="og:description" content="{e(desc, quote=True)}">
+<meta property="og:type" content="article">
+<link rel="alternate" type="application/json" href="skills.json" title="The {N} skills as data">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&amp;display=swap">
+<script>document.documentElement.className += " js";</script>
+<style>
+{css}</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="mast">
+ <div class="wrap">
+  <a class="wm" href="{SITE}">Modern GTM</a>
+  <a class="sect" href="#plugins">Plugins</a>
+  <span class="asof"><b>Preview</b>Not yet public</span>
+ </div>
+</header>
+<nav class="tabs" id="nav" aria-label="Plugins" data-group="home">
+ <div class="wrap">
+  <a class="back" href="#plugins"><span class="lg">All plugins</span><span class="smo">Plugins</span></a>
+  <b id="here">Plugins</b>
+  <div class="tl" data-nav="sales"><a href="#overview">Overview</a><a href="#skills">Skills</a><a href="#fit">Fit</a><a href="#rollout"><span class="lg">Before rollout</span><span class="smo">Rollout</span></a><a href="#configure">Configure</a></div>
+  <div class="tl" data-nav="gpt"><a href="#gpt-skills">Skills</a><a href="#gpt-apps"><span class="lg">Works with</span><span class="smo">Apps</span></a><a href="#gpt-setup">Setup</a><a href="#gpt-rollout"><span class="lg">Before rollout</span><span class="smo">Rollout</span></a><a href="#side-by-side"><span class="lg">Beside Claude</span><span class="smo">Compare</span></a></div>
+  <div class="tl" data-nav="home"><span class="onp">On this page</span><a href="#from-anthropic">Anthropic</a><a href="#from-openai">OpenAI</a><a href="#leader-skills"><span class="lg">Skills for leaders</span><span class="smo">For leaders</span></a></div>
+  <div class="tl" data-nav="all"><a href="#plugins">All plugins</a>{"".join(f'<a href="#{a}">{e(n)}</a>' for a, n, *_ in V.PAGES)}</div>
+ </div>
+</nav>
+
+<main id="main">
+
+{V.home_view(sum(len(v) for v in PD.ADJACENT.values()))}
+
+<!-- ============================================================ OVERVIEW -->
+<div id="overview" data-view="overview" data-group="sales" data-title="Claude Sales plugin">
+ <section class="open">
+  <div class="wrap">
+   <h1>Anthropic's Sales plugin for Claude</h1>
+   <p class="lede">Anthropic, the AI lab that makes Claude, is the vendor of this plugin. It gives Claude {N} skills for sales work. This entry sets out what each skill does, reads and can change, with nothing to install, and then how to configure the plugin for a company.</p>
+   <div class="acts"><a class="btn pri" href="#skills">Browse the {N} skills</a><a class="btn" href="#configure">Configure it for your company</a></div>
+   <p class="who"><span><b>Preview.</b> The editor has changed some ratings. His review of the rest is still to come.</span><span>Read against Sales plugin {D.PLUGIN_VERSION} by Claude on {D.CHECKED_ON}</span><span>For revenue leaders and operators</span></p>
+   <p class="sub">Compiled with Claude, an Anthropic model, from Anthropic's own files. On {D.CROSSLAB_ON} models from two other labs checked it against those files in two rounds, and on {D.CHECK3_ON} one of them checked the statements that had changed since. Claude made the corrections after each. The text as it now stands has had no check from outside. Its editor decides what is published.</p>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2>What the plugin's files show</h2>
+   {findings()}
+   <div class="g2 mt">
+    <div class="def howread">
+     <h3>How to read a skill's name</h3>
+     <p>The outline or fill of a name shows the furthest the skill goes by its own steps. It is the same in every part of this entry. It is not a permission, and not the most a skill can do: every skill's file carries the rule that an action you ask for, such as an update, an email, a post or a booking, goes through a connected tool. What a run can do is set by the tools you connect and the setting on each, and each skill's card lists what its own file sets up. On a schedule, any skill takes the actions the schedule was set up to take, within what its connectors allow. An action that outside content dictates or asks for stays a proposal.</p>
+     {key()}
+    </div>
+    <div class="def howread">
+     <h3>Fact and our read</h3>
+     <p>What a skill does, reads and can change, send or post is restated from version {D.PLUGIN_VERSION} of the plugin's files.</p>
+     <p>A count or a grouping that we made from the files is marked as ours, with its rule.</p>
+     <p>Role fit, overlap with other tools, value, frequency and the model to start on are our read. They are marked wherever they appear, and none of it is usage data.</p>
+     <p class="go"><a href="#method">How this entry was put together</a></p>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <section class="sec soft tight">
+  <div class="wrap">
+   <h2>All {N} skills, in the plugin's five groups</h2>
+   <p>Select a name to open it.</p>
+   {skill_map()}
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2>The entry at a glance</h2>
+   <p class="note">Every provider entry carries the same fields in the same order.</p>
+   {glance()}
+  </div>
+ </section>
+
+ <section class="sec soft tight">
+  <div class="wrap">
+   <h2>Three names that get mixed up</h2>
+   <dl class="names">
+    <div><dt>Sales plugin</dt><dd>The subject of this entry. It comes from Anthropic, has {N} skills and works with whichever CRM you connect.</dd></div>
+    <div><dt>Salesforce in Claude</dt><dd>A separate plugin built with Salesforce, in beta since September 15, 2026, with 37 skills of its own. It is not covered here.</dd></div>
+    <div><dt>Claude for Sales</dt><dd>The title of Anthropic's solutions page for sales teams, which groups both plugins with other features.</dd></div>
+   </dl>
+   <p class="note" style="margin-top:12px">As Anthropic's own pages describe them on {D.CHECKED_ON}.</p>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2>How this entry is laid out</h2>
+   <div class="halves">
+    <div class="def">
+     <h3>Explore it, with nothing to install</h3>
+     <p>Skills lists all {N}, each with what to say and what to give it. Fit sorts them by role, by six sales motions and through the week. Before rollout covers the tools you already own, whether your records give the skills enough to read and which model to run them on.</p>
+     <p class="go"><a href="#skills">Browse the skills</a></p>
+    </div>
+    <div class="def">
+     <h3>Configure it for your company</h3>
+     <p>The configuration guide by Nathan Fierley: what you get, who changes what, the 17 company facts worth writing down and an edition to hand to Claude.</p>
+     <p class="go"><a href="#configure">Open the guide</a></p>
+    </div>
+   </div>
+  </div>
+ </section>
+</div>
+
+<!-- ============================================================ SKILLS -->
+<div id="skills" data-view="skills" data-group="sales" data-title="Claude Sales plugin">
+ <section class="open">
+  <div class="wrap">
+   <h1>The {N} skills, one by one</h1>
+   <p class="lede">Each row opens on a run card: when to reach for the skill, what to say and what to give it. Under the card sit what the skill reads, where it delivers and what it can do when you ask, then our read on who it suits, which model to start on and what to check first.</p>
+   <p class="sub">Every tool a skill reads is optional unless it is marked needed. With a tool missing, the skill works from an upload or from what you paste, and says what it could not see.</p>
+  </div>
+ </section>
+ <section class="sec tight">
+  <div class="wrap">
+   <div class="bar jsonly">
+    {picker("s")}
+    <form class="fld q" id="q-form" role="search"><label for="q">Find a skill</label><input type="search" id="q" name="q" placeholder="Try forecast or renewal" autocomplete="off"></form>
+   </div>
+   {kind_filter()}
+   <div class="nojs">{key()}</div>
+   <p class="stat jsonly"><span id="sk-count" role="status" aria-live="polite">Showing <b>{N}</b> of <b>{N}</b> skills</span>
+    <span class="acts2"><button class="lb" type="button" id="sk-clear" hidden>Clear filters</button><button class="lb" type="button" id="sk-open">Open all</button><button class="lb" type="button" id="sk-close">Close all</button></span></p>
+   <p id="sk-empty" class="box empty" hidden>No skill matches those choices. <button class="lb" type="button" id="sk-empty-clear">Clear the filters</button></p>
+{catalog()}
+   <p class="note" style="margin-top:20px">The example requests are illustrations written for this entry. The company and people in them are invented.</p>
+  </div>
+ </section>
+</div>
+
+<!-- ============================================================ FIT -->
+<div id="fit" data-view="fit" data-group="sales" data-title="Claude Sales plugin">
+ <section class="open">
+  <div class="wrap">
+   <h1>Which skills fit your team</h1>
+   <p class="lede">The plugin locks no skill to a role, and the same skill is a daily habit in one business and idle in another. Choose a role and the sales motion closest to yours.</p>
+   <p class="sub">This part is our read from the skill files, apart from the lines marked as from the files. None of it is usage data. It was compiled with Claude, an Anthropic model, about an Anthropic plugin. Its editor has changed some of the ratings, and his review of the rest is still to come.</p>
+   <div class="subnav"><a href="#fit-role">By role</a><a href="#fit-motion">By sales motion</a><a href="#fit-week">Through the week</a></div>
+  </div>
+ </section>
+ <section class="sec tight">
+  <div class="wrap">
+   <div class="bar lead jsonly">{picker("f")}</div>
+   <h2 id="fit-role">By role</h2>
+   <p>Where it can read the CRM, the plugin's {skl("setup")} skill infers one of four roles: account executive, SDR or BDR, leader or customer success. With a role or without one, it suggests three skills to start with. The rows below are a wider reading, role by role.</p>
+   <p>Built for this role means the skill does that role's own core work. Also useful means it helps now and then. {skl("setup")} is each person's own run, leaders included: first on opening the plugin, and again to check what is connected or to relearn a voice. So no row lists it.</p>
+   <div class="def shared">
+    <h3>Anyone who carries a book</h3>
+    <p>The {num(len(DAY))} skills in the plugin's Your day group are not tied to a role. They run the routine around meetings, email and the CRM for whoever sells, so the first four rows below leave them out.</p>
+    <div class="chips">{chips(DAY)}</div>
+   </div>
+   {role_rows()}
+   <h3 style="margin-top:38px">What separates a rep's skill from a manager's</h3>
+   <ul class="princ">
+    <li><b>Three skills are written for leaders</b>The plugin's own descriptions call {skl("team-pipeline")} a leader view, {skl("rep-context")} a leader's prep and {skl("win-loss-review")} leader-focused.</li>
+    <li><b>{num(len(C.TEAM), True)} can be run for a team, and {num(len(C.REP))} for a named rep</b>Each file names its own scope, and each works within what the person running it can see. For a team: {team_names}. For a named rep: {rep_names}.</li>
+    <li><b>Access follows the person</b>Claude acts with each person's own sign-in, so a manager sees a team only as far as the CRM already allows. {skl("rep-context")} leaves out what the manager cannot see, and says so.</li>
+    <li><b>Leaders mostly need three views</b>The number: {skl("forecast")}, {skl("team-pipeline")} and {skl("deal-slip-scenario")}. The patterns: {skl("win-loss-review")}, {skl("competitive-intelligence")} and {skl("customer-voice")}. The base: {skl("renewal-radar")}.</li>
+   </ul>
+   <p class="note" style="margin-top:14px">The first and third come from the plugin's files and Anthropic's help pages. The second is our count from the files, and the fourth is our read.</p>
+  </div>
+ </section>
+ <section class="sec soft tight">
+  <div class="wrap">
+   <h2 id="fit-motion">By sales motion</h2>
+   <p>The grid is our reading, for a team that keeps its deals as records. It places each skill by how much it is likely to be worth in the chosen motion, and by a first guess at how often its user would reach for it. Neither is measured.</p>
+   <p class="nojs note">The menus need scripts to run. The grid below shows complex new business, and the table under it gives every motion.</p>
+   <div class="mnote"><b id="mo-name">{e(ent[1])}</b><p id="mo-note">{e(ent[4])}</p><p class="note" id="mo-eg">{e(ent[2])} {e(ent[3])}.</p></div>
+   {matrix("ent")}
+   <p class="note" id="mx-sum" role="status" aria-live="polite" style="margin-top:14px"></p>
+   <p class="note">{num(len(D.EVENT), True)} skills are used when something calls for them, and the grid places them by a rough cadence: {join(skl(i) for i in D.EVENT)}. Each skill's card says when.</p>
+   <div class="g2 picks">
+    <div class="def"><h3>A low-risk place to start</h3><p id="pilot-start-note">Core for this motion, used weekly or daily and marked Reads and proposes.</p><div class="chips" id="pilot-start">{start_chips}</div><p class="note" style="margin-top:10px">What keeps a pilot low-risk is the tools you grant it. Through a tool that is not connected, a skill cannot post or send. Through a tool set to ask first it still can, once a person says yes, so name who gives that yes.</p></div>
+    <div class="def"><h3>Decide a rule before these</h3><p>Useful or core for this motion, and in the group Agree the rule first.</p><div class="chips" id="pilot-rule">{rule_chips}</div></div>
+   </div>
+   <details class="more"><summary>Every rating as a table</summary>{ratings_table()}</details>
+   <h3 style="margin-top:34px">How to read a rating</h3>
+   <ul>
+    {value_defs}
+    <li><strong>Frequency.</strong> How often the person a skill suits would reach for it: daily, weekly, monthly, or quarterly or less. It is a first guess from how the skill is designed. A poor fit is given none.</li>
+    <li><strong>Outside the grid.</strong> {skl("setup")} is each person's own setup run, so it is not placed.</li>
+   </ul>
+  </div>
+ </section>
+ <section class="sec tight">
+  <div class="wrap">
+   <h2 id="fit-week">Through the week</h2>
+   <p>A skill becomes a habit when it has a fixed moment. The first list sorts the skills rated core or useful for the chosen role and sales motion by how often they are likely to be used, with those used only when something calls for them at the end. The routines under it put a few skills in the order a day calls for them.</p>
+   <p class="note">The routines and their order are ours, as a suggested way to work. Each step after the first is tied to the one before it by a line in one of the two skills' files: a handoff, a suggestion or a named source. The step says which, with the condition the file gives.</p>
+   {cadence("ent")}
+   <p class="note" id="cad-sum" role="status" aria-live="polite" style="margin-top:12px"></p>
+   <h3 style="margin-top:36px">Eight routines</h3>
+   <p>Each step shows the skill and what to say. Brackets mark the part you fill in.</p>
+   <p class="note jsonly" id="rt-sum" role="status" aria-live="polite"></p>
+   {routines()}
+  </div>
+ </section>
+</div>
+
+<!-- ============================================================ BEFORE ROLLOUT -->
+<div id="rollout" data-view="rollout" data-group="sales" data-title="Claude Sales plugin">
+ <section class="open">
+  <div class="wrap">
+   <h1>Before you roll it out</h1>
+   <p class="lede">A rep can get into trouble with a good skill by using it in place of the system the business bought for that job. The plugin does not know what else you own. Two checks come before a rollout: where each skill meets a tool you already run, and whether your records give it enough to read. One setting comes with them, which is the model a skill runs on.</p>
+   <p class="sub">Compiled with Claude, an Anthropic model, about an Anthropic plugin. The sorting and the model advice in this part are our read. The editor has changed some of both, and his review of the rest is still to come.</p>
+   <div class="subnav"><a href="#rule">The rule</a><a href="#overlap">This plugin, sorted</a><a href="#readiness">Readiness check</a><a href="#models">Which model</a><a href="#setups">Eight setups</a></div>
+  </div>
+ </section>
+ <section class="sec tight">
+  <div class="wrap g75">
+   <div>
+    <h2 id="rule">A rule for any assistant that can act in your tools</h2>
+    <p class="read">Sort what the assistant can do into three groups before anyone uses it. The groups are worded for any provider's sales skills, and the rest of this part applies them to one.</p>
+    <ol class="wk">
+     <li><span><b>Agree the rule first.</b> Anything that can change a record or put words in front of a customer. Decide where the official version lives, and who may let the assistant write there.</span></li>
+     <li><span><b>Know the overlap.</b> Anything that changes no record and writes to no customer by its own steps, but gives a second view of a figure another tool or team already reports. Use it to prepare, and quote the official tool.</span></li>
+     <li><span><b>Start here.</b> Anything that reads and proposes, and competes with nothing you run. These are the low-risk pilots, as long as the tools you grant them cannot send or write.</span></li>
+    </ol>
+   </div>
+   <div class="tests">
+    <h3>Our read; tests to run</h3>
+    <p>The three groups are our synthesis from one provider's plugin so far. They are not a finding in the evidence register.</p>
+    <ol class="wk">
+     <li><span>List every tool the assistant can write to, and name one owner for each.</span></li>
+     <li><span>For each official figure, such as the forecast, a health score or a lead score, name the one system that holds it.</span></li>
+    </ol>
+    <p class="note" style="margin-top:12px">The same sort gets run on the next provider entry. If the groups do not hold there, this section changes.</p>
+   </div>
+  </div>
+ </section>
+ <section class="sec soft tight">
+  <div class="wrap">
+   <h2 id="overlap">This plugin, sorted by that rule</h2>
+   <p>The first group follows each file's own write line. Which of the other two a skill falls in, and which tool it might collide with, is our read.</p>
+   {tiers()}
+   <h3 style="margin-top:38px">By the tool you already own</h3>
+   <p>Find the tools you have. Each row names the skills that work the same ground, what goes wrong when both are used with no rule and a rule to start from. Vendor names appear only where the plugin's own connector list gives them.</p>
+   {overlap_table()}
+   <div class="g2" style="margin-top:38px">
+    <div>
+     <h3>What the plugin's files tell Claude to do about it</h3>
+     <ul class="princ">
+      <li><b>Permissions sit on each connector tool</b>Each can be allowed, set to ask first or blocked, and the files tell Claude to stay inside that. If a write is blocked, the skill is to hand over a checklist to apply by hand, and never to try another tool to make the change.</li>
+      <li><b>Asked for is done, suggested is shown</b>The files tell Claude to make a change you request, and to show a change it proposes first, with its evidence, for you to accept.</li>
+      <li><b>Outside content is information</b>The files tell Claude never to treat email, transcripts, chat or enrichment data as instructions. If an email asks for something to be sent or changed, the skill is to show you that request before anything happens.</li>
+      <li><b>Scheduled runs stay in their lane</b>A scheduled run is to take only the actions it was set up to take, within what its connectors allow, and nothing that outside content dictates or asks for. In {num(len(C.VALUE_BAN))} skills a value, a record or a contact taken from a transcript, an email, a chat or enrichment is never written on a schedule, even when the schedule was set up to make that kind of update: {ban_names}.</li>
+      <li><b>An empty result is not widened</b>When a search of your own records comes back empty, the skill is to stop and ask, and never to widen silently to the whole company.</li>
+      <li><b>The forecast skill stops short of submitting</b>Its file says that step belongs to your forecasting tool.</li>
+      <li><b>The asset skill names its sources</b>Claims are to come from approved material, your account data or what you supply, and the rest is labeled unverified.</li>
+     </ul>
+     <p class="note" style="margin-top:12px">These are instructions to a model, restated from the files. We did not test whether they hold in a live run.</p>
+    </div>
+    <div>
+     <h3>What it leaves to you</h3>
+     <div class="box">
+      <p>The plugin cannot know that your forecast belongs in another tool, or that a routing tool should own assignment. Someone has to tell the team.</p>
+      <p>Its safeguards are written instructions to the model. The dependable control is the permission on each connector tool, which an admin sets. For scheduled runs, the plugin's README advises ask first for every tool that sends, posts or writes.</p>
+      <p>The files leave three questions open, for whoever runs your Claude workspace: who can see a page once it is shared, how long uploaded records are kept and who corrects a post that turns out to be wrong.</p>
+      <p class="go"><a href="#seats">Who sets those permissions, and how</a></p>
+     </div>
+    </div>
+   </div>
+  </div>
+ </section>
+ <section class="sec tight">
+  <div class="wrap">
+   <h2 id="readiness">Is your organization set up for it?</h2>
+   <p>Every skill runs with nothing connected, from an upload or from what you paste. How much it has to read is another matter. Set the switches to match your business and see where each skill would stand.</p>
+   <p class="note jsonly">The switches start from a sketch of one sales motion. Each sketch is an illustration, not data, so change any switch. Your settings stay in this browser.</p>
+   <p class="note nojs">The switches need scripts to run. The table below gives the same information in a fixed form.</p>
+   <div class="jsonly">
+    {presets()}
+    <div class="rd" id="rd">
+     {switches()}
+     {results()}
+    </div>
+    {pinbar()}
+   </div>
+   <p class="note" style="margin-top:18px">What each skill leans on is our read of its steps. The plugin keeps no such list. The check looks at inputs only: it tests no permission, no routing rule and no result. For a first pilot, name an owner, a handful of real cases, the figure or record to compare the output with, and what counts as a pass.</p>
+   <details class="more plan"><summary>A sample plan for a first pilot of a skill that can reach a customer</summary>
+    <p>This is a sketch for {skl("schedule-meeting")}, which can put an invitation in a customer's inbox. Change the parts to fit your own tools. What the skill is to do is restated from its file. The cases, the pass and the stop rule are our read, as a place to start.</p>
+    <dl class="setups">
+     <div><dt>Owner</dt><dd>One person who signs off the pilot, and one who checks each run against the calendar and the CRM.</dd></div>
+     <div><dt>Cases</dt><dd>Up to 10 real requests. Include a follow-up with one contact, an account with two open deals, a contact with no email address on the record, a request made while the calendar's write tool is blocked and the same request made a second time.</dd></div>
+     <div><dt>What the file says to expect</dt><dd>With two open deals, it asks which one the meeting belongs to. With no address on the record, it shows one from the header of an email thread as unverified, and uses it once you pick it. With the write tool blocked, it gives the invite details as text to paste, quotes the refusal and neither retries nor reaches for another tool. The file does not say what happens when you ask a second time, so check for a duplicate.</dd></div>
+     <div><dt>What to compare</dt><dd>After a direct booking, the calendar: one event at the time agreed, 30 minutes long, or 60 for a demo or a quarterly business review, unless you said otherwise, with attendees taken only from your own words, the CRM or an address you picked from a thread. The customer's inbox: one invitation, since creating the event emails every attendee. The CRM, when you asked for the meeting to be logged or booked end to end: one event or activity on the related deal or account, saved as it was shown.</dd></div>
+     <div><dt>Who puts it right</dt><dd>Name who corrects a wrong invitation or a duplicate record, and who tells the customer.</dd></div>
+     <div><dt>A pass</dt><dd>Every case gives the result its kind calls for. A direct booking: right on all three counts above. A blocked write: the invite details as text to paste, and nothing created in the calendar, the inbox or the CRM. Two open deals: it asks which one and waits for your answer. No address on the record: it uses only an address you picked. A repeat: count what was created, since the file sets no check for duplicates. A wrong attendee fails the case, whatever else is right.</dd></div>
+     <div><dt>When to stop</dt><dd>At a wrong attendee, a meeting logged to the wrong deal or a booking made while the tool was blocked. Find the cause before the next run.</dd></div>
+     <div><dt>Not known until you measure it</dt><dd>The time a booking saves, how long an approval takes with the tools set to ask first, what it costs and whether more meetings are held.</dd></div>
+    </dl>
+   </details>
+   <details class="more"><summary>What each skill leans on, as a table</summary>{leans_table()}</details>
+  </div>
+ </section>
+ {models_section()}
+ <section class="sec tight">
+  <div class="wrap">
+   <h2 id="setups">Eight setups worth checking</h2>
+   <dl class="setups">
+    <div><dt>We do not call them opportunities</dt><dd>The skills take stage and field names from your CRM instead of assuming one vendor's. HubSpot's deals, for example, are checked on their own properties. From an upload, a skill uses your own column headers.</dd></div>
+    <div><dt>Our deals live in a custom object</dt><dd>Nothing in the skill files describes standing in another object for deals. Expect to say so in your project instructions, or to work from an export. This is our read of the files and was not tested.</dd></div>
+    <div><dt>We do not track deals at all</dt><dd>{num(len(C.OPPS), True)} skills are built around a deal with a stage, an amount and a close date, and have little to read without one: {opps_names}. That grouping is ours. Others lose a part: {skl("account-context")} names its deals section as having no data, {skl("daily-briefing")} shows leads in that row when you upload a lead backlog, and {skl("competitive-intelligence")} loses its counts of wins and losses.</dd></div>
+    <div><dt>We log client meetings as events</dt><dd>Two skills check this for themselves. {skl("log-activity")} reads from the CRM whether meetings are logged as tasks or as calendar-style events, and {skl("schedule-meeting")} whether they are calendar-style events or activities. Each drafts the shape your setup expects.</dd></div>
+    <div><dt>Our renewals are not deals</dt><dd>{skl("renewal-radar")} accepts renewal deals, contract records or a renewal date field. It reads which you use from the CRM and from what it already knows about your company, and asks once only if neither tells it.</dd></div>
+    <div><dt>Our customers are households</dt><dd>{skl("lead-triage")} marks industry and company size as not applicable for a consumer lead, and scores the dimensions that do apply. Scoring on intent alone is its rule for a team with no ICP recorded. {skl("account-research")} and {skl("account-tiering")} score fit on industry, size and buyer titles, so they have less to go on.</dd></div>
+    <div><dt>Our meeting notes sit in a shared drive</dt><dd>Four skills say that the Google Drive connector cannot see shared drives, or may not: {skl("setup")}, {skl("call-prep")}, {skl("call-summary")} and {skl("customer-voice")}. Each is to name the gap and offer a paste or an upload. Notes kept there are missed until you paste or upload them.</dd></div>
+    <div><dt>We run on Salesforce and Microsoft 365</dt><dd>Both are included. Each needs an admin to enable it before anyone can sign in.</dd></div>
+   </dl>
+  </div>
+ </section>
+</div>
+
+<!-- ============================================================ CONFIGURE -->
+<div id="configure" data-view="configure" data-group="sales" data-title="Claude Sales plugin">
+ <section class="open">
+  <div class="wrap g75">
+   <div>
+    <h1>Configure it for your company</h1>
+    <p class="lede">{G["deck"]}</p>
+    <div class="acts"><a class="btn pri" href="#outcome">See what you get</a><a class="btn" href="#for-claude">Hand it to Claude</a></div>
+    <p class="who"><span>A guide by <b>Nathan Fierley</b></span><span>{e(G["byline"][1])}</span><span>{e(G["byline"][2])}</span><span>Checked against Sales plugin {D.PLUGIN_VERSION} on {D.GUIDE_CHECKED_ON}</span></p>
+   </div>
+   {film}
+  </div>
+ </section>
+ <div class="wrap rep">
+  {configure_article()}
+ </div>
+</div>
+
+{V.plugin_page("marketing")}
+
+{V.plugin_page("customer-support")}
+
+{V.plugin_page("small-business")}
+
+{V.chatgpt_view()}
+
+<!-- ============================================================ METHOD -->
+<div id="method" data-view="method" data-group="page" data-title="Method and sources">
+ <section class="open">
+  <div class="wrap">
+   <h1>Method, limits and sources</h1>
+   <p class="lede">The Claude Sales plugin entry was compiled from the plugin's own files, and the ratings in it are a first reading, which its editor has begun to change. The shorter plugin pages are described at the end.</p>
+  </div>
+ </section>
+ <div class="wrap" style="padding-block:clamp(32px,4.5vw,56px) clamp(48px,6vw,88px)">
+  <div class="art">
+   <h2 style="margin-top:0">How it was put together</h2>
+   <ul>
+    <li>All {N} skill files, the README and the connector notes of Sales plugin {D.PLUGIN_VERSION} were read from an installed copy on {D.CHECKED_ON}. A public copy sits in Anthropic's knowledge-work-plugins repository, under the Apache 2.0 license.</li>
+    <li>The tools a skill uses are taken by script from the table in its file. Whether a tool is read, or is somewhere the skill delivers to, was set by hand from that table's own words, and from the file's write line or a step where the table lists only a read. What a skill can change, send or post was written by hand from its file, and a script holds it to the file's own write line. Each skill that another one names was sorted by hand: one it hands work to, one it draws on or one it only mentions. The card leaves out the last kind. A script checks that each name shown is in the file. The build fails when the dataset and the files disagree.</li>
+    <li>What the build checks is narrow: that a skill named on a card is in that skill's file, that a tool's direction is one the table allows and that the four facts agree with the file's write line. It checks no number, no condition and no scope. Those rest on reading, and that is where all three rounds of outside checks found most of what they disputed.</li>
+    <li>Descriptions are restated in this entry's words. For the plugin's exact wording, open the skill file.</li>
+    <li>Each run card restates the skill's own trigger phrases, the inputs it names and what it accepts when no tool is connected. A request for a wider scope or for a schedule appears only where the skill's file takes one. The routines and their order are ours, and each link in one is checked against the file that states it.</li>
+    <li>On {D.CROSSLAB_ON} two models from other labs checked the entry's numbered claims against the plugin's files, in two rounds: an OpenAI model (GPT-6-based Codex, by its own account) and xAI's Grok Build. In the first round they disputed 78 of 398 claims between them. In the second they disputed 105 of the 595 claims of the corrected entry, much of it wording that the first corrections had added. Each round also held six false claims planted as a test, and each model caught all six both times. On {D.CHECK3_ON} the OpenAI model checked the 170 statements that had changed since, with five false ones planted among them, and caught all five. It disputed 52 of the entry's own. The most common fault, on 11 cards, was a line that read as a limit on what a skill can do, where every skill's file says an action you ask for goes through a connected tool. Claude checked each dispute against the file and made the corrections, and the editor decided what to accept. What they found and what changed is set out in <a href="kit/CROSSLAB.md"><code>kit/CROSSLAB.md</code></a>. The text as it now stands has had no check from outside.</li>
+    <li>The configuration half is Nathan Fierley's guide, checked against the same plugin version on {D.GUIDE_CHECKED_ON}. Its words are kept, apart from five small edits: three serial commas and one numeral changed to meet the site's style rules, and one sentence about buttons that this page replaced with a menu. Its sales leader is split here into a frontline manager and a leader. On {D.CROSSLAB_ON}, {num(len(G["check_findings"]))} corrections were made here after the checks by two other labs' models, such as the number of skills written for leaders. Three of them were worded again on {D.CHECK3_ON}, after the third check. Each change is listed in <a href="kit/CONFIGURE-EDITS.md"><code>kit/CONFIGURE-EDITS.md</code></a>. The guide's own published copy does not carry them yet.</li>
+   </ul>
+
+   <h2>Fact and our read</h2>
+   <p>Three kinds of statement sit side by side in this entry. They are marked apart wherever they meet.</p>
+   <ul>
+    <li><strong>From the plugin's files.</strong> What each skill does, what it reads, what it can change, send or post and which skill it hands work to. The plugin is open source, so each statement can be checked against the skill files.</li>
+    <li><strong>Our count from the files.</strong> Counts and groupings that we made from what the files say: the four markings of a skill's name, who takes a team or a named rep and which skills are named as routines. Each gives its rule, and none is a sentence in a file.</li>
+    <li><strong>Our read.</strong> Which role a skill suits, where it overlaps a tool you may own, how much it is worth and how often it is used in a sales motion, when in the week it fits, the eight routines and their order, which model to start it on and what it leans on in your organization. The reasons are shown. None of it is usage data.</li>
+   </ul>
+   <p>Our read is a first reading by Claude, the AI model made by Anthropic, for Nathan Fierley to edit. He has changed parts of it, as the credits say. Anthropic also makes the plugin, so weigh the ratings with that in mind.</p>
+   <p>The ratings place this plugin's skills against roles and sales motions. They do not score the provider, and they are kept out of the evidence register.</p>
+
+   <h2>What it does not tell you</h2>
+   <ul>
+    <li><strong>How the skills perform in your business.</strong> One small test ran {num(len(D.TESTED))} skills from invented files, and it is described below. Nothing was run against a live CRM, and no time saved or deals won are claimed.</li>
+    <li><strong>How often anyone uses a skill.</strong> The frequency ratings are estimates from how each skill is designed. {num(len(D.EVENT), True)} skills are given an occasion in place of a frequency. {num(len(C.SCHED), True)} are named as routines in the plugin's files: {sched_names}.</li>
+    <li><strong>How it compares.</strong> Only Anthropic's Sales plugin is covered in depth. The <a href="#chatgpt-sales">ChatGPT for Sales</a> page sets out what OpenAI makes public about its own, and neither is rated against the other.</li>
+    <li><strong>What changes next.</strong> Skills are added and reworded between versions. Check the version in this entry against yours.</li>
+   </ul>
+
+   <h2 id="model-test-method">How the model test was run</h2>
+   <ul>
+    <li><strong>What ran.</strong> {num(len(D.TESTED), True)} skills, each on four Claude models, once: {join(skl(i) for i in D.TESTED)}. Each run was a fresh session that read the skill's file and followed it for one request, working only from the test files.</li>
+    <li><strong>Where.</strong> In the agent harness this entry was built in, on {D.PILOT_DATE}. That is not the Claude app, and nothing was connected. Effort was left at each model's default, which differs between models.</li>
+    <li><strong>The answer key.</strong> The pipeline figures in the key were computed by script from the test file. The planted items in the call, the inbox and the leads were written with the files. One of those items was wrong: the key expected a draft reply to legal redlines, where the skill's file says to flag legal mail and not draft it. It was corrected on {D.CROSSLAB_ON}, after a model from another lab caught it. Claude set the corrected mark on reading each reply again. The two markers did not mark it.</li>
+    <li><strong>The marking.</strong> Two separate Claude sessions, one on Opus 5.5 and one on Sonnet 5.5, marked the four replies for each skill against the key, under code names. On that first marking they agreed on {PILOT["marker_agreement"]["items"]["same"] + PILOT["marker_agreement"]["numbers"]["same"] + PILOT["marker_agreement"]["guardrails"]["same"]} of {PILOT["marker_agreement"]["items"]["of"] + PILOT["marker_agreement"]["numbers"]["of"] + PILOT["marker_agreement"]["guardrails"]["of"]} marks. One guardrail mark was set on a second reading, and the reason is recorded with the files. So Anthropic models marked Anthropic models, on an Anthropic plugin. The key is made of facts that can be checked, and every reply and mark is published with this page.</li>
+    <li><strong>What it is not.</strong> One run for each skill and model cannot separate a model's ability from chance. The test covers the from-files path only. It is our own test, and it stays out of the evidence register.</li>
+   </ul>
+
+{V.method_extra()}
+   <h2>Rules this entry follows</h2>
+   <ul>
+    <li><strong>A listing is never paid for.</strong> Providers cannot pay to be listed, moved or described differently, and a listing is not an endorsement.</li>
+    <li><strong>The provider's statements are dated.</strong> What this entry says about the product comes from the provider's own files and pages, with the date each was read.</li>
+    <li><strong>Named systems only.</strong> Vendor names appear only where the plugin's own connector list gives them. Every other tool is named as a category.</li>
+    <li><strong>The conflict is stated.</strong> This entry was compiled with Claude, an Anthropic model, and it covers an Anthropic product. On {D.CROSSLAB_ON} models from two other labs checked it against the plugin's files in two rounds, and on {D.CHECK3_ON} one of them checked what had changed since. Claude made the corrections after each. Before it is published it still needs its editor's review, and the latest corrections have had no check from outside.</li>
+    <li><strong>One template.</strong> <a href="#chatgpt-sales">ChatGPT for Sales</a> from OpenAI, also an AI lab and a vendor, is set out on the same 12 fields.</li>
+   </ul>
+
+   <h2>Credits</h2>
+   <dl class="credits">
+    <div><dt>Compiled by</dt><dd>Claude, from the plugin's files and the configuration guide.</dd></div>
+    <div><dt>Source-checked by</dt><dd>Claude, by script against the plugin's files, as described above. On {D.CROSSLAB_ON}, an OpenAI model (GPT-6-based Codex, by its own account) and xAI's Grok Build each checked the entry's claims against the same files, twice. On {D.CHECK3_ON} the OpenAI model checked the statements that had changed since.</dd></div>
+    <div><dt>Edited by</dt><dd>Nathan Fierley decided which corrections to accept. On {D.CROSSLAB_ON} he moved three overlap ratings: {skl("handle-objection")}, {skl("daily-briefing")} and {skl("weekly-wrap")}. On {D.EDITED_ON} he accepted 18 more findings from the second round of checks. They moved three more overlap ratings ({skl("crm-hygiene-check")}, {skl("deal-advance-gap")} and {skl("end-of-day")}), the role marks on five skills and the rating of four skills in one sales motion each. They put an occasion in place of a frequency on {num(len(D.EVENT))} skills, started the seven skills that weigh several sources on Sonnet 5.5 and split one readiness switch in two. The same day he accepted every correction Claude proposed from the third check: among them, the marking Reads only became Reads and proposes, {skl("setup")} left it and {skl("close-plan")} joined the skills built around a deal record. The wording of each change is Claude's. His review of the other ratings, the six sales motions and the wording is still to come.</dd></div>
+    <div><dt>Configuration guide</dt><dd>Written by Nathan Fierley.</dd></div>
+   </dl>
+
+   <h2 id="sources">Sources</h2>
+   <p>{G["sources_note"]} The plugin's files were read again on {D.CHECKED_ON}.</p>
+   <ul class="srcs">
+    <li><a href="{D.REPO_PINNED_URL}">Sales plugin {D.PLUGIN_VERSION} by Anthropic</a>: its README, connector notes and {N} skill files, read from the installed plugin. The link opens the public copy at the commit the outside checks read. <a href="{D.REPO_URL}">The current version</a> may differ.</li>
+    <li><a href="https://claude.com/blog/salesforce-in-claude">Salesforce in Claude</a>, Anthropic's announcement of September 15, 2026: the beta, its 37 skills and who built it.</li>
+    <li><a href="https://claude.com/solutions/sales">Claude for Sales</a>, Anthropic's solutions page: what the name covers.</li>
+    {guide_sources}
+   </ul>
+   <p class="note" style="margin-top:16px">The same dataset travels with this page as a file, <code>skills.json</code>, for anyone who would sooner read it by machine.</p>
+  </div>
+ </div>
+</div>
+
+</main>
+
+<footer class="foot">
+ <div class="wrap">
+  <p class="wmx">Modern GTM</p>
+  <div class="fcols">
+   <p>Evidence, plays and tools for revenue teams of people and agents.</p>
+   {site_nav("fnav", "Elsewhere on Modern GTM", '<a href="#method">Method and sources</a>')}
+  </div>
+  <p class="disc">Product names belong to their owners. These pages are not published or endorsed by Anthropic or OpenAI, and a listing here is never paid for. The benefits described are how the plugin is designed to behave. Apart from one small test of {num(len(D.TESTED))} skills on invented files, nothing in this entry was measured.</p>
+  <div class="fine"><span>Modern GTM is curated by Nathan Fierley</span><span>Sales plugin {D.PLUGIN_VERSION}, checked {D.CHECKED_ON}</span></div>
+ </div>
+</footer>
+
+<script type="application/json" id="data">{data_json}</script>
+<script type="application/json" id="ai-md">{G["ai_md"]}</script>
+<script>
+{js}</script>
+</body>
+</html>
+'''
+    os.makedirs(OUT, exist_ok=True)
+    open(os.path.join(OUT, "index.html"), "w", encoding="utf-8").write(page)
+    json.dump(skills_json(), open(os.path.join(OUT, "skills.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    print("built", len(page), "bytes;", N, "skills;", "reads", C.N_READ, "acts", C.N_ACT, C.COUNT)
+    print("opps", len(C.OPPS), "team", len(C.TEAM), "sched", len(C.SCHED))
+
+
+if __name__ == "__main__":
+    build()
