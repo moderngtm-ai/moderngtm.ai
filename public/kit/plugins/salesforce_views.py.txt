@@ -1,0 +1,281 @@
+# -*- coding: utf-8 -*-
+"""The Salesforce in Claude entry: one page in the plugin area, from public pages only. Data is in salesforce_data.py.
+
+The plugin is in a beta whose agreement makes the beta and the information Salesforce discloses about it
+Salesforce's confidential information. The page says so at the top, and every fact on it comes from a public page by Salesforce
+or Anthropic. The comparison with Anthropic's Sales plugin is by skill ID and by our placement under the GTM jobs;
+it does not compare instructions, which for Salesforce's skills are not public."""
+import html
+import json
+import os
+import re
+
+import data as D
+import plugins_data as PD
+import salesforce_data as S
+
+e = html.escape
+WORD = {4: "four", 5: "five", 6: "six", 9: "nine"}
+ANTHROPIC_IDS = [s["id"] for s in D.SKILLS]
+CLAUDE_WRITES = {s["id"] for s in D.SKILLS if s["cls"] == "W"}
+SF_IDS = [s["id"] for s in S.SKILLS]
+SHARED = [i for i in SF_IDS if i in ANTHROPIC_IDS]
+ONLY_SF = sorted(i for i in SF_IDS if i not in ANTHROPIC_IDS)
+ONLY_AN = sorted(i for i in ANTHROPIC_IDS if i not in SF_IDS)
+SF_WRITES = [s["id"] for s in S.SKILLS if s["writes"]]
+SHARED_SF_WRITES = sorted(i for i in SHARED if S.BY[i]["writes"])
+SHARED_CLAUDE_WRITES = sorted(i for i in SHARED if i in CLAUDE_WRITES)
+CO_SHARED = [i for i in S.COPILOT_IDS if i in SF_IDS]
+CO_ONLY = [i for i in S.COPILOT_IDS if i not in SF_IDS]
+SF_NOT_CO = [i for i in SF_IDS if i not in S.COPILOT_IDS]
+
+
+def code(name):
+    return f"<code>{e(name)}</code>"
+
+
+def schip(i):
+    return f'<a class="chip" href="#sfk-{i}">{e(i)}</a>'
+
+
+def cchip(i):
+    return f'<a class="chip" href="#skill-{i}">{e(i)}</a>'
+
+
+def join(items, last=" and "):
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + last + items[-1]
+
+
+def a(url, text):
+    return f'<a href="{e(url)}">{text}</a>'
+
+
+def slug(text):
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def catalog():
+    out = []
+    for group, rows in S.GROUPS:
+        group = group[0] + group[1:].lower()   # Salesforce's groups, in the site's sentence case
+        body = []
+        for i, name, does, writes, job in rows:
+            mark = '<span class="t">Can create and update records</span>' if writes else '<span class="nil">No</span>'
+            body.append(f'<tr id="sfk-{i}"><th scope="row">{code(i)}<span class="sfn">{e(name)}</span></th>'
+                        f'<td class="fmt" data-l="What it does">{e(does)}</td>'
+                        f'<td class="fmt" data-l="GTM job, our read">{e(job) if job else "Outside the 13 jobs"}</td>'
+                        f'<td class="fmt" data-l="Records">{mark}</td></tr>')
+        out.append(f'<div class="sfgrp"><h3 id="sf-g-{slug(group)}">{e(group)} <small>{len(rows)} {"skill" if len(rows) == 1 else "skills"}</small></h3>'
+                   f'<div class="scroll" tabindex="0" role="region" aria-label="{e(group)}: skills"><table class="rt dt skt stack wide sft"><thead><tr>'
+                   '<th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody>'
+                   + "".join(body) + "</tbody></table></div></div>")
+    return "\n".join(out)
+
+
+def jobs_list():
+    rows = []
+    for j in PD.JOB_NAMES:
+        ids = [s["id"] for s in S.SKILLS if s["job"] == j]
+        if ids:
+            rows.append(f'<li><span>{e(j)}</span><span class="chips">{"".join(schip(i) for i in ids)}</span></li>')
+    return '<ul class="jobs">' + "".join(rows) + "</ul>"
+
+
+def no_job():
+    return [j for j in PD.JOB_NAMES if not any(s["job"] == j for s in S.SKILLS)]
+
+
+def glance():
+    outside = [s["id"] for s in S.SKILLS if s["job"] is None]
+    rows = [
+        ("Provider and offering", f'<p>Salesforce, a vendor. The plugin is the first product of {a(S.CLAUDEFORCE_URL, "Claudeforce")}, a partnership between Salesforce and Anthropic. Anthropic calls it a plugin built with Salesforce. In beta since {S.BETA_SINCE}.</p>'),
+        ("Category", "<p>CRM vendor</p>"),
+        ("In one sentence", f"<p>A plugin for Claude with {S.SKILLS_N} sales skills, a first-run skill and connectors to Salesforce and Slack, for researching accounts, preparing and following up meetings, working deals, reviewing pipeline and keeping Salesforce up to date.</p>"),
+        ("Go-to-market (GTM) jobs it covers", jobs_list() + f'<p class="note" style="margin-top:10px">Placed by us from Salesforce\'s one-line descriptions. Under CRM updates, {schip("sfdc-hygiene-check")} finds what is wrong and changes nothing. No skill of its own for {join(PD.job_lower(j) for j in no_job())}. Outside the list: {join(schip(i) for i in outside)}.</p>'),
+        ("Systems it works with", f"<p>Salesforce and Slack. Claude reaches Salesforce through Salesforce's hosted MCP server. The Claude Help Center says both connectors come with the plugin, and Salesforce says connecting Slack is optional for the first run. Anthropic says the skills can read and write Slack deal channels and account-team threads.</p>"),
+        ("Who can get it", f'<p>Organizations that Salesforce approves through a {a(S.REQUEST_URL, "beta request on AgentExchange")}. Salesforce\'s pages list its Enterprise, Performance, Unlimited and Developer Editions. On the Claude side the sources differ, as <a href="#sf-open">set out below</a>. Salesforce says companies that reach Claude only through a cloud provider, such as AWS Bedrock or Google Cloud Vertex AI, cannot use it for now. The Claude Help Center says it works in chat and Cowork, on the web and desktop. No price is stated.</p>'),
+        ("Controls", "<p>Claude sees only what the signed-in user can see in Salesforce. An admin decides with one tool setting whether skills may create and update records: with the user's approval, without it or not at all. No skill deletes a record.</p>"),
+        ("What the provider reports", "<p>No measured result. Anthropic's announcement names GitLab, Siemens and Legora as customers that have deployed the plugin, and says 14,000 Salesforce sellers use it. Its customer quotes report time saved on meeting preparation, with no study behind them.</p>"),
+        ("Evidence in the register", "<p>None yet.</p>"),
+        ("Not public or not known", "<p>The skill files are not public. Not known: what each skill's instructions say, which skills change records in practice and how any of them performs.</p>"),
+        ("On this site", "<p>This entry. It rates nothing.</p>"),
+        ("Last checked", f"<p>{S.CHECKED_ON}: Salesforce's help pages, its Claudeforce page and its beta request form, the Claude Help Center, Anthropic's announcement and the skills folder of Anthropic's Sales plugin, by Claude, then against the same pages by OpenAI's Codex.</p>"),
+    ]
+    return '<dl class="glance">' + "".join(f"<div><dt>{x}</dt><dd>{y}</dd></div>" for x, y in rows) + "</dl>"
+
+
+def by_job():
+    """The site's 13 GTM jobs with the skills of both plugins. It lists and does not rate."""
+    claude = {j: ids for j, ids in D.JOBS}
+    none = '<span class="nil">No skill of its own</span>'
+    support = '<span class="nil">No skill of its own. Anthropic publishes a <a href="#customer-support">Customer support plugin</a>.</span>'
+    rows = []
+    for j in PD.JOB_NAMES:
+        sf = "".join(schip(s["id"]) for s in S.SKILLS if s["job"] == j) or none
+        cl = "".join(cchip(i) for i in claude.get(j, [])) or (support if j == "Support" else none)
+        rows.append(f'<tr><th scope="row">{e(j)}</th><td data-l="Salesforce in Claude"><span class="chips">{sf}</span></td><td data-l="Claude Sales"><span class="chips">{cl}</span></td></tr>')
+    return ('<div class="scroll" tabindex="0" role="region" aria-label="Salesforce in Claude and the Claude Sales plugin, by GTM job"><table class="rt dt stack wide"><thead><tr><th scope="col">GTM job</th>'
+            '<th scope="col">Salesforce in Claude</th><th scope="col">Claude Sales plugin</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
+
+
+def sources():
+    help_pages = [(S.SKILLS_REF_URL, "Skills Reference for Salesforce in Claude: Sales"), (S.CLAUDEFORCE_HELP_URL, "About Claudeforce"),
+                  (S.SETUP_URL, "Set Up Salesforce in Claude"), (S.SECURITY_URL, "Security"),
+                  (S.CONNECT_URL, "Connect Claude to the Salesforce MCP Server"), (S.TOOLS_URL, "Set Tool Restrictions"),
+                  (S.ROLLOUT_URL, "Roll Out the Plugin"), (S.USE_URL, "Use Salesforce in Claude"), (S.SIGNIN_URL, "Sign In"),
+                  (S.CONFIGURE_URL, "Configure Your Workspace"), (S.HOW_SKILLS_URL, "How Skills Work"),
+                  (S.RECORDS_URL, "How Record Creation and Updates Work"), (S.PARTNER_URL, "Connect an AI Partner to Salesforce"),
+                  (S.MCP_URL, "Activate the Salesforce MCP Server"), (S.ECA_URL, "Create and Configure the External Client App"),
+                  (S.COPILOT_REF_URL, "Sales Skills Reference for Salesforce in Microsoft Copilot")]
+    items = [
+        f"<li>Salesforce Help, its AIforce section: {join(a(u, e(t)) for u, t in help_pages)}. The pages mark the plugin as a beta and were read in a browser, since they draw their text by script.</li>",
+        f'<li>Claude Help Center: {a(S.CLAUDE_SETUP_URL, "Set up Salesforce in Claude for your organization")} and {a(S.CLAUDE_USE_URL, "Use Salesforce in Claude")}, both dated {S.CLAUDE_HELP_DATE}.</li>',
+        f'<li>Anthropic: {a(S.ANTHROPIC_POST_URL, "Bringing Salesforce into Claude")}, {S.BETA_SINCE}.</li>',
+        f'<li>Salesforce: its {a(S.CLAUDEFORCE_URL, "Claudeforce page")}, the {a(S.REQUEST_URL, "beta request form")} and the {a(S.BETA_AGREEMENT_URL, "beta agreement")} the form links to.</li>',
+    ]
+    return '<ul class="srcs">' + "".join(items) + "</ul>"
+
+
+def view():
+    co_only = join(code(i) for i in CO_ONLY)
+    sf_not_co = join(code(i) for i in SF_NOT_CO)
+    return f'''<div id="salesforce-in-claude" data-view="salesforce-in-claude" data-group="sf" data-title="Salesforce in Claude">
+ <section class="open">
+  <div class="wrap">
+   <h1>Salesforce in Claude, from Salesforce</h1>
+   <p class="lede">This plugin from Salesforce, the CRM vendor, brings a seller's Salesforce accounts, opportunities and pipeline into Claude, with {S.SKILLS_N} skills for sales work. This entry sets out what Salesforce and Anthropic have published about it.</p>
+   <div class="acts"><a class="btn pri" href="#sf-skills">Browse the {S.SKILLS_N} skills</a><a class="btn" href="#sf-source">Why only public pages</a></div>
+   <p class="who"><span><b>Preview.</b> From public pages only. It awaits its editor's review.</span><span>In beta since {S.BETA_SINCE}, read on {S.CHECKED_ON}</span><span>For revenue leaders and operators</span></p>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="sf-source">Why only public pages</h2>
+   <p class="lead2">Salesforce in Claude is in a beta that Salesforce approves organization by organization. Its {a(S.BETA_AGREEMENT_URL, "beta agreement")} makes the beta and the information Salesforce discloses about it Salesforce's confidential information, so this page uses only what Salesforce and Anthropic have published.</p>
+   <div class="g3 mt">
+    <div class="def"><h3>What this entry uses</h3><p>Salesforce's help pages on the plugin, its Claudeforce page and its beta request form, the Claude Help Center's two articles, Anthropic's announcement and the list of skills in Anthropic's public Sales plugin, all read on {S.CHECKED_ON}. <a href="#sf-sources">The sources</a> are listed at the end of the page.</p></div>
+    <div class="def"><h3>What it does not use</h3><p>No skill file was read, nothing was installed for this entry and no skill was run. Nothing on the page comes from the beta itself.</p></div>
+    <div class="def"><h3>What that leaves open</h3><p>What each skill's instructions say, which tools it calls and how well it works. Where the published pages disagree, the entry says so.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="sf-glance">At a glance</h2>
+   {glance()}
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="sf-skills">The {S.SKILLS_N} skills</h2>
+   <p class="lead2">Claude picks a skill from what the user asks, and a user can also call one by typing / and its ID. Salesforce groups the skills by the work they do, and this page keeps its groups.</p>
+   <ul class="sftally">
+    <li><b>{len(SF_WRITES)} of {S.SKILLS_N}</b> are marked by Salesforce as able to create and update records, if the admin allows it.</li>
+    <li><b>None</b> deletes a record. Salesforce says deletion stays in Salesforce.</li>
+    <li><b>Configure</b> is offered on first use, a skill outside Salesforce's list of {S.SKILLS_N}.</li>
+   </ul>
+   <p class="note">What each skill does is restated from Salesforce's one-line description. The GTM job beside it is our read.</p>
+   {catalog()}
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="sf-setup">Setup, first run and admin controls</h2>
+   <div class="g2 mt">
+    <div class="def"><h3>Request access</h3><p>A Salesforce admin asks for the beta through the {a(S.REQUEST_URL, "request form on AgentExchange")}. The {a(S.CLAUDE_SETUP_URL, "Claude Help Center")} says approval brings an email with the setup steps.</p></div>
+    <div class="def"><h3>In Salesforce</h3><p>The admin turns on Salesforce's hosted MCP server once for the org. Setup calls it the Headless360 (H360) MCP Server. An External Client App with Claude's callback address gives the key and secret that Claude needs, and {a(S.SETUP_URL, "Salesforce's setup pages")} have the values. A permission set limits who may connect, once that app admits only users an admin has approved. Salesforce recommends one, and without it anyone in the org can. It warns that letting users authorize themselves skips the set.</p></div>
+    <div class="def"><h3>In Claude</h3><p>An Owner or Primary Owner of the Claude organization enters that key and secret for the Salesforce connector. They then choose, for everyone or for set groups, whether members get the plugin installed or may install it themselves. The Claude Help Center adds a third choice, required. Each user signs in with their own Salesforce account.</p></div>
+    <div class="def"><h3>Record changes</h3><p>One tool setting in Claude, for what Salesforce calls the Dispatch API, decides whether skills may create and update records. Needs Approval, which Salesforce recommends, has the user approve each change. Always Allowed makes changes without asking. Deny keeps the plugin read only. {a(S.TOOLS_URL, "Salesforce says")} the tools are unrestricted until an admin sets them.</p><p>A save follows the same rules for required and read-only fields as in Lightning Experience. Records must use page layouts or Dynamic Forms. Objects whose actions are overridden with Lightning web components or Visualforce are not supported, unless the user has the Customize Application permission and the Builder user type. {a(S.RECORDS_URL, "No record can be deleted")}.</p></div>
+    <div class="def"><h3>First run</h3><p>{a(S.CONFIGURE_URL, "Salesforce calls the first-run skill Configure")} and prompts the user to run it on first use. It sets up a recurring daily task called Salesforce Updates and gathers the user's role, recently viewed records, recent activity and open opportunities on the accounts they own. On request it builds a live view of the user's book. Anthropic's announcement and the Claude Help Center call it a setup skill that tailors the plugin to the user's role and book of business.</p></div>
+    <div class="def"><h3>Data</h3><p>Claude sees only the records and fields the user can see in Salesforce, under the org's profiles, permission sets and sharing rules. {a(S.SECURITY_URL, "Salesforce says")} that once data reaches Anthropic, the customer's contract with Anthropic governs it and that Anthropic may not use Salesforce data or business logic reached through the connection without permission. Anthropic says it does not train its models on Team and Enterprise data by default.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="sf-compare">Beside the Claude Sales plugin</h2>
+   <p>Salesforce's list shares many skill IDs with Anthropic's own Sales plugin, and Salesforce's Claudeforce page says Salesforce and Anthropic built the skills. A shared ID may still mean different instructions. Salesforce's skill files are not public, and nothing here compares them.</p>
+   <ul class="sftally">
+    <li><b>{len(SHARED)}</b> IDs are the same in both.</li>
+    <li><b>{len(ONLY_SF)}</b> are only in Salesforce's list.</li>
+    <li><b>{WORD[len(ONLY_AN)].capitalize()}</b> are only in Anthropic's plugin.</li>
+   </ul>
+   <dl class="sfonly">
+    <div><dt>Only in Salesforce's list</dt><dd><span class="chips">{"".join(schip(i) for i in ONLY_SF)}</span></dd></div>
+    <div><dt>Only in Anthropic's plugin</dt><dd><span class="chips">{"".join(cchip(i) for i in ONLY_AN)}</span></dd></div>
+   </dl>
+   <p>Record changes are marked differently, so the two counts are not the same measure: Salesforce's mark covers Salesforce records, and the Claude Sales entry's covers any record system a skill writes to. Salesforce marks {WORD[len(SHARED_SF_WRITES)]} of the {len(SHARED)} shared skills as able to create and update records: {join(schip(i) for i in SHARED_SF_WRITES)}. The Claude Sales entry, reading Anthropic's files, marks {len(SHARED_CLAUDE_WRITES)} of the {len(SHARED)} as changing records. Anthropic's announcement also describes call preparation that adds contacts, and a deal review that, when the seller asks it to keep going, fills in qualification fields and contact roles and saves them once approved. Salesforce marks none of {schip("call-prep")}, {schip("deal-review")} and {schip("close-plan")}. Which skill makes those changes is not public.</p>
+   <h3 class="mt" id="sf-by-job">By GTM job</h3>
+   <p>The site's 13 jobs, with the skills of each plugin placed under them. Placement is our read, and a shared ID sits under the same job in both columns.</p>
+   {by_job()}
+   <p class="note" style="margin-top:12px">The Salesforce column is from Salesforce's skills reference, read on {S.CHECKED_ON}. The Claude column is from version {D.PLUGIN_VERSION} of Anthropic's Sales plugin, read in its public files. {schip("voice-profile")} in Salesforce's list and {cchip("setup")} in Anthropic's fall outside the 13 jobs, and those are not in the table.</p>
+   <h3 class="mt" id="sf-copilot">Salesforce's build for Microsoft 365 Copilot</h3>
+   <p>Salesforce documents the same kind of plugin for Microsoft 365 Copilot, in beta and needing a Microsoft 365 Copilot license. Its {a(S.COPILOT_REF_URL, "skills reference")} lists {len(S.COPILOT_IDS)} skills, {len(CO_SHARED)} of them with the same IDs as the list for Claude. Only for Copilot: {co_only}. Only for Claude: {sf_not_co}. Salesforce marks {WORD[len(S.COPILOT_WRITES)]} of the {len(S.COPILOT_IDS)} as able to create and update records.</p>
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="sf-open">Where the public pages disagree</h2>
+   <ul class="lim">
+    <li><strong>The Claude plan.</strong> {a(S.SETUP_URL, "Salesforce's setup page")} asks for a direct Anthropic subscription: Claude Enterprise, Claude Team or Claude Console. The box at the top of its pages on setting up and using the plugin says Claude Enterprise. The {a(S.CLAUDE_SETUP_URL, "Claude Help Center")} and {a(S.ANTHROPIC_POST_URL, "Anthropic's announcement")} say all paid plans.</li>
+    <li><strong>The beta.</strong> {a(S.CLAUDEFORCE_URL, "Salesforce's Claudeforce page")} says select pilot customers have the plugin today and an open beta is planned for September 2026. Anthropic announced the beta on {S.BETA_SINCE}. The Claude Help Center says Salesforce approves organizations through its beta sign-up.</li>
+    <li><strong>The Salesforce edition.</strong> Salesforce's pages list Enterprise, Performance, Unlimited and Developer Editions. The Claude Help Center says the latest Sales Cloud enterprise edition.</li>
+    <li><strong>Who built the skills.</strong> The Claude Help Center says Salesforce, Anthropic says it built the plugin with Salesforce and Salesforce's Claudeforce page says both companies built the skills.</li>
+    <li><strong>Approval of record changes.</strong> Anthropic and the Claude Help Center say Claude asks the seller before each change by default. Salesforce says the tools are unrestricted until an admin sets them, and that users create and update records only once an admin sets the Dispatch API to Needs Approval or Always Allowed. The pages do not say how the two levels combine.</li>
+    <li><strong>The first-run skill.</strong> Salesforce calls it Configure and prompts the user to run it on first use. The Claude Help Center calls it a setup skill that runs automatically the first time the plugin opens, and Anthropic says it creates an artifact for the user's role and book.</li>
+    <li><strong>How the plugin reaches members.</strong> Both let the admin pick groups. Salesforce lists two choices for them, installed by default and available to install. The Claude Help Center adds a third, required.</li>
+    <li><strong>A workflow with no skill.</strong> The Claude Help Center gives QBR decks as an example, and no skill in Salesforce's list names one.</li>
+   </ul>
+   <h3 class="mt" id="sf-sources">Sources</h3>
+   <p>All read on {S.CHECKED_ON}.</p>
+   {sources()}
+  </div>
+ </section>
+</div>'''
+
+
+def method():
+    return f'''    <li>The Salesforce in Claude entry rests on public pages only. The plugin is in a beta whose agreement makes the beta and the information Salesforce discloses about it Salesforce's confidential information. Claude read Salesforce's help pages on the plugin, its Claudeforce page and beta request form, the Claude Help Center, Anthropic's announcement and the list of skills in Anthropic's public Sales plugin on {S.CHECKED_ON}. The same day OpenAI's Codex, based on GPT-6, checked every line against the same pages. The entry took its 18 corrections. Each skill's line restates Salesforce's one-line description in this site's words, and the build holds the wording apart from Salesforce's. The groups and the mark on skills that can change records are Salesforce's. The GTM jobs are our read, and a skill ID shared with Anthropic's Sales plugin sits under the same job. No skill file was read, nothing was installed and nothing on that page is rated.</li>'''
+
+
+def check(desc_path="/home/claude/sfic/sf_ref_descriptions.json"):
+    """Hold the entry to Salesforce's skills reference as read: counts, IDs, the marks and our own wording."""
+    assert len(SF_IDS) == len(set(SF_IDS)) == S.SKILLS_N == 37 and len(S.GROUPS) == 8
+    assert sorted(SF_WRITES) == sorted(["account-plan", "update-opportunity", "assign-target-to-sdr", "summarize-conversation-transcript", "schedule-meeting", "log-activity"])
+    assert all(s["job"] is None or s["job"] in PD.JOB_NAMES for s in S.SKILLS)
+    assert [s["id"] for s in S.SKILLS if s["job"] is None] == ["voice-profile"]
+    assert (len(SHARED), len(ONLY_SF), len(ONLY_AN)) == (27, 10, 9), (len(SHARED), len(ONLY_SF), len(ONLY_AN))
+    assert len(SHARED_SF_WRITES) == 4 and len(SHARED_CLAUDE_WRITES) == 10, (SHARED_SF_WRITES, SHARED_CLAUDE_WRITES)
+    claude_job = {i: j for j, ids in D.JOBS for i in ids}
+    assert all(S.BY[i]["job"] == claude_job.get(i) for i in SHARED), [i for i in SHARED if S.BY[i]["job"] != claude_job.get(i)]
+    assert len(S.COPILOT_IDS) == len(set(S.COPILOT_IDS)) == 38 and len(CO_SHARED) == 35 and set(S.COPILOT_WRITES) <= set(S.COPILOT_IDS)
+    for s in S.SKILLS:
+        assert s["does"].endswith(".") and s["does"] == s["does"].strip(), s["id"]
+    if not os.path.exists(desc_path):
+        return f"{S.SKILLS_N} skills held to the reference; wording not checked: no copy of Salesforce's descriptions"
+    theirs = json.load(open(desc_path, encoding="utf-8"))["descriptions"]
+    assert sorted(theirs) == sorted(SF_IDS)
+
+    def words(t):
+        return re.findall(r"[a-z0-9']+", t.lower().replace("’", "'"))
+
+    def longest(x, y):
+        x, y, best = words(x), words(y), 0
+        for i in range(len(x)):
+            for k in range(len(y)):
+                n = 0
+                while i + n < len(x) and k + n < len(y) and x[i + n] == y[k + n]:
+                    n += 1
+                best = max(best, n)
+        return best
+    runs = {i: longest(S.BY[i]["does"], theirs[i]) for i in SF_IDS}
+    worst = max(runs.values())
+    assert worst <= 4, {i: n for i, n in runs.items() if n > 4}
+    return f"{S.SKILLS_N} skills held to the reference; longest run of words shared with Salesforce's descriptions: {worst}"

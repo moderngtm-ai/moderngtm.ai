@@ -916,6 +916,12 @@ html:not(.js) :where(.plg) .tabs .back,html:not(.js) :where(.plg) .tabs #here,ht
 :where(.plg) .lsk .more .cnt{display:block;margin:2px 0 0}
 }
 .js :where(.plg) .tabs[data-group=gpt] [data-nav=gpt]{display:flex}
+.js :where(.plg) .tabs[data-group=sf] [data-nav=sf]{display:flex}
+:where(.plg) .sft .sfn{display:block;font:400 13.5px/1.35 var(--disp);color:var(--muted);margin-top:4px}
+:where(.plg) .sfonly{margin:0 0 20px}
+:where(.plg) .sfonly>div{margin:0 0 14px}
+:where(.plg) .sfonly dt{font-weight:650;font-size:15px;margin:0 0 6px}
+:where(.plg) .sfonly dd{margin:0}
 :where(.plg) .gsk{border-bottom:1px solid var(--line)}
 :where(.plg) .gsk>summary{display:grid;grid-template-columns:minmax(0,290px) minmax(0,1fr) auto 24px;gap:4px 18px;align-items:center;padding:13px 10px;margin-inline:-10px;border-radius:8px;cursor:pointer;list-style:none}
 :where(.plg) .gsk>summary::-webkit-details-marker{display:none}
@@ -928,12 +934,12 @@ html:not(.js) :where(.plg) .tabs .back,html:not(.js) :where(.plg) .tabs #here,ht
 :where(.plg) .gsk dt small{font:500 12.5px/1.3 var(--disp);color:var(--muted);margin-left:6px}
 :where(.plg) .gcard{background:var(--soft);border-radius:12px;padding:16px 20px 18px;margin:0 0 22px}
 :where(.plg) .gcard .runkv dd:not(:has(.sayline)){max-width:58ch}
-:where(.plg) .ggrp{margin-top:34px}
-:where(.plg) .ggrp>h3{display:flex;flex-wrap:wrap;gap:2px 14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:8px;margin:0}
-:where(.plg) .ggrp>h3 small{font:400 14.5px/1.4 var(--disp);color:var(--muted)}
-:where(.plg) .gtally{list-style:none;padding:0;margin:20px 0 16px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 32px}
-:where(.plg) .gtally li{border-top:2px solid var(--ink);padding-top:10px;margin:0;font-size:15px;line-height:1.45}
-:where(.plg) .gtally b{display:block;font:800 20px/1.2 var(--disp);font-stretch:108%;margin-bottom:3px}
+:where(.plg) .ggrp,:where(.plg) .sfgrp{margin-top:34px}
+:where(.plg) .ggrp>h3,:where(.plg) .sfgrp>h3{display:flex;flex-wrap:wrap;gap:2px 14px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:8px;margin:0}
+:where(.plg) .ggrp>h3 small,:where(.plg) .sfgrp>h3 small{font:400 14.5px/1.4 var(--disp);color:var(--muted)}
+:where(.plg) .gtally,:where(.plg) .sftally{list-style:none;padding:0;margin:20px 0 16px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 32px}
+:where(.plg) .gtally li,:where(.plg) .sftally li{border-top:2px solid var(--ink);padding-top:10px;margin:0;font-size:15px;line-height:1.45}
+:where(.plg) .gtally b,:where(.plg) .sftally b{display:block;font:800 20px/1.2 var(--disp);font-stretch:108%;margin-bottom:3px}
 :where(.plg) .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px 40px;align-items:start}
 :where(.plg) .g3>.def+.def{margin-top:0}
 :where(.plg) .more-n,:where(.plg) .nil{color:var(--muted)}
@@ -946,7 +952,7 @@ html:not(.js) :where(.plg) .tabs .back,html:not(.js) :where(.plg) .tabs #here,ht
 :where(.plg) .gsk>summary{grid-template-columns:minmax(0,270px) minmax(0,1fr) 24px}
 :where(.plg) .gsk .fitm{grid-column:2;grid-row:2;justify-content:flex-start}
 :where(.plg) .gsk .pm{grid-column:3;grid-row:1}
-:where(.plg) .gtally{grid-template-columns:repeat(2,minmax(0,1fr))}
+:where(.plg) .gtally,:where(.plg) .sftally{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:860px){
 :where(.plg) .g3{grid-template-columns:minmax(0,1fr)}
@@ -960,8 +966,29 @@ html:not(.js) :where(.plg) .tabs .back,html:not(.js) :where(.plg) .tabs #here,ht
 :where(.plg) .gcard{padding:14px 14px 8px}
 }
 @media(max-width:600px){
-:where(.plg) .gtally{grid-template-columns:minmax(0,1fr)}
+:where(.plg) .gtally,:where(.plg) .sftally{grid-template-columns:minmax(0,1fr)}
 :where(.plg) .tabs[data-group=gpt] .tl{gap:0 15px}
+:where(.plg) .tabs[data-group=sf] .tl{gap:0 15px}
+}
+:where(.plg) .pk{position:fixed;z-index:40;width:440px;max-width:calc(100vw - 32px);background:var(--card);color:var(--ink);border:1.5px solid var(--ink);border-radius:12px;padding:16px 18px 16px;box-shadow:0 14px 36px rgba(23,22,43,.24)}
+:where(.plg) .pk[hidden],:where(.plg) .pk-bg[hidden],:where(.plg) .bk[hidden]{display:none}
+:where(.plg) .pk-k{margin:0 0 6px;font:700 12.5px/1.2 var(--disp);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+:where(.plg) .pk-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:0;font:700 18px/1.3 var(--disp)}
+:where(.plg) .pk-t code{font:600 14.5px/1.3 var(--mono)}
+:where(.plg) .pk-t:focus{outline:none}
+:where(.plg) .pk-t:focus-visible{outline:2px solid var(--link);outline-offset:3px;border-radius:4px}
+:where(.plg) .pk-d{margin:10px 0 0;font-size:15.5px;line-height:1.5;text-wrap:pretty}
+:where(.plg) .pk-f{margin:12px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:14.5px;line-height:1.4}
+:where(.plg) .pk-f dt{font-weight:700;color:var(--muted)}
+:where(.plg) .pk-f dd{margin:0}
+:where(.plg) .pk-a{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+:where(.plg) .pk-bg{position:fixed;inset:0;z-index:39;background:rgba(23,22,43,.34)}
+:where(.plg) .bk{position:fixed;z-index:38;right:20px;bottom:20px;display:inline-flex;align-items:center;min-height:46px;padding:11px 18px;border:0;border-radius:999px;background:var(--v);color:#fff;font:700 15px/1.1 var(--disp);white-space:nowrap;box-shadow:0 10px 26px rgba(23,22,43,.3);cursor:pointer}
+:where(.plg) .bk:hover{background:var(--v2)}
+:where(.plg) .bk:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+@media(max-width:719px){
+:where(.plg) .pk{left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;max-height:72vh;overflow:auto;border-width:1.5px 0 0;border-radius:16px 16px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom))}
+:where(.plg) .bk{right:auto;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom))}
 }
 /* ---- the merge: the plugin area's second row and foot show only while a plugin view is open */
 html.js:not(.plg-on) .plg .tabs,html.js:not(.plg-on) .plgfoot{display:none}
@@ -3069,8 +3096,9 @@ Decision rule: Scale if the margin holds over 4 weeks and 1,000 leads. If the vo
   <b id="here">Plugins</b>
   <div class="tl" data-nav="sales"><a href="#overview">Overview</a><a href="#skills">Skills</a><a href="#fit">Fit</a><a href="#rollout"><span class="lg">Before rollout</span><span class="smo">Rollout</span></a><a href="#configure">Configure</a></div>
   <div class="tl" data-nav="gpt"><a href="#gpt-skills">Skills</a><a href="#gpt-apps"><span class="lg">Works with</span><span class="smo">Apps</span></a><a href="#gpt-setup">Setup</a><a href="#gpt-rollout"><span class="lg">Before rollout</span><span class="smo">Rollout</span></a><a href="#side-by-side"><span class="lg">Beside Claude</span><span class="smo">Compare</span></a></div>
-  <div class="tl" data-nav="home"><span class="onp">On this page</span><a href="#from-anthropic">Anthropic</a><a href="#from-openai">OpenAI</a><a href="#leader-skills"><span class="lg">Skills for leaders</span><span class="smo">For leaders</span></a></div>
-  <div class="tl" data-nav="all"><a href="#plugins">All plugins</a><a href="#overview">Claude Sales plugin</a><a href="#marketing">Claude Marketing plugin</a><a href="#customer-support">Claude Customer support plugin</a><a href="#small-business">Claude Small business plugin</a><a href="#chatgpt-sales">ChatGPT for Sales</a></div>
+  <div class="tl" data-nav="sf"><a href="#sf-skills">Skills</a><a href="#sf-setup">Setup</a><a href="#sf-compare"><span class="lg">Beside Claude Sales</span><span class="smo">Compare</span></a><a href="#sf-open"><span class="lg">Where sources disagree</span><span class="smo">Disagree</span></a></div>
+  <div class="tl" data-nav="home"><span class="onp">On this page</span><a href="#from-anthropic">Anthropic</a><a href="#from-openai">OpenAI</a><a href="#from-salesforce">Salesforce</a><a href="#leader-skills"><span class="lg">Skills for leaders</span><span class="smo">For leaders</span></a></div>
+  <div class="tl" data-nav="all"><a href="#plugins">All plugins</a><a href="#overview">Claude Sales plugin</a><a href="#marketing">Claude Marketing plugin</a><a href="#customer-support">Claude Customer support plugin</a><a href="#small-business">Claude Small business plugin</a><a href="#chatgpt-sales">ChatGPT for Sales</a><a href="#salesforce-in-claude">Salesforce in Claude</a></div>
  </div>
 </nav>
 
@@ -3079,7 +3107,7 @@ Decision rule: Scale if the margin holds over 4 weeks and 1,000 leads. If the vo
  <section class="open">
   <div class="wrap">
    <h1>Plugins from the AI labs, for revenue teams</h1>
-   <p class="lede">Anthropic and OpenAI, both AI labs and vendors, publish plugins: sets of skills that their assistants run for one kind of work. Choose one to see what it holds.</p>
+   <p class="lede">Anthropic and OpenAI, both AI labs and vendors, publish plugins: sets of skills that their assistants run for one kind of work. Salesforce, a CRM vendor, publishes one for Claude. Choose one to see what it holds.</p>
    <p class="who"><span><b>Preview.</b> Compiled by Claude and not yet reviewed.</span><span>Checked on November 21, 2026</span><span>For revenue leaders and operators</span></p>
   </div>
  </section>
@@ -3089,7 +3117,9 @@ Decision rule: Scale if the margin holds over 4 weeks and 1,000 leads. If the vo
    <ul class="plist"><li><a class="pl" href="#overview"><span class="pn">Claude Sales plugin</span><span class="pf">Version 2.1.0, 36 skills</span><span class="pd">Sales work from first touch to renewal: research, calls, pipeline, forecast and CRM updates.</span><span class="pgo">Full entry</span></a></li><li><a class="pl" href="#marketing"><span class="pn">Claude Marketing plugin</span><span class="pf">Version 1.2.0, 8 skills</span><span class="pd">Planning a campaign, drafting and checking content, and reporting on results.</span><span class="pgo">Skill list</span></a></li><li><a class="pl" href="#customer-support"><span class="pn">Claude Customer support plugin</span><span class="pf">Version 1.3.0, 5 skills</span><span class="pd">Sorting tickets, drafting replies, escalating and writing help articles.</span><span class="pgo">Skill list</span></a></li><li><a class="pl" href="#small-business"><span class="pn">Claude Small business plugin</span><span class="pf">Version 1.35.2, 44 workflows</span><span class="pd">An owner&#x27;s sales, marketing, finance and hiring. Of its 44 workflows, 18 serve sales, marketing or customers.</span><span class="pgo">Skill list</span></a></li></ul>
    <h2 id="from-openai" style="margin-top:44px">From OpenAI</h2>
    <ul class="plist"><li><a class="pl" href="#chatgpt-sales"><span class="pn">ChatGPT for Sales</span><span class="pf">Version 1.1.7, 18 skills</span><span class="pd">Researching accounts, preparing and following up meetings, planning deals, reviewing a forecast and coaching reps.</span><span class="pgo">Reported by ChatGPT</span></a></li></ul>
-   <dl class="depth"><div><dt>Full entry</dt><dd>Every skill, one by one: what it reads and can change, who it suits, what to settle before rollout and how to configure it.</dd></div><div><dt>Skill list</dt><dd>Every relevant skill, restated from its own description. Nothing is rated.</dd></div><div><dt>Reported by ChatGPT</dt><dd>Every skill, as the provider's own assistant reported it from an installed copy. We did not read the files, and nothing is rated.</dd></div></dl>
+   <h2 id="from-salesforce" style="margin-top:44px">From Salesforce</h2>
+   <ul class="plist"><li><a class="pl" href="#salesforce-in-claude"><span class="pn">Salesforce in Claude</span><span class="pf">Beta, 37 skills</span><span class="pd">Researching accounts, preparing and following up meetings, working deals, reviewing pipeline and keeping Salesforce up to date.</span><span class="pgo">Public pages only</span></a></li></ul>
+   <dl class="depth"><div><dt>Full entry</dt><dd>Every skill, one by one: what it reads and can change, who it suits, what to settle before rollout and how to configure it.</dd></div><div><dt>Skill list</dt><dd>Every relevant skill, restated from its own description. Nothing is rated.</dd></div><div><dt>Reported by ChatGPT</dt><dd>Every skill, as the provider's own assistant reported it from an installed copy. We did not read the files, and nothing is rated.</dd></div><div><dt>Public pages only</dt><dd>What its makers publish about a plugin in beta. No skill file was read, and nothing is rated.</dd></div></dl>
   </div>
  </section>
  <section class="sec soft tight">
@@ -3168,7 +3198,7 @@ Decision rule: Scale if the margin holds over 4 weeks and 1,000 leads. If the vo
    <h2>Three names that get mixed up</h2>
    <dl class="names">
     <div><dt>Sales plugin</dt><dd>The subject of this entry. It comes from Anthropic, has 36 skills and works with whichever CRM you connect.</dd></div>
-    <div><dt>Salesforce in Claude</dt><dd>A separate plugin built with Salesforce, in beta since September 15, 2026, with 37 skills of its own. It is not covered here.</dd></div>
+    <div><dt>Salesforce in Claude</dt><dd>A separate plugin from Salesforce, in beta since September 15, 2026, with 37 skills. It has <a href="#salesforce-in-claude">a page of its own</a>, from public pages only.</dd></div>
     <div><dt>Claude for Sales</dt><dd>The title of Anthropic's solutions page for sales teams, which groups both plugins with other features.</dd></div>
    </dl>
    <p class="note" style="margin-top:12px">As Anthropic's own pages describe them on November 21, 2026.</p>
@@ -5981,6 +6011,113 @@ This comparison comes from reading what each stock skill asks for. It is not a b
  </section>
 </div>
 
+<div id="salesforce-in-claude" data-view="salesforce-in-claude" data-group="sf" data-title="Salesforce in Claude">
+ <section class="open">
+  <div class="wrap">
+   <h1>Salesforce in Claude, from Salesforce</h1>
+   <p class="lede">This plugin from Salesforce, the CRM vendor, brings a seller's Salesforce accounts, opportunities and pipeline into Claude, with 37 skills for sales work. This entry sets out what Salesforce and Anthropic have published about it.</p>
+   <div class="acts"><a class="btn pri" href="#sf-skills">Browse the 37 skills</a><a class="btn" href="#sf-source">Why only public pages</a></div>
+   <p class="who"><span><b>Preview.</b> From public pages only. It awaits its editor's review.</span><span>In beta since September 15, 2026, read on November 25, 2026</span><span>For revenue leaders and operators</span></p>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="sf-source">Why only public pages</h2>
+   <p class="lead2">Salesforce in Claude is in a beta that Salesforce approves organization by organization. Its <a href="https://www.salesforce.com/en-us/wp-content/uploads/sites/4/documents/legal/Agreements/beta-agreements/Beta-Services-Agreement.pdf">beta agreement</a> makes the beta and the information Salesforce discloses about it Salesforce's confidential information, so this page uses only what Salesforce and Anthropic have published.</p>
+   <div class="g3 mt">
+    <div class="def"><h3>What this entry uses</h3><p>Salesforce's help pages on the plugin, its Claudeforce page and its beta request form, the Claude Help Center's two articles, Anthropic's announcement and the list of skills in Anthropic's public Sales plugin, all read on November 25, 2026. <a href="#sf-sources">The sources</a> are listed at the end of the page.</p></div>
+    <div class="def"><h3>What it does not use</h3><p>No skill file was read, nothing was installed for this entry and no skill was run. Nothing on the page comes from the beta itself.</p></div>
+    <div class="def"><h3>What that leaves open</h3><p>What each skill's instructions say, which tools it calls and how well it works. Where the published pages disagree, the entry says so.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="sf-glance">At a glance</h2>
+   <dl class="glance"><div><dt>Provider and offering</dt><dd><p>Salesforce, a vendor. The plugin is the first product of <a href="https://www.salesforce.com/claudeforce/">Claudeforce</a>, a partnership between Salesforce and Anthropic. Anthropic calls it a plugin built with Salesforce. In beta since September 15, 2026.</p></dd></div><div><dt>Category</dt><dd><p>CRM vendor</p></dd></div><div><dt>In one sentence</dt><dd><p>A plugin for Claude with 37 sales skills, a first-run skill and connectors to Salesforce and Slack, for researching accounts, preparing and following up meetings, working deals, reviewing pipeline and keeping Salesforce up to date.</p></dd></div><div><dt>Go-to-market (GTM) jobs it covers</dt><dd><ul class="jobs"><li><span>Lead qualification</span><span class="chips"><a class="chip" href="#sfk-lead-triage">lead-triage</a><a class="chip" href="#sfk-assign-target-to-sdr">assign-target-to-sdr</a></span></li><li><span>Account research and call preparation</span><span class="chips"><a class="chip" href="#sfk-account-context">account-context</a><a class="chip" href="#sfk-research-prospect">research-prospect</a><a class="chip" href="#sfk-call-prep">call-prep</a><a class="chip" href="#sfk-query-activity-history">query-activity-history</a></span></li><li><span>Outreach and follow-up</span><span class="chips"><a class="chip" href="#sfk-draft-outreach">draft-outreach</a><a class="chip" href="#sfk-call-follow-up">call-follow-up</a><a class="chip" href="#sfk-summarize-conversation-transcript">summarize-conversation-transcript</a><a class="chip" href="#sfk-schedule-meeting">schedule-meeting</a><a class="chip" href="#sfk-inbox-sweep">inbox-sweep</a></span></li><li><span>Deal strategy and reviews</span><span class="chips"><a class="chip" href="#sfk-stakeholder-map">stakeholder-map</a><a class="chip" href="#sfk-deal-review">deal-review</a><a class="chip" href="#sfk-deal-advance-gap">deal-advance-gap</a><a class="chip" href="#sfk-deal-signals">deal-signals</a><a class="chip" href="#sfk-handle-objection">handle-objection</a></span></li><li><span>Proposals</span><span class="chips"><a class="chip" href="#sfk-close-plan">close-plan</a></span></li><li><span>Pipeline review and forecasting</span><span class="chips"><a class="chip" href="#sfk-deal-slip-scenario">deal-slip-scenario</a><a class="chip" href="#sfk-pipeline-review">pipeline-review</a><a class="chip" href="#sfk-team-pipeline">team-pipeline</a><a class="chip" href="#sfk-forecast-narrative">forecast-narrative</a></span></li><li><span>CRM updates</span><span class="chips"><a class="chip" href="#sfk-update-opportunity">update-opportunity</a><a class="chip" href="#sfk-sfdc-hygiene-check">sfdc-hygiene-check</a><a class="chip" href="#sfk-log-activity">log-activity</a></span></li><li><span>Account planning and expansion</span><span class="chips"><a class="chip" href="#sfk-account-plan">account-plan</a><a class="chip" href="#sfk-account-tiering">account-tiering</a><a class="chip" href="#sfk-expansion-whitespace">expansion-whitespace</a></span></li><li><span>Renewals</span><span class="chips"><a class="chip" href="#sfk-customer-health">customer-health</a><a class="chip" href="#sfk-renewal-radar">renewal-radar</a></span></li><li><span>Coaching and enablement</span><span class="chips"><a class="chip" href="#sfk-win-loss-review">win-loss-review</a><a class="chip" href="#sfk-customer-voice">customer-voice</a><a class="chip" href="#sfk-rep-context">rep-context</a><a class="chip" href="#sfk-find-internal-answer">find-internal-answer</a></span></li><li><span>Daily planning</span><span class="chips"><a class="chip" href="#sfk-weekly-wrap">weekly-wrap</a><a class="chip" href="#sfk-calendar-events">calendar-events</a><a class="chip" href="#sfk-daily-briefing">daily-briefing</a></span></li></ul><p class="note" style="margin-top:10px">Placed by us from Salesforce's one-line descriptions. Under CRM updates, <a class="chip" href="#sfk-sfdc-hygiene-check">sfdc-hygiene-check</a> finds what is wrong and changes nothing. No skill of its own for onboarding and adoption and support. Outside the list: <a class="chip" href="#sfk-voice-profile">voice-profile</a>.</p></dd></div><div><dt>Systems it works with</dt><dd><p>Salesforce and Slack. Claude reaches Salesforce through Salesforce's hosted MCP server. The Claude Help Center says both connectors come with the plugin, and Salesforce says connecting Slack is optional for the first run. Anthropic says the skills can read and write Slack deal channels and account-team threads.</p></dd></div><div><dt>Who can get it</dt><dd><p>Organizations that Salesforce approves through a <a href="https://agentexchange.salesforce.com/sales-cloud-in-claude-beta-access">beta request on AgentExchange</a>. Salesforce's pages list its Enterprise, Performance, Unlimited and Developer Editions. On the Claude side the sources differ, as <a href="#sf-open">set out below</a>. Salesforce says companies that reach Claude only through a cloud provider, such as AWS Bedrock or Google Cloud Vertex AI, cannot use it for now. The Claude Help Center says it works in chat and Cowork, on the web and desktop. No price is stated.</p></dd></div><div><dt>Controls</dt><dd><p>Claude sees only what the signed-in user can see in Salesforce. An admin decides with one tool setting whether skills may create and update records: with the user's approval, without it or not at all. No skill deletes a record.</p></dd></div><div><dt>What the provider reports</dt><dd><p>No measured result. Anthropic's announcement names GitLab, Siemens and Legora as customers that have deployed the plugin, and says 14,000 Salesforce sellers use it. Its customer quotes report time saved on meeting preparation, with no study behind them.</p></dd></div><div><dt>Evidence in the register</dt><dd><p>None yet.</p></dd></div><div><dt>Not public or not known</dt><dd><p>The skill files are not public. Not known: what each skill's instructions say, which skills change records in practice and how any of them performs.</p></dd></div><div><dt>On this site</dt><dd><p>This entry. It rates nothing.</p></dd></div><div><dt>Last checked</dt><dd><p>November 25, 2026: Salesforce's help pages, its Claudeforce page and its beta request form, the Claude Help Center, Anthropic's announcement and the skills folder of Anthropic's Sales plugin, by Claude, then against the same pages by OpenAI's Codex.</p></dd></div></dl>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="sf-skills">The 37 skills</h2>
+   <p class="lead2">Claude picks a skill from what the user asks, and a user can also call one by typing / and its ID. Salesforce groups the skills by the work they do, and this page keeps its groups.</p>
+   <ul class="sftally">
+    <li><b>6 of 37</b> are marked by Salesforce as able to create and update records, if the admin allows it.</li>
+    <li><b>None</b> deletes a record. Salesforce says deletion stays in Salesforce.</li>
+    <li><b>Configure</b> is offered on first use, a skill outside Salesforce's list of 37.</li>
+   </ul>
+   <p class="note">What each skill does is restated from Salesforce's one-line description. The GTM job beside it is our read.</p>
+   <div class="sfgrp"><h3 id="sf-g-account-intelligence-and-research">Account intelligence and research <small>6 skills</small></h3><div class="scroll" tabindex="0" role="region" aria-label="Account intelligence and research: skills"><table class="rt dt skt stack wide sft"><thead><tr><th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody><tr id="sfk-account-context"><th scope="row"><code>account-context</code><span class="sfn">See Account Context</span></th><td class="fmt" data-l="What it does">One view of an account: who owns it, what activity is open and the context of recent messages.</td><td class="fmt" data-l="GTM job, our read">Account research and call preparation</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-research-prospect"><th scope="row"><code>research-prospect</code><span class="sfn">Research New Prospects</span></th><td class="fmt" data-l="What it does">A brief on a company you are pursuing: what it does, its news and how it compares with your best customers, using the CRM.</td><td class="fmt" data-l="GTM job, our read">Account research and call preparation</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-account-plan"><th scope="row"><code>account-plan</code><span class="sfn">Build Account Plans</span></th><td class="fmt" data-l="What it does">Shows, creates or changes the plan for a key account, to map its stakeholders and track its goals.</td><td class="fmt" data-l="GTM job, our read">Account planning and expansion</td><td class="fmt" data-l="Records"><span class="t">Can create and update records</span></td></tr><tr id="sfk-account-tiering"><th scope="row"><code>account-tiering</code><span class="sfn">Prioritize Your Accounts</span></th><td class="fmt" data-l="What it does">Rates accounts on fit and engagement, sorts them into tiers and suggests an approach for each.</td><td class="fmt" data-l="GTM job, our read">Account planning and expansion</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-stakeholder-map"><th scope="row"><code>stakeholder-map</code><span class="sfn">Map Deal Stakeholders</span></th><td class="fmt" data-l="What it does">The people behind a deal or an account, with each one&#x27;s role, influence and sentiment.</td><td class="fmt" data-l="GTM job, our read">Deal strategy and reviews</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-expansion-whitespace"><th scope="row"><code>expansion-whitespace</code><span class="sfn">Find Expansion Opportunities</span></th><td class="fmt" data-l="What it does">Sets what a customer has bought against what it could buy, and suggests where the account could grow.</td><td class="fmt" data-l="GTM job, our read">Account planning and expansion</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr></tbody></table></div></div>
+<div class="sfgrp"><h3 id="sf-g-deals-and-opportunities">Deals and opportunities <small>7 skills</small></h3><div class="scroll" tabindex="0" role="region" aria-label="Deals and opportunities: skills"><table class="rt dt skt stack wide sft"><thead><tr><th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody><tr id="sfk-deal-review"><th scope="row"><code>deal-review</code><span class="sfn">Review Deal Health</span></th><td class="fmt" data-l="What it does">Where an upcoming deal stands: a health score, its risks and the next actions it recommends.</td><td class="fmt" data-l="GTM job, our read">Deal strategy and reviews</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-deal-advance-gap"><th scope="row"><code>deal-advance-gap</code><span class="sfn">See What&#x27;s Blocking This Deal</span></th><td class="fmt" data-l="What it does">What must happen for a deal to reach its next stage, with an owner and a date for each step.</td><td class="fmt" data-l="GTM job, our read">Deal strategy and reviews</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-deal-signals"><th scope="row"><code>deal-signals</code><span class="sfn">Track Deal Signals</span></th><td class="fmt" data-l="What it does">A digest of alerts on changes across the pipeline: dates slipping, new risks and conversations that went quiet.</td><td class="fmt" data-l="GTM job, our read">Deal strategy and reviews</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-deal-slip-scenario"><th scope="row"><code>deal-slip-scenario</code><span class="sfn">See What Happens If a Deal Slips</span></th><td class="fmt" data-l="What it does">How the forecast moves when one deal slips or gets smaller.</td><td class="fmt" data-l="GTM job, our read">Pipeline review and forecasting</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-close-plan"><th scope="row"><code>close-plan</code><span class="sfn">Build Close Plans</span></th><td class="fmt" data-l="What it does">Drafts the business case and a mutual action plan to carry a deal in its last stages to signature.</td><td class="fmt" data-l="GTM job, our read">Proposals</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-update-opportunity"><th scope="row"><code>update-opportunity</code><span class="sfn">Update Opportunities</span></th><td class="fmt" data-l="What it does">Makes approved edits to an opportunity, such as its close date or next steps.</td><td class="fmt" data-l="GTM job, our read">CRM updates</td><td class="fmt" data-l="Records"><span class="t">Can create and update records</span></td></tr><tr id="sfk-handle-objection"><th scope="row"><code>handle-objection</code><span class="sfn">Handle Objections</span></th><td class="fmt" data-l="What it does">An answer to an objection or a competitive threat that comes up live, drawing on the user&#x27;s own track record.</td><td class="fmt" data-l="GTM job, our read">Deal strategy and reviews</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr></tbody></table></div></div>
+<div class="sfgrp"><h3 id="sf-g-pipelines-and-forecasting">Pipelines and forecasting <small>6 skills</small></h3><div class="scroll" tabindex="0" role="region" aria-label="Pipelines and forecasting: skills"><table class="rt dt skt stack wide sft"><thead><tr><th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody><tr id="sfk-pipeline-review"><th scope="row"><code>pipeline-review</code><span class="sfn">Review My Pipeline</span></th><td class="fmt" data-l="What it does">The health of an open pipeline stage by stage: coverage, age and deals at risk.</td><td class="fmt" data-l="GTM job, our read">Pipeline review and forecasting</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-team-pipeline"><th scope="row"><code>team-pipeline</code><span class="sfn">Review Team Pipeline</span></th><td class="fmt" data-l="What it does">Each rep&#x27;s pipeline across the team, stage by stage, with deals at risk and chances to coach flagged.</td><td class="fmt" data-l="GTM job, our read">Pipeline review and forecasting</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-forecast-narrative"><th scope="row"><code>forecast-narrative</code><span class="sfn">Write My Forecast Story</span></th><td class="fmt" data-l="What it does">Writes what to say on the next forecast call: the story behind the commit, the best case or the wider pipeline.</td><td class="fmt" data-l="GTM job, our read">Pipeline review and forecasting</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-sfdc-hygiene-check"><th scope="row"><code>sfdc-hygiene-check</code><span class="sfn">Audit CRM Hygiene</span></th><td class="fmt" data-l="What it does">Finds blank fields, stale dates and mismatched stages across opportunities.</td><td class="fmt" data-l="GTM job, our read">CRM updates</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-weekly-wrap"><th scope="row"><code>weekly-wrap</code><span class="sfn">Wrap Up the Week</span></th><td class="fmt" data-l="What it does">The week in deals: what closed, moved or slipped, and what is coming on Monday.</td><td class="fmt" data-l="GTM job, our read">Daily planning</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-win-loss-review"><th scope="row"><code>win-loss-review</code><span class="sfn">Analyze Win/Loss Patterns</span></th><td class="fmt" data-l="What it does">Patterns in deals closed recently: where deals are lost, what works and why.</td><td class="fmt" data-l="GTM job, our read">Coaching and enablement</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr></tbody></table></div></div>
+<div class="sfgrp"><h3 id="sf-g-customer-success-and-renewals">Customer success and renewals <small>3 skills</small></h3><div class="scroll" tabindex="0" role="region" aria-label="Customer success and renewals: skills"><table class="rt dt skt stack wide sft"><thead><tr><th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody><tr id="sfk-customer-health"><th scope="row"><code>customer-health</code><span class="sfn">Check Customer Health</span></th><td class="fmt" data-l="What it does">A health score for an account and material for a review: risk signals, engagement and the value delivered.</td><td class="fmt" data-l="GTM job, our read">Renewals</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-renewal-radar"><th scope="row"><code>renewal-radar</code><span class="sfn">Track Renewals</span></th><td class="fmt" data-l="What it does">Renewals coming up, with timing, risk and room for an uplift.</td><td class="fmt" data-l="GTM job, our read">Renewals</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-customer-voice"><th scope="row"><code>customer-voice</code><span class="sfn">Surface Customer Feedback</span></th><td class="fmt" data-l="What it does">What customers said on a topic in calls and emails, quoted with the speaker and sorted into themes.</td><td class="fmt" data-l="GTM job, our read">Coaching and enablement</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr></tbody></table></div></div>
+<div class="sfgrp"><h3 id="sf-g-leads-and-prospecting">Leads and prospecting <small>3 skills</small></h3><div class="scroll" tabindex="0" role="region" aria-label="Leads and prospecting: skills"><table class="rt dt skt stack wide sft"><thead><tr><th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody><tr id="sfk-lead-triage"><th scope="row"><code>lead-triage</code><span class="sfn">Triage Inbound Leads</span></th><td class="fmt" data-l="What it does">Rates a lead against the ideal customer profile, gives it a priority tier and suggests what to do next.</td><td class="fmt" data-l="GTM job, our read">Lead qualification</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-assign-target-to-sdr"><th scope="row"><code>assign-target-to-sdr</code><span class="sfn">Assign Contacts and Leads to an Agent</span></th><td class="fmt" data-l="What it does">Sends a lead or contact to an Agentforce agent for lead nurturing, which qualifies it and reaches out.</td><td class="fmt" data-l="GTM job, our read">Lead qualification</td><td class="fmt" data-l="Records"><span class="t">Can create and update records</span></td></tr><tr id="sfk-draft-outreach"><th scope="row"><code>draft-outreach</code><span class="sfn">Draft Prospect Outreach</span></th><td class="fmt" data-l="What it does">Drafts a personal outreach email for the seller to review and then send.</td><td class="fmt" data-l="GTM job, our read">Outreach and follow-up</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr></tbody></table></div></div>
+<div class="sfgrp"><h3 id="sf-g-meetings-and-calls">Meetings and calls <small>5 skills</small></h3><div class="scroll" tabindex="0" role="region" aria-label="Meetings and calls: skills"><table class="rt dt skt stack wide sft"><thead><tr><th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody><tr id="sfk-call-prep"><th scope="row"><code>call-prep</code><span class="sfn">Prep for Customer Calls</span></th><td class="fmt" data-l="What it does">A brief of one page ahead of a meeting: who is coming, what has happened and discovery questions to ask.</td><td class="fmt" data-l="GTM job, our read">Account research and call preparation</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-call-follow-up"><th scope="row"><code>call-follow-up</code><span class="sfn">Follow Up After Calls</span></th><td class="fmt" data-l="What it does">From the transcript of a meeting, a recap email for the customer and a summary for the team.</td><td class="fmt" data-l="GTM job, our read">Outreach and follow-up</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-summarize-conversation-transcript"><th scope="row"><code>summarize-conversation-transcript</code><span class="sfn">Summarize Call Transcripts</span></th><td class="fmt" data-l="What it does">A summary of a call recorded in Salesforce, with the customer&#x27;s impression and the next steps.</td><td class="fmt" data-l="GTM job, our read">Outreach and follow-up</td><td class="fmt" data-l="Records"><span class="t">Can create and update records</span></td></tr><tr id="sfk-schedule-meeting"><th scope="row"><code>schedule-meeting</code><span class="sfn">Schedule Meetings</span></th><td class="fmt" data-l="What it does">Finds a time that suits everyone, then drafts, creates or updates the invitation and its log in Salesforce.</td><td class="fmt" data-l="GTM job, our read">Outreach and follow-up</td><td class="fmt" data-l="Records"><span class="t">Can create and update records</span></td></tr><tr id="sfk-calendar-events"><th scope="row"><code>calendar-events</code><span class="sfn">View My Calendar</span></th><td class="fmt" data-l="What it does">The user&#x27;s meetings over any span of dates, in one view.</td><td class="fmt" data-l="GTM job, our read">Daily planning</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr></tbody></table></div></div>
+<div class="sfgrp"><h3 id="sf-g-daily-workflow-and-productivity">Daily workflow and productivity <small>6 skills</small></h3><div class="scroll" tabindex="0" role="region" aria-label="Daily workflow and productivity: skills"><table class="rt dt skt stack wide sft"><thead><tr><th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody><tr id="sfk-daily-briefing"><th scope="row"><code>daily-briefing</code><span class="sfn">Start My Day</span></th><td class="fmt" data-l="What it does">A summary to start the day: the day&#x27;s meetings, customer emails that need attention and deals due to close soon.</td><td class="fmt" data-l="GTM job, our read">Daily planning</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-inbox-sweep"><th scope="row"><code>inbox-sweep</code><span class="sfn">Sweep My Inbox</span></th><td class="fmt" data-l="What it does">Sorts unread customer emails by priority and drafts replies.</td><td class="fmt" data-l="GTM job, our read">Outreach and follow-up</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-log-activity"><th scope="row"><code>log-activity</code><span class="sfn">Log Customer Activity</span></th><td class="fmt" data-l="What it does">Drafts, creates or updates the entry that logs a call, an email or a meeting on its account and contact.</td><td class="fmt" data-l="GTM job, our read">CRM updates</td><td class="fmt" data-l="Records"><span class="t">Can create and update records</span></td></tr><tr id="sfk-query-activity-history"><th scope="row"><code>query-activity-history</code><span class="sfn">See Activity History</span></th><td class="fmt" data-l="What it does">Recent activity on a deal, a contact or an account, as a timeline.</td><td class="fmt" data-l="GTM job, our read">Account research and call preparation</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-rep-context"><th scope="row"><code>rep-context</code><span class="sfn">Prep for Rep One-on-Ones</span></th><td class="fmt" data-l="What it does">Before a one-on-one, what a rep has been working on: deals in the pipeline and recent activity.</td><td class="fmt" data-l="GTM job, our read">Coaching and enablement</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr><tr id="sfk-find-internal-answer"><th scope="row"><code>find-internal-answer</code><span class="sfn">Find Internal Answers</span></th><td class="fmt" data-l="What it does">Answers from an internal source the company has approved, not from a summary that Claude writes.</td><td class="fmt" data-l="GTM job, our read">Coaching and enablement</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr></tbody></table></div></div>
+<div class="sfgrp"><h3 id="sf-g-personalization">Personalization <small>1 skill</small></h3><div class="scroll" tabindex="0" role="region" aria-label="Personalization: skills"><table class="rt dt skt stack wide sft"><thead><tr><th scope="col">Skill</th><th scope="col">What it does</th><th scope="col">GTM job <small>Our read</small></th><th scope="col">Records</th></tr></thead><tbody><tr id="sfk-voice-profile"><th scope="row"><code>voice-profile</code><span class="sfn">Set Up My Voice Profile</span></th><td class="fmt" data-l="What it does">Learns the user&#x27;s writing style, so that drafts and outreach read as theirs.</td><td class="fmt" data-l="GTM job, our read">Outside the 13 jobs</td><td class="fmt" data-l="Records"><span class="nil">No</span></td></tr></tbody></table></div></div>
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="sf-setup">Setup, first run and admin controls</h2>
+   <div class="g2 mt">
+    <div class="def"><h3>Request access</h3><p>A Salesforce admin asks for the beta through the <a href="https://agentexchange.salesforce.com/sales-cloud-in-claude-beta-access">request form on AgentExchange</a>. The <a href="https://support.claude.com/en/articles/16952184-set-up-salesforce-in-claude-for-your-organization">Claude Help Center</a> says approval brings an email with the setup steps.</p></div>
+    <div class="def"><h3>In Salesforce</h3><p>The admin turns on Salesforce's hosted MCP server once for the org. Setup calls it the Headless360 (H360) MCP Server. An External Client App with Claude's callback address gives the key and secret that Claude needs, and <a href="https://help.salesforce.com/s/articleView?id=platform.set_up_salesforce_in_claude.htm&amp;type=5">Salesforce's setup pages</a> have the values. A permission set limits who may connect, once that app admits only users an admin has approved. Salesforce recommends one, and without it anyone in the org can. It warns that letting users authorize themselves skips the set.</p></div>
+    <div class="def"><h3>In Claude</h3><p>An Owner or Primary Owner of the Claude organization enters that key and secret for the Salesforce connector. They then choose, for everyone or for set groups, whether members get the plugin installed or may install it themselves. The Claude Help Center adds a third choice, required. Each user signs in with their own Salesforce account.</p></div>
+    <div class="def"><h3>Record changes</h3><p>One tool setting in Claude, for what Salesforce calls the Dispatch API, decides whether skills may create and update records. Needs Approval, which Salesforce recommends, has the user approve each change. Always Allowed makes changes without asking. Deny keeps the plugin read only. <a href="https://help.salesforce.com/s/articleView?id=platform.set_tool_restrictions.htm&amp;type=5">Salesforce says</a> the tools are unrestricted until an admin sets them.</p><p>A save follows the same rules for required and read-only fields as in Lightning Experience. Records must use page layouts or Dynamic Forms. Objects whose actions are overridden with Lightning web components or Visualforce are not supported, unless the user has the Customize Application permission and the Builder user type. <a href="https://help.salesforce.com/s/articleView?id=platform.salesforce_in_claude_record_crud.htm&amp;type=5">No record can be deleted</a>.</p></div>
+    <div class="def"><h3>First run</h3><p><a href="https://help.salesforce.com/s/articleView?id=platform.configure_salesforce_in_claude.htm&amp;type=5">Salesforce calls the first-run skill Configure</a> and prompts the user to run it on first use. It sets up a recurring daily task called Salesforce Updates and gathers the user's role, recently viewed records, recent activity and open opportunities on the accounts they own. On request it builds a live view of the user's book. Anthropic's announcement and the Claude Help Center call it a setup skill that tailors the plugin to the user's role and book of business.</p></div>
+    <div class="def"><h3>Data</h3><p>Claude sees only the records and fields the user can see in Salesforce, under the org's profiles, permission sets and sharing rules. <a href="https://help.salesforce.com/s/articleView?id=platform.security_permissions_and_data_handling.htm&amp;type=5">Salesforce says</a> that once data reaches Anthropic, the customer's contract with Anthropic governs it and that Anthropic may not use Salesforce data or business logic reached through the connection without permission. Anthropic says it does not train its models on Team and Enterprise data by default.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="sec">
+  <div class="wrap">
+   <h2 id="sf-compare">Beside the Claude Sales plugin</h2>
+   <p>Salesforce's list shares many skill IDs with Anthropic's own Sales plugin, and Salesforce's Claudeforce page says Salesforce and Anthropic built the skills. A shared ID may still mean different instructions. Salesforce's skill files are not public, and nothing here compares them.</p>
+   <ul class="sftally">
+    <li><b>27</b> IDs are the same in both.</li>
+    <li><b>10</b> are only in Salesforce's list.</li>
+    <li><b>Nine</b> are only in Anthropic's plugin.</li>
+   </ul>
+   <dl class="sfonly">
+    <div><dt>Only in Salesforce's list</dt><dd><span class="chips"><a class="chip" href="#sfk-assign-target-to-sdr">assign-target-to-sdr</a><a class="chip" href="#sfk-calendar-events">calendar-events</a><a class="chip" href="#sfk-call-follow-up">call-follow-up</a><a class="chip" href="#sfk-find-internal-answer">find-internal-answer</a><a class="chip" href="#sfk-forecast-narrative">forecast-narrative</a><a class="chip" href="#sfk-query-activity-history">query-activity-history</a><a class="chip" href="#sfk-research-prospect">research-prospect</a><a class="chip" href="#sfk-sfdc-hygiene-check">sfdc-hygiene-check</a><a class="chip" href="#sfk-summarize-conversation-transcript">summarize-conversation-transcript</a><a class="chip" href="#sfk-voice-profile">voice-profile</a></span></dd></div>
+    <div><dt>Only in Anthropic's plugin</dt><dd><span class="chips"><a class="chip" href="#skill-account-research">account-research</a><a class="chip" href="#skill-call-summary">call-summary</a><a class="chip" href="#skill-competitive-intelligence">competitive-intelligence</a><a class="chip" href="#skill-create-an-asset">create-an-asset</a><a class="chip" href="#skill-crm-hygiene-check">crm-hygiene-check</a><a class="chip" href="#skill-end-of-day">end-of-day</a><a class="chip" href="#skill-forecast">forecast</a><a class="chip" href="#skill-route-lead">route-lead</a><a class="chip" href="#skill-setup">setup</a></span></dd></div>
+   </dl>
+   <p>Record changes are marked differently, so the two counts are not the same measure: Salesforce's mark covers Salesforce records, and the Claude Sales entry's covers any record system a skill writes to. Salesforce marks four of the 27 shared skills as able to create and update records: <a class="chip" href="#sfk-account-plan">account-plan</a>, <a class="chip" href="#sfk-log-activity">log-activity</a>, <a class="chip" href="#sfk-schedule-meeting">schedule-meeting</a> and <a class="chip" href="#sfk-update-opportunity">update-opportunity</a>. The Claude Sales entry, reading Anthropic's files, marks 10 of the 27 as changing records. Anthropic's announcement also describes call preparation that adds contacts, and a deal review that, when the seller asks it to keep going, fills in qualification fields and contact roles and saves them once approved. Salesforce marks none of <a class="chip" href="#sfk-call-prep">call-prep</a>, <a class="chip" href="#sfk-deal-review">deal-review</a> and <a class="chip" href="#sfk-close-plan">close-plan</a>. Which skill makes those changes is not public.</p>
+   <h3 class="mt" id="sf-by-job">By GTM job</h3>
+   <p>The site's 13 jobs, with the skills of each plugin placed under them. Placement is our read, and a shared ID sits under the same job in both columns.</p>
+   <div class="scroll" tabindex="0" role="region" aria-label="Salesforce in Claude and the Claude Sales plugin, by GTM job"><table class="rt dt stack wide"><thead><tr><th scope="col">GTM job</th><th scope="col">Salesforce in Claude</th><th scope="col">Claude Sales plugin</th></tr></thead><tbody><tr><th scope="row">Lead qualification</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-lead-triage">lead-triage</a><a class="chip" href="#sfk-assign-target-to-sdr">assign-target-to-sdr</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-lead-triage">lead-triage</a><a class="chip" href="#skill-route-lead">route-lead</a></span></td></tr><tr><th scope="row">Account research and call preparation</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-account-context">account-context</a><a class="chip" href="#sfk-research-prospect">research-prospect</a><a class="chip" href="#sfk-call-prep">call-prep</a><a class="chip" href="#sfk-query-activity-history">query-activity-history</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-account-research">account-research</a><a class="chip" href="#skill-account-context">account-context</a><a class="chip" href="#skill-call-prep">call-prep</a></span></td></tr><tr><th scope="row">Outreach and follow-up</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-draft-outreach">draft-outreach</a><a class="chip" href="#sfk-call-follow-up">call-follow-up</a><a class="chip" href="#sfk-summarize-conversation-transcript">summarize-conversation-transcript</a><a class="chip" href="#sfk-schedule-meeting">schedule-meeting</a><a class="chip" href="#sfk-inbox-sweep">inbox-sweep</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-draft-outreach">draft-outreach</a><a class="chip" href="#skill-call-summary">call-summary</a><a class="chip" href="#skill-inbox-sweep">inbox-sweep</a><a class="chip" href="#skill-schedule-meeting">schedule-meeting</a></span></td></tr><tr><th scope="row">Deal strategy and reviews</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-stakeholder-map">stakeholder-map</a><a class="chip" href="#sfk-deal-review">deal-review</a><a class="chip" href="#sfk-deal-advance-gap">deal-advance-gap</a><a class="chip" href="#sfk-deal-signals">deal-signals</a><a class="chip" href="#sfk-handle-objection">handle-objection</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-deal-review">deal-review</a><a class="chip" href="#skill-deal-advance-gap">deal-advance-gap</a><a class="chip" href="#skill-deal-signals">deal-signals</a><a class="chip" href="#skill-stakeholder-map">stakeholder-map</a><a class="chip" href="#skill-handle-objection">handle-objection</a><a class="chip" href="#skill-competitive-intelligence">competitive-intelligence</a></span></td></tr><tr><th scope="row">Proposals</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-close-plan">close-plan</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-close-plan">close-plan</a><a class="chip" href="#skill-create-an-asset">create-an-asset</a></span></td></tr><tr><th scope="row">Pipeline review and forecasting</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-deal-slip-scenario">deal-slip-scenario</a><a class="chip" href="#sfk-pipeline-review">pipeline-review</a><a class="chip" href="#sfk-team-pipeline">team-pipeline</a><a class="chip" href="#sfk-forecast-narrative">forecast-narrative</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-pipeline-review">pipeline-review</a><a class="chip" href="#skill-forecast">forecast</a><a class="chip" href="#skill-team-pipeline">team-pipeline</a><a class="chip" href="#skill-deal-slip-scenario">deal-slip-scenario</a></span></td></tr><tr><th scope="row">CRM updates</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-update-opportunity">update-opportunity</a><a class="chip" href="#sfk-sfdc-hygiene-check">sfdc-hygiene-check</a><a class="chip" href="#sfk-log-activity">log-activity</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-update-opportunity">update-opportunity</a><a class="chip" href="#skill-log-activity">log-activity</a><a class="chip" href="#skill-crm-hygiene-check">crm-hygiene-check</a></span></td></tr><tr><th scope="row">Onboarding and adoption</th><td data-l="Salesforce in Claude"><span class="chips"><span class="nil">No skill of its own</span></span></td><td data-l="Claude Sales"><span class="chips"><span class="nil">No skill of its own</span></span></td></tr><tr><th scope="row">Account planning and expansion</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-account-plan">account-plan</a><a class="chip" href="#sfk-account-tiering">account-tiering</a><a class="chip" href="#sfk-expansion-whitespace">expansion-whitespace</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-account-plan">account-plan</a><a class="chip" href="#skill-account-tiering">account-tiering</a><a class="chip" href="#skill-expansion-whitespace">expansion-whitespace</a></span></td></tr><tr><th scope="row">Renewals</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-customer-health">customer-health</a><a class="chip" href="#sfk-renewal-radar">renewal-radar</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-renewal-radar">renewal-radar</a><a class="chip" href="#skill-customer-health">customer-health</a></span></td></tr><tr><th scope="row">Support</th><td data-l="Salesforce in Claude"><span class="chips"><span class="nil">No skill of its own</span></span></td><td data-l="Claude Sales"><span class="chips"><span class="nil">No skill of its own. Anthropic publishes a <a href="#customer-support">Customer support plugin</a>.</span></span></td></tr><tr><th scope="row">Coaching and enablement</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-win-loss-review">win-loss-review</a><a class="chip" href="#sfk-customer-voice">customer-voice</a><a class="chip" href="#sfk-rep-context">rep-context</a><a class="chip" href="#sfk-find-internal-answer">find-internal-answer</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-rep-context">rep-context</a><a class="chip" href="#skill-win-loss-review">win-loss-review</a><a class="chip" href="#skill-customer-voice">customer-voice</a></span></td></tr><tr><th scope="row">Daily planning</th><td data-l="Salesforce in Claude"><span class="chips"><a class="chip" href="#sfk-weekly-wrap">weekly-wrap</a><a class="chip" href="#sfk-calendar-events">calendar-events</a><a class="chip" href="#sfk-daily-briefing">daily-briefing</a></span></td><td data-l="Claude Sales"><span class="chips"><a class="chip" href="#skill-daily-briefing">daily-briefing</a><a class="chip" href="#skill-end-of-day">end-of-day</a><a class="chip" href="#skill-weekly-wrap">weekly-wrap</a></span></td></tr></tbody></table></div>
+   <p class="note" style="margin-top:12px">The Salesforce column is from Salesforce's skills reference, read on November 25, 2026. The Claude column is from version 2.1.0 of Anthropic's Sales plugin, read in its public files. <a class="chip" href="#sfk-voice-profile">voice-profile</a> in Salesforce's list and <a class="chip" href="#skill-setup">setup</a> in Anthropic's fall outside the 13 jobs, and those are not in the table.</p>
+   <h3 class="mt" id="sf-copilot">Salesforce's build for Microsoft 365 Copilot</h3>
+   <p>Salesforce documents the same kind of plugin for Microsoft 365 Copilot, in beta and needing a Microsoft 365 Copilot license. Its <a href="https://help.salesforce.com/s/articleView?id=platform.m365copilot_sales_skills_ref.htm&amp;type=5">skills reference</a> lists 38 skills, 35 of them with the same IDs as the list for Claude. Only for Copilot: <code>executive-movement</code>, <code>salesforce-hygiene-check</code> and <code>event-invite-list</code>. Only for Claude: <code>update-opportunity</code> and <code>sfdc-hygiene-check</code>. Salesforce marks five of the 38 as able to create and update records.</p>
+  </div>
+ </section>
+
+ <section class="sec soft">
+  <div class="wrap">
+   <h2 id="sf-open">Where the public pages disagree</h2>
+   <ul class="lim">
+    <li><strong>The Claude plan.</strong> <a href="https://help.salesforce.com/s/articleView?id=platform.set_up_salesforce_in_claude.htm&amp;type=5">Salesforce's setup page</a> asks for a direct Anthropic subscription: Claude Enterprise, Claude Team or Claude Console. The box at the top of its pages on setting up and using the plugin says Claude Enterprise. The <a href="https://support.claude.com/en/articles/16952184-set-up-salesforce-in-claude-for-your-organization">Claude Help Center</a> and <a href="https://claude.com/resources/articles/salesforce-in-claude">Anthropic's announcement</a> say all paid plans.</li>
+    <li><strong>The beta.</strong> <a href="https://www.salesforce.com/claudeforce/">Salesforce's Claudeforce page</a> says select pilot customers have the plugin today and an open beta is planned for September 2026. Anthropic announced the beta on September 15, 2026. The Claude Help Center says Salesforce approves organizations through its beta sign-up.</li>
+    <li><strong>The Salesforce edition.</strong> Salesforce's pages list Enterprise, Performance, Unlimited and Developer Editions. The Claude Help Center says the latest Sales Cloud enterprise edition.</li>
+    <li><strong>Who built the skills.</strong> The Claude Help Center says Salesforce, Anthropic says it built the plugin with Salesforce and Salesforce's Claudeforce page says both companies built the skills.</li>
+    <li><strong>Approval of record changes.</strong> Anthropic and the Claude Help Center say Claude asks the seller before each change by default. Salesforce says the tools are unrestricted until an admin sets them, and that users create and update records only once an admin sets the Dispatch API to Needs Approval or Always Allowed. The pages do not say how the two levels combine.</li>
+    <li><strong>The first-run skill.</strong> Salesforce calls it Configure and prompts the user to run it on first use. The Claude Help Center calls it a setup skill that runs automatically the first time the plugin opens, and Anthropic says it creates an artifact for the user's role and book.</li>
+    <li><strong>How the plugin reaches members.</strong> Both let the admin pick groups. Salesforce lists two choices for them, installed by default and available to install. The Claude Help Center adds a third, required.</li>
+    <li><strong>A workflow with no skill.</strong> The Claude Help Center gives QBR decks as an example, and no skill in Salesforce's list names one.</li>
+   </ul>
+   <h3 class="mt" id="sf-sources">Sources</h3>
+   <p>All read on November 25, 2026.</p>
+   <ul class="srcs"><li>Salesforce Help, its AIforce section: <a href="https://help.salesforce.com/s/articleView?id=platform.skills_ref.htm&amp;type=5">Skills Reference for Salesforce in Claude: Sales</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.what_is_claudeforce.htm&amp;type=5">About Claudeforce</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.set_up_salesforce_in_claude.htm&amp;type=5">Set Up Salesforce in Claude</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.security_permissions_and_data_handling.htm&amp;type=5">Security</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.connect_claude_to_salesforce_mcp.htm&amp;type=5">Connect Claude to the Salesforce MCP Server</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.set_tool_restrictions.htm&amp;type=5">Set Tool Restrictions</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.roll_out_the_plugin.htm&amp;type=5">Roll Out the Plugin</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.what_is_salesforce_in_claude.htm&amp;type=5">Use Salesforce in Claude</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.sign_in_to_salesforce_in_claude.htm&amp;type=5">Sign In</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.configure_salesforce_in_claude.htm&amp;type=5">Configure Your Workspace</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.how_skills_work.htm&amp;type=5">How Skills Work</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.salesforce_in_claude_record_crud.htm&amp;type=5">How Record Creation and Updates Work</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.what_salesforce_platform_is.htm&amp;type=5">Connect an AI Partner to Salesforce</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.activate_the_mcp_server.htm&amp;type=5">Activate the Salesforce MCP Server</a>, <a href="https://help.salesforce.com/s/articleView?id=platform.create_and_configure_the_eca.htm&amp;type=5">Create and Configure the External Client App</a> and <a href="https://help.salesforce.com/s/articleView?id=platform.m365copilot_sales_skills_ref.htm&amp;type=5">Sales Skills Reference for Salesforce in Microsoft Copilot</a>. The pages mark the plugin as a beta and were read in a browser, since they draw their text by script.</li><li>Claude Help Center: <a href="https://support.claude.com/en/articles/16952184-set-up-salesforce-in-claude-for-your-organization">Set up Salesforce in Claude for your organization</a> and <a href="https://support.claude.com/en/articles/16952186-use-salesforce-in-claude">Use Salesforce in Claude</a>, both dated September 25, 2026.</li><li>Anthropic: <a href="https://claude.com/resources/articles/salesforce-in-claude">Bringing Salesforce into Claude</a>, September 15, 2026.</li><li>Salesforce: its <a href="https://www.salesforce.com/claudeforce/">Claudeforce page</a>, the <a href="https://agentexchange.salesforce.com/sales-cloud-in-claude-beta-access">beta request form</a> and the <a href="https://www.salesforce.com/en-us/wp-content/uploads/sites/4/documents/legal/Agreements/beta-agreements/Beta-Services-Agreement.pdf">beta agreement</a> the form links to.</li></ul>
+  </div>
+ </section>
+</div>
+
 <!-- ============================================================ METHOD -->
 <div id="plugins-method" data-view="plugins-method" data-group="page" data-title="Method and sources">
  <section class="open">
@@ -6016,7 +6153,7 @@ This comparison comes from reading what each stock skill asks for. It is not a b
    <ul>
     <li><strong>How the skills perform in your business.</strong> One small test ran six skills from invented files, and it is described below. Nothing was run against a live CRM, and no time saved or deals won are claimed.</li>
     <li><strong>How often anyone uses a skill.</strong> The frequency ratings are estimates from how each skill is designed. Five skills are given an occasion in place of a frequency. Seven are named as routines in the plugin's files: <a class="skl" href="#skill-daily-briefing"><code>daily-briefing</code></a>, <a class="skl" href="#skill-end-of-day"><code>end-of-day</code></a>, <a class="skl" href="#skill-weekly-wrap"><code>weekly-wrap</code></a>, <a class="skl" href="#skill-route-lead"><code>route-lead</code></a>, <a class="skl" href="#skill-deal-signals"><code>deal-signals</code></a>, <a class="skl" href="#skill-competitive-intelligence"><code>competitive-intelligence</code></a> and <a class="skl" href="#skill-crm-hygiene-check"><code>crm-hygiene-check</code></a>.</li>
-    <li><strong>How it compares.</strong> Only Anthropic's Sales plugin is covered in depth. The <a href="#chatgpt-sales">ChatGPT for Sales</a> page sets out what OpenAI makes public about its own, and neither is rated against the other.</li>
+    <li><strong>How it compares.</strong> Only Anthropic's Sales plugin is covered in depth. The <a href="#chatgpt-sales">ChatGPT for Sales</a> and <a href="#salesforce-in-claude">Salesforce in Claude</a> pages set out what OpenAI and Salesforce make public about their own, and none is rated against another.</li>
     <li><strong>What changes next.</strong> Skills are added and reworded between versions. Check the version in this entry against yours.</li>
    </ul>
 
@@ -6035,6 +6172,7 @@ This comparison comes from reading what each stock skill asks for. It is not a b
     <li>A skill list restates each skill's own description. The steps inside the skill files were read only for the Sales plugin.</li>
     <li>The ChatGPT for Sales entry rests on a report, because the plugin's files are not public. On November 22, 2026 the site's editor installed the plugin in his own ChatGPT account and gave ChatGPT <a href="kit/chatgpt/inventory-prompt.md">a fixed prompt</a>, kept in this page's files, that asked for a read-only inventory of the plugin's own text. ChatGPT reported version 1.1.7 and the full instructions of 18 skills. Claude checked the report against two facts the prompt had held back, against itself and against OpenAI's <a href="https://openai.com/business/plugins/sales/">plugin page</a>, <a href="https://help.openai.com/en/articles/20001707-getting-started-with-chatgpt-for-sales">help page</a>, <a href="https://openai.com/index/introducing-chatgpt-for-sales/">announcement</a> and <a href="https://learn.chatgpt.com/docs/plugins">plugins guide</a>, opened on November 22, 2026. The entry restates the report in this site's words and quotes the plugin once. No workflow was run, and nothing in the entry is rated.</li>
     <li>What ChatGPT marked as its own inference is not given as fact: the plan and mode of the session, the order of the skills and the names behind integrations stored as codes.</li>
+    <li>The Salesforce in Claude entry rests on public pages only. The plugin is in a beta whose agreement makes the beta and the information Salesforce discloses about it Salesforce's confidential information. Claude read Salesforce's help pages on the plugin, its Claudeforce page and beta request form, the Claude Help Center, Anthropic's announcement and the list of skills in Anthropic's public Sales plugin on November 25, 2026. The same day OpenAI's Codex, based on GPT-6, checked every line against the same pages. The entry took its 18 corrections. Each skill's line restates Salesforce's one-line description in this site's words, and the build holds the wording apart from Salesforce's. The groups and the mark on skills that can change records are Salesforce's. The GTM jobs are our read, and a skill ID shared with Anthropic's Sales plugin sits under the same job. No skill file was read, nothing was installed and nothing on that page is rated.</li>
     <li>Which skills count as leader skills, and who may reach for each, is our read. The note on Google rests on one search and on its <a href="https://workspaceupdates.googleblog.com/2026/09/skills-gemini-app-workspace.html">Workspace Updates</a> post about skills. The note on Microsoft rests on its <a href="https://learn.microsoft.com/en-us/dynamics365/sales/use-copilot-cowork-sales-skills">documentation of the sales skills in Copilot Cowork</a> and on its <a href="https://www.microsoft.com/en-us/dynamics-365/blog/business-leader/2026/11/17/microsoft-ignite-2026-introducing-dynamics-365-in-copilot/">post of November 17, 2026</a>, both read on November 23, 2026. How the 18 skills divide between its two plugins is our count from the table in that documentation.</li>
     <li>Nothing on those pages is rated, and none of their skills was run.</li>
    </ul>
@@ -6045,7 +6183,7 @@ This comparison comes from reading what each stock skill asks for. It is not a b
     <li><strong>The provider's statements are dated.</strong> What this entry says about the product comes from the provider's own files and pages, with the date each was read.</li>
     <li><strong>Named systems only.</strong> Vendor names appear only where the plugin's own connector list gives them. Every other tool is named as a category.</li>
     <li><strong>The conflict is stated.</strong> This entry was compiled with Claude, an Anthropic model, and it covers an Anthropic product. On November 22, 2026 models from two other labs checked it against the plugin's files in two rounds, and on November 23, 2026 one of them checked what had changed since. Claude made the corrections after each. Before it is published it still needs its editor's review, and the latest corrections have had no check from outside.</li>
-    <li><strong>One template.</strong> <a href="#chatgpt-sales">ChatGPT for Sales</a> from OpenAI, also an AI lab and a vendor, is set out on the same 12 fields.</li>
+    <li><strong>One template.</strong> <a href="#chatgpt-sales">ChatGPT for Sales</a> from OpenAI, also an AI lab and a vendor, and <a href="#salesforce-in-claude">Salesforce in Claude</a> from Salesforce, a CRM vendor, are set out on the same 12 fields.</li>
    </ul>
 
    <h2>Credits</h2>
@@ -6070,7 +6208,7 @@ This comparison comes from reading what each stock skill asks for. It is not a b
 </div>
 
 
-<div class="plgfoot"><div class="wrap"><p>Product names belong to their owners. These pages are not published or endorsed by Anthropic or OpenAI, and a listing here is never paid for. The benefits described are how the plugin is designed to behave. Apart from one small test of six skills on invented files, nothing in this entry was measured.</p><p><a href="#plugins-method">Method and sources for the plugin pages</a><span>Sales plugin 2.1.0, checked November 21, 2026</span></p></div></div>
+<div class="plgfoot"><div class="wrap"><p>Product names belong to their owners. These pages are not published or endorsed by Anthropic, OpenAI or Salesforce, and a listing here is never paid for. The benefits described are how the plugin is designed to behave. Apart from one small test of six skills on invented files, nothing in this entry was measured.</p><p><a href="#plugins-method">Method and sources for the plugin pages</a><span>Sales plugin 2.1.0, checked November 21, 2026</span></p></div></div>
 </div>
 </main>
 <footer class="foot">
@@ -6438,6 +6576,8 @@ safe(()=>{
   var viewByName = {};
   views.forEach(function (v) { viewByName[v.getAttribute('data-view')] = v; if (PLG.contains(v)) { v.removeAttribute('id'); } });
   var tabLinks = $$('.tabs .tl:not([data-nav="all"]) a');
+  var restoreY = null;   // set by the browser's Back: the place to return to instead of the link's target
+  var pendingBack = null;   // set by a click on a link: where the reader was, for "Back to where you were"
   var navEl = $('#nav'), hereEl = $('#here');
 
   // The one navigation row follows the page: on the front door it lists the page's parts, inside a plugin
@@ -6460,7 +6600,8 @@ safe(()=>{
         a.removeAttribute('aria-current');
       }
     });
-    if (el === view) { window.scrollTo(0, 0); } else { jump(el); }
+    if (restoreY !== null) { var y = restoreY; restoreY = null; window.scrollTo(0, y); } else if (el === view) { window.scrollTo(0, 0); } else { jump(el); }
+    if (pendingBack) { offerBack(pendingBack, view); pendingBack = null; }
     if (user) {
       var target = el === view ? $('h1', view) : (el.tagName === 'DETAILS' ? $('summary', el) : el);
       if (target) {
@@ -6491,8 +6632,141 @@ safe(()=>{
   // A link to the address already showing fires no hashchange, so go there by hand.
   document.addEventListener('click', function (e) {
     var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
-    if (a && a.getAttribute('href') === window.location.hash) { route(true); }
+    if (a && !e.defaultPrevented && a.getAttribute('href') === window.location.hash) { route(true); }
   });
+
+  /* ---------------------------------------------------------------- a look at a skill, and the way back */
+  // A chip names a skill whose row or card may sit far down this view or in another one. A click shows that
+  // skill's own line where the reader is, with a link to the full card. A jump a link does make can be undone:
+  // "Back to where you were", or the browser's Back, returns to the same place on the page. Without scripts the
+  // chips stay plain links.
+  var host = (typeof PLG !== 'undefined' && PLG) ? PLG : document.body;
+  var KICK = { sk: 'Claude Sales plugin', gsk: 'ChatGPT for Sales', sfk: 'Salesforce in Claude' };
+  function narrow() { return window.matchMedia('(max-width: 719px)').matches; }
+  function txt(el) { return el ? el.textContent.replace(/\s+/g, ' ').trim() : ''; }
+  function cap(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : t; }
+
+  function peekData(id) {
+    var t = document.getElementById(id);
+    if (!t) { return null; }
+    if (t.tagName === 'TR' && id.indexOf('sfk-') === 0) {
+      var cells = $$('td[data-l]', t), d = { kick: KICK.sfk, code: txt($('th code', t)), name: txt($('.sfn', t)), does: '', facts: [], go: 'Show it in the list' };
+      cells.forEach(function (c) {
+        var l = c.getAttribute('data-l');
+        if (l === 'What it does') { d.does = txt(c); } else { d.facts.push([l, txt(c)]); }
+      });
+      return d;
+    }
+    if (t.classList.contains('sk')) {
+      var ch = $('summary .chip', t), k = ch ? (ch.className.match(/k-[A-Z]/) || [''])[0] : '';
+      return { kick: KICK.sk, code: t.getAttribute('data-id') || id.replace(/^skill-/, ''), name: txt($('summary .tg', t)), does: txt($('.body .does', t)),
+        facts: KIND_WORDS[k] ? [['Marked', cap(KIND_WORDS[k])]] : [], go: 'Open the full card' };
+    }
+    if (t.classList.contains('gsk')) {
+      var fit = txt($('summary .fitm', t));
+      return { kick: KICK.gsk, code: txt($('summary code', t)), name: txt($('summary .tg', t)), does: txt($('.body .does', t)),
+        facts: fit ? [['For', fit]] : [], go: 'Open the full card' };
+    }
+    return null;
+  }
+
+  var peekEl = null, peekBg = null, peekFrom = null;
+  function buildPeek() {
+    peekBg = document.createElement('div'); peekBg.className = 'pk-bg'; peekBg.hidden = true;
+    peekEl = document.createElement('div'); peekEl.className = 'pk'; peekEl.hidden = true;
+    peekEl.setAttribute('role', 'dialog'); peekEl.setAttribute('aria-labelledby', 'pk-t');
+    host.appendChild(peekBg); host.appendChild(peekEl);
+    peekBg.addEventListener('click', function () { closePeek(true); });
+    peekEl.addEventListener('click', function (e) {
+      if (e.target.closest('[data-pk-x]')) { closePeek(true); }
+      else if (e.target.closest('[data-pk-go]')) { closePeek(false); }
+    });
+  }
+  function placePeek() {
+    if (!peekEl || peekEl.hidden) { return; }
+    if (narrow()) { peekEl.style.left = ''; peekEl.style.top = ''; peekEl.style.width = ''; return; }
+    var r = peekFrom.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > window.innerHeight) { closePeek(false); return; }
+    var w = Math.min(440, window.innerWidth - 32), h, top;
+    peekEl.style.width = w + 'px';
+    h = peekEl.offsetHeight;
+    top = r.bottom + 8;
+    if (top + h > window.innerHeight - 12 && r.top - 8 - h >= 64) { top = r.top - 8 - h; }
+    top = Math.max(64, Math.min(top, window.innerHeight - h - 12));
+    peekEl.style.left = Math.min(Math.max(16, r.left), window.innerWidth - w - 16) + 'px';
+    peekEl.style.top = top + 'px';
+  }
+  function openPeek(a, d) {
+    if (!peekEl) { buildPeek(); }
+    peekFrom = a;
+    var facts = d.facts.length ? '<dl class="pk-f">' + d.facts.map(function (f) { return '<dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd>'; }).join('') + '</dl>' : '';
+    peekEl.innerHTML = '<p class="pk-k">' + esc(d.kick) + '</p>' +
+      '<h2 class="pk-t" id="pk-t" tabindex="-1"><code>' + esc(d.code) + '</code>' + (d.name ? '<span>' + esc(d.name) + '</span>' : '') + '</h2>' +
+      (d.does ? '<p class="pk-d">' + esc(d.does) + '</p>' : '') + facts +
+      '<div class="pk-a"><a class="btn sm pri" href="' + esc(a.getAttribute('href')) + '" data-pk-go>' + esc(d.go) + '</a><button class="btn sm" type="button" data-pk-x>Close</button></div>';
+    peekEl.hidden = false;
+    peekBg.hidden = !narrow();
+    placePeek();
+    focusQuiet($('#pk-t', peekEl));
+  }
+  function closePeek(refocus) {
+    if (!peekEl || peekEl.hidden) { return; }
+    peekEl.hidden = true; peekBg.hidden = true;
+    if (refocus && peekFrom && peekFrom.isConnected) { focusQuiet(peekFrom); }
+  }
+
+  var backEl = null, backFrom = null;
+  function hideBack() { if (backEl) { backEl.hidden = true; } backFrom = null; }
+  function offerBack(from, view) {
+    var far = from.view !== view || Math.abs(window.scrollY - from.y) > window.innerHeight * 0.75;
+    if (!far) { hideBack(); return; }
+    if (!backEl) {
+      backEl = document.createElement('button');
+      backEl.type = 'button'; backEl.className = 'bk'; backEl.hidden = true;
+      backEl.textContent = 'Back to where you were';
+      host.appendChild(backEl);
+      backEl.addEventListener('click', function () { hideBack(); window.history.back(); });
+    }
+    backFrom = { y: from.y, view: from.view };
+    backEl.hidden = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (backFrom && backFrom.view.classList.contains('on') && Math.abs(window.scrollY - backFrom.y) < 160) { hideBack(); }
+    if (peekEl && !peekEl.hidden) { window.requestAnimationFrame(placePeek); }
+  }, { passive: true });
+  window.addEventListener('resize', function () { if (peekEl && !peekEl.hidden) { peekBg.hidden = !narrow(); placePeek(); } });
+
+  // The browser's Back returns to the place the reader left, not to the top of the section the address names.
+  window.addEventListener('popstate', function (e) {
+    restoreY = e.state && typeof e.state.mgY === 'number' ? e.state.mgY : null;
+    hideBack(); closePeek(false);
+    // An address that does not change fires no hashchange, so restore here as well.
+    window.setTimeout(function () { if (restoreY !== null) { window.scrollTo(0, restoreY); restoreY = null; } }, 0);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && peekEl && !peekEl.hidden) { closePeek(true); }
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (peekEl && !peekEl.hidden && !e.target.closest('.pk, .pk-bg') && a !== peekFrom) { closePeek(false); }
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+    var href = a.getAttribute('href'), id = href.slice(1);
+    if (a.classList.contains('chip') && /^(skill|sfk|gpt)-/.test(id) && !a.closest('.map, .pk')) {
+      var d = peekData(id);
+      if (d) {
+        e.preventDefault();
+        if (peekEl && !peekEl.hidden && peekFrom === a) { closePeek(true); } else { openPeek(a, d); }
+        return;
+      }
+    }
+    if (href === window.location.hash || href === '#' || a.closest('.tabs, .mast')) { return; }
+    try { window.history.replaceState({ mgY: window.scrollY }, '', window.location.href); } catch (err) { /* the place is a convenience */ }
+    var cur = views.filter(function (v) { return v.classList.contains('on'); })[0] || views[0];
+    var mark = pendingBack = { y: window.scrollY, view: cur };
+    // A link whose jump some other handler stops leaves nothing to come back from.
+    window.setTimeout(function () { if (pendingBack === mark) { pendingBack = null; } }, 600);
+  }, true);
 
   /* ---------------------------------------------------------------- one choice of role and sales motion */
   function setRole(k) {

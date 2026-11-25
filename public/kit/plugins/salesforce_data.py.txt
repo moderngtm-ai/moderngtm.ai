@@ -1,0 +1,114 @@
+# -*- coding: utf-8 -*-
+"""Salesforce in Claude: one page in the plugin area, built from public pages only.
+
+The plugin is in a beta that Salesforce approves organization by organization, and its beta agreement makes the
+beta and the information Salesforce discloses about it Salesforce's confidential information. So every fact on the page
+comes from what Salesforce and Anthropic publish, read on CHECKED_ON. No skill file was read, nothing was installed
+for the page and no skill was run.
+
+Each skill's line restates Salesforce's own one-line description in this site's words; salesforce_views.check()
+holds the wording apart from Salesforce's when the descriptions file is present. The groups and the mark on skills
+that can create and update records are Salesforce's. The GTM job of each skill is our read.
+"""
+CHECKED_ON = "November 25, 2026"
+BETA_SINCE = "September 15, 2026"
+SKILLS_N = 37
+
+
+def sfh(page):
+    """An article in the AIforce section of Salesforce Help. The pages draw their text by script, so they were read in a browser."""
+    return f"https://help.salesforce.com/s/articleView?id=platform.{page}.htm&type=5"
+
+
+SKILLS_REF_URL = sfh("skills_ref")
+CLAUDEFORCE_HELP_URL = sfh("what_is_claudeforce")
+SETUP_URL = sfh("set_up_salesforce_in_claude")
+SECURITY_URL = sfh("security_permissions_and_data_handling")
+CONNECT_URL = sfh("connect_claude_to_salesforce_mcp")
+TOOLS_URL = sfh("set_tool_restrictions")
+ROLLOUT_URL = sfh("roll_out_the_plugin")
+USE_URL = sfh("what_is_salesforce_in_claude")
+SIGNIN_URL = sfh("sign_in_to_salesforce_in_claude")
+CONFIGURE_URL = sfh("configure_salesforce_in_claude")
+HOW_SKILLS_URL = sfh("how_skills_work")
+RECORDS_URL = sfh("salesforce_in_claude_record_crud")
+PARTNER_URL = sfh("what_salesforce_platform_is")
+MCP_URL = sfh("activate_the_mcp_server")
+ECA_URL = sfh("create_and_configure_the_eca")
+COPILOT_REF_URL = sfh("m365copilot_sales_skills_ref")
+CLAUDE_SETUP_URL = "https://support.claude.com/en/articles/16952184-set-up-salesforce-in-claude-for-your-organization"
+CLAUDE_USE_URL = "https://support.claude.com/en/articles/16952186-use-salesforce-in-claude"
+CLAUDE_HELP_DATE = "September 25, 2026"
+ANTHROPIC_POST_URL = "https://claude.com/resources/articles/salesforce-in-claude"
+CLAUDEFORCE_URL = "https://www.salesforce.com/claudeforce/"
+REQUEST_URL = "https://agentexchange.salesforce.com/sales-cloud-in-claude-beta-access"
+BETA_AGREEMENT_URL = "https://www.salesforce.com/en-us/wp-content/uploads/sites/4/documents/legal/Agreements/beta-agreements/Beta-Services-Agreement.pdf"
+
+# Salesforce's eight groups, in the order of its skills reference: (group, [(id, Salesforce's name, what it does in
+# our words, can create and update records, GTM job)]). None for the job: outside the site's 13 jobs.
+GROUPS = [
+    ("Account Intelligence and Research", [
+        ("account-context", "See Account Context", "One view of an account: who owns it, what activity is open and the context of recent messages.", False, "Account research and call preparation"),
+        ("research-prospect", "Research New Prospects", "A brief on a company you are pursuing: what it does, its news and how it compares with your best customers, using the CRM.", False, "Account research and call preparation"),
+        ("account-plan", "Build Account Plans", "Shows, creates or changes the plan for a key account, to map its stakeholders and track its goals.", True, "Account planning and expansion"),
+        ("account-tiering", "Prioritize Your Accounts", "Rates accounts on fit and engagement, sorts them into tiers and suggests an approach for each.", False, "Account planning and expansion"),
+        ("stakeholder-map", "Map Deal Stakeholders", "The people behind a deal or an account, with each one's role, influence and sentiment.", False, "Deal strategy and reviews"),
+        ("expansion-whitespace", "Find Expansion Opportunities", "Sets what a customer has bought against what it could buy, and suggests where the account could grow.", False, "Account planning and expansion"),
+    ]),
+    ("Deals and Opportunities", [
+        ("deal-review", "Review Deal Health", "Where an upcoming deal stands: a health score, its risks and the next actions it recommends.", False, "Deal strategy and reviews"),
+        ("deal-advance-gap", "See What's Blocking This Deal", "What must happen for a deal to reach its next stage, with an owner and a date for each step.", False, "Deal strategy and reviews"),
+        ("deal-signals", "Track Deal Signals", "A digest of alerts on changes across the pipeline: dates slipping, new risks and conversations that went quiet.", False, "Deal strategy and reviews"),
+        ("deal-slip-scenario", "See What Happens If a Deal Slips", "How the forecast moves when one deal slips or gets smaller.", False, "Pipeline review and forecasting"),
+        ("close-plan", "Build Close Plans", "Drafts the business case and a mutual action plan to carry a deal in its last stages to signature.", False, "Proposals"),
+        ("update-opportunity", "Update Opportunities", "Makes approved edits to an opportunity, such as its close date or next steps.", True, "CRM updates"),
+        ("handle-objection", "Handle Objections", "An answer to an objection or a competitive threat that comes up live, drawing on the user's own track record.", False, "Deal strategy and reviews"),
+    ]),
+    ("Pipelines and Forecasting", [
+        ("pipeline-review", "Review My Pipeline", "The health of an open pipeline stage by stage: coverage, age and deals at risk.", False, "Pipeline review and forecasting"),
+        ("team-pipeline", "Review Team Pipeline", "Each rep's pipeline across the team, stage by stage, with deals at risk and chances to coach flagged.", False, "Pipeline review and forecasting"),
+        ("forecast-narrative", "Write My Forecast Story", "Writes what to say on the next forecast call: the story behind the commit, the best case or the wider pipeline.", False, "Pipeline review and forecasting"),
+        ("sfdc-hygiene-check", "Audit CRM Hygiene", "Finds blank fields, stale dates and mismatched stages across opportunities.", False, "CRM updates"),
+        ("weekly-wrap", "Wrap Up the Week", "The week in deals: what closed, moved or slipped, and what is coming on Monday.", False, "Daily planning"),
+        ("win-loss-review", "Analyze Win/Loss Patterns", "Patterns in deals closed recently: where deals are lost, what works and why.", False, "Coaching and enablement"),
+    ]),
+    ("Customer Success and Renewals", [
+        ("customer-health", "Check Customer Health", "A health score for an account and material for a review: risk signals, engagement and the value delivered.", False, "Renewals"),
+        ("renewal-radar", "Track Renewals", "Renewals coming up, with timing, risk and room for an uplift.", False, "Renewals"),
+        ("customer-voice", "Surface Customer Feedback", "What customers said on a topic in calls and emails, quoted with the speaker and sorted into themes.", False, "Coaching and enablement"),
+    ]),
+    ("Leads and Prospecting", [
+        ("lead-triage", "Triage Inbound Leads", "Rates a lead against the ideal customer profile, gives it a priority tier and suggests what to do next.", False, "Lead qualification"),
+        ("assign-target-to-sdr", "Assign Contacts and Leads to an Agent", "Sends a lead or contact to an Agentforce agent for lead nurturing, which qualifies it and reaches out.", True, "Lead qualification"),
+        ("draft-outreach", "Draft Prospect Outreach", "Drafts a personal outreach email for the seller to review and then send.", False, "Outreach and follow-up"),
+    ]),
+    ("Meetings and Calls", [
+        ("call-prep", "Prep for Customer Calls", "A brief of one page ahead of a meeting: who is coming, what has happened and discovery questions to ask.", False, "Account research and call preparation"),
+        ("call-follow-up", "Follow Up After Calls", "From the transcript of a meeting, a recap email for the customer and a summary for the team.", False, "Outreach and follow-up"),
+        ("summarize-conversation-transcript", "Summarize Call Transcripts", "A summary of a call recorded in Salesforce, with the customer's impression and the next steps.", True, "Outreach and follow-up"),
+        ("schedule-meeting", "Schedule Meetings", "Finds a time that suits everyone, then drafts, creates or updates the invitation and its log in Salesforce.", True, "Outreach and follow-up"),
+        ("calendar-events", "View My Calendar", "The user's meetings over any span of dates, in one view.", False, "Daily planning"),
+    ]),
+    ("Daily Workflow and Productivity", [
+        ("daily-briefing", "Start My Day", "A summary to start the day: the day's meetings, customer emails that need attention and deals due to close soon.", False, "Daily planning"),
+        ("inbox-sweep", "Sweep My Inbox", "Sorts unread customer emails by priority and drafts replies.", False, "Outreach and follow-up"),
+        ("log-activity", "Log Customer Activity", "Drafts, creates or updates the entry that logs a call, an email or a meeting on its account and contact.", True, "CRM updates"),
+        ("query-activity-history", "See Activity History", "Recent activity on a deal, a contact or an account, as a timeline.", False, "Account research and call preparation"),
+        ("rep-context", "Prep for Rep One-on-Ones", "Before a one-on-one, what a rep has been working on: deals in the pipeline and recent activity.", False, "Coaching and enablement"),
+        ("find-internal-answer", "Find Internal Answers", "Answers from an internal source the company has approved, not from a summary that Claude writes.", False, "Coaching and enablement"),
+    ]),
+    ("Personalization", [
+        ("voice-profile", "Set Up My Voice Profile", "Learns the user's writing style, so that drafts and outreach read as theirs.", False, None),
+    ]),
+]
+SKILLS = [dict(id=i, name=n, does=d, writes=w, job=j, group=g) for g, rows in GROUPS for i, n, d, w, j in rows]
+BY = {s["id"]: s for s in SKILLS}
+
+# Salesforce's build of the same plugin for Microsoft 365 Copilot, from its own skills reference (COPILOT_REF_URL).
+COPILOT_IDS = ["account-context", "research-prospect", "account-plan", "account-tiering", "stakeholder-map", "expansion-whitespace",
+               "executive-movement", "deal-review", "deal-advance-gap", "deal-signals", "deal-slip-scenario", "close-plan", "handle-objection",
+               "pipeline-review", "team-pipeline", "forecast-narrative", "salesforce-hygiene-check", "weekly-wrap", "win-loss-review",
+               "customer-health", "renewal-radar", "customer-voice", "lead-triage", "assign-target-to-sdr", "draft-outreach", "call-prep",
+               "call-follow-up", "summarize-conversation-transcript", "schedule-meeting", "calendar-events", "event-invite-list",
+               "daily-briefing", "inbox-sweep", "log-activity", "query-activity-history", "rep-context", "find-internal-answer", "voice-profile"]
+COPILOT_WRITES = ["account-plan", "assign-target-to-sdr", "summarize-conversation-transcript", "schedule-meeting", "log-activity"]

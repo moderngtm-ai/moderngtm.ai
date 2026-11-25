@@ -11,7 +11,7 @@ const URL = 'http://localhost:8766/merged/index.html';
 // DOMAIN=1: the domain version, where domain.py gives the Latest list a Changes view after Contribute.
 const DOMAIN = process.env.DOMAIN === '1';
 const SITE = ['home', 'research', 'report', 'playbooks', 'tools', 'evidence', 'about', 'contribute'].concat(DOMAIN ? ['changes'] : []);
-const PLG = ['plugins', 'overview', 'skills', 'fit', 'rollout', 'configure', 'marketing', 'customer-support', 'small-business', 'chatgpt-sales', 'plugins-method'];
+const PLG = ['plugins', 'overview', 'skills', 'fit', 'rollout', 'configure', 'marketing', 'customer-support', 'small-business', 'chatgpt-sales', 'salesforce-in-claude', 'plugins-method'];
 const NAVCUR = { home: '', research: 'Research', report: 'Research', playbooks: 'Playbooks', tools: 'Tools', evidence: 'Evidence', about: 'About', contribute: 'About', changes: '' };
 const UC = process.env.USE_CASES === '1';
 const UCD = UC ? JSON.parse(fs.readFileSync(process.env.USE_CASES_JSON || __dirname + '/use_cases.json', 'utf8')) : null;
@@ -43,7 +43,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console
 
   const p = await open(1280, 900);
   // ------------------------------------------------------------------ structure
-  ok((DOMAIN ? 'twenty' : 'nineteen') + ' views, the site first', (await p.evaluate(() => [...document.querySelectorAll('[data-view]')].map(v => v.dataset.view))).join() === SITE.concat(PLG).join());
+  ok((DOMAIN ? 'twenty-one' : 'twenty') + ' views, the site first', (await p.evaluate(() => [...document.querySelectorAll('[data-view]')].map(v => v.dataset.view))).join() === SITE.concat(PLG).join());
   ok('home shows first', (await state(p)).on === 'home');
   ok('one masthead, one footer', await p.locator('header.mast').count() === 1 && await p.locator('footer.foot').count() === 1);
   ok('six links in the navigation', (await p.locator('.mast .nav a').allTextContents()).join('|') === 'Research|Playbooks|Tools|Plugins|Evidence|About');

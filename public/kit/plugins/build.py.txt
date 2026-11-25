@@ -920,7 +920,8 @@ def build():
   <b id="here">Plugins</b>
   <div class="tl" data-nav="sales"><a href="#overview">Overview</a><a href="#skills">Skills</a><a href="#fit">Fit</a><a href="#rollout"><span class="lg">Before rollout</span><span class="smo">Rollout</span></a><a href="#configure">Configure</a></div>
   <div class="tl" data-nav="gpt"><a href="#gpt-skills">Skills</a><a href="#gpt-apps"><span class="lg">Works with</span><span class="smo">Apps</span></a><a href="#gpt-setup">Setup</a><a href="#gpt-rollout"><span class="lg">Before rollout</span><span class="smo">Rollout</span></a><a href="#side-by-side"><span class="lg">Beside Claude</span><span class="smo">Compare</span></a></div>
-  <div class="tl" data-nav="home"><span class="onp">On this page</span><a href="#from-anthropic">Anthropic</a><a href="#from-openai">OpenAI</a><a href="#leader-skills"><span class="lg">Skills for leaders</span><span class="smo">For leaders</span></a></div>
+  <div class="tl" data-nav="sf"><a href="#sf-skills">Skills</a><a href="#sf-setup">Setup</a><a href="#sf-compare"><span class="lg">Beside Claude Sales</span><span class="smo">Compare</span></a><a href="#sf-open"><span class="lg">Where sources disagree</span><span class="smo">Disagree</span></a></div>
+  <div class="tl" data-nav="home"><span class="onp">On this page</span><a href="#from-anthropic">Anthropic</a><a href="#from-openai">OpenAI</a><a href="#from-salesforce">Salesforce</a><a href="#leader-skills"><span class="lg">Skills for leaders</span><span class="smo">For leaders</span></a></div>
   <div class="tl" data-nav="all"><a href="#plugins">All plugins</a>{"".join(f'<a href="#{a}">{e(n)}</a>' for a, n, *_ in V.PAGES)}</div>
  </div>
 </nav>
@@ -983,7 +984,7 @@ def build():
    <h2>Three names that get mixed up</h2>
    <dl class="names">
     <div><dt>Sales plugin</dt><dd>The subject of this entry. It comes from Anthropic, has {N} skills and works with whichever CRM you connect.</dd></div>
-    <div><dt>Salesforce in Claude</dt><dd>A separate plugin built with Salesforce, in beta since September 15, 2026, with 37 skills of its own. It is not covered here.</dd></div>
+    <div><dt>Salesforce in Claude</dt><dd>A separate plugin from Salesforce, in beta since September 15, 2026, with 37 skills. It has <a href="#salesforce-in-claude">a page of its own</a>, from public pages only.</dd></div>
     <div><dt>Claude for Sales</dt><dd>The title of Anthropic's solutions page for sales teams, which groups both plugins with other features.</dd></div>
    </dl>
    <p class="note" style="margin-top:12px">As Anthropic's own pages describe them on {D.CHECKED_ON}.</p>
@@ -1245,6 +1246,8 @@ def build():
 
 {V.chatgpt_view()}
 
+{V.salesforce_view()}
+
 <!-- ============================================================ METHOD -->
 <div id="method" data-view="method" data-group="page" data-title="Method and sources">
  <section class="open">
@@ -1280,7 +1283,7 @@ def build():
    <ul>
     <li><strong>How the skills perform in your business.</strong> One small test ran {num(len(D.TESTED))} skills from invented files, and it is described below. Nothing was run against a live CRM, and no time saved or deals won are claimed.</li>
     <li><strong>How often anyone uses a skill.</strong> The frequency ratings are estimates from how each skill is designed. {num(len(D.EVENT), True)} skills are given an occasion in place of a frequency. {num(len(C.SCHED), True)} are named as routines in the plugin's files: {sched_names}.</li>
-    <li><strong>How it compares.</strong> Only Anthropic's Sales plugin is covered in depth. The <a href="#chatgpt-sales">ChatGPT for Sales</a> page sets out what OpenAI makes public about its own, and neither is rated against the other.</li>
+    <li><strong>How it compares.</strong> Only Anthropic's Sales plugin is covered in depth. The <a href="#chatgpt-sales">ChatGPT for Sales</a> and <a href="#salesforce-in-claude">Salesforce in Claude</a> pages set out what OpenAI and Salesforce make public about their own, and none is rated against another.</li>
     <li><strong>What changes next.</strong> Skills are added and reworded between versions. Check the version in this entry against yours.</li>
    </ul>
 
@@ -1300,7 +1303,7 @@ def build():
     <li><strong>The provider's statements are dated.</strong> What this entry says about the product comes from the provider's own files and pages, with the date each was read.</li>
     <li><strong>Named systems only.</strong> Vendor names appear only where the plugin's own connector list gives them. Every other tool is named as a category.</li>
     <li><strong>The conflict is stated.</strong> This entry was compiled with Claude, an Anthropic model, and it covers an Anthropic product. On {D.CROSSLAB_ON} models from two other labs checked it against the plugin's files in two rounds, and on {D.CHECK3_ON} one of them checked what had changed since. Claude made the corrections after each. Before it is published it still needs its editor's review, and the latest corrections have had no check from outside.</li>
-    <li><strong>One template.</strong> <a href="#chatgpt-sales">ChatGPT for Sales</a> from OpenAI, also an AI lab and a vendor, is set out on the same 12 fields.</li>
+    <li><strong>One template.</strong> <a href="#chatgpt-sales">ChatGPT for Sales</a> from OpenAI, also an AI lab and a vendor, and <a href="#salesforce-in-claude">Salesforce in Claude</a> from Salesforce, a CRM vendor, are set out on the same 12 fields.</li>
    </ul>
 
    <h2>Credits</h2>
@@ -1333,7 +1336,7 @@ def build():
    <p>Evidence, plays and tools for revenue teams of people and agents.</p>
    {site_nav("fnav", "Elsewhere on Modern GTM", '<a href="#method">Method and sources</a>')}
   </div>
-  <p class="disc">Product names belong to their owners. These pages are not published or endorsed by Anthropic or OpenAI, and a listing here is never paid for. The benefits described are how the plugin is designed to behave. Apart from one small test of {num(len(D.TESTED))} skills on invented files, nothing in this entry was measured.</p>
+  <p class="disc">Product names belong to their owners. These pages are not published or endorsed by Anthropic, OpenAI or Salesforce, and a listing here is never paid for. The benefits described are how the plugin is designed to behave. Apart from one small test of {num(len(D.TESTED))} skills on invented files, nothing in this entry was measured.</p>
   <div class="fine"><span>Modern GTM is curated by Nathan Fierley</span><span>Sales plugin {D.PLUGIN_VERSION}, checked {D.CHECKED_ON}</span></div>
  </div>
 </footer>

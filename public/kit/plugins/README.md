@@ -51,6 +51,7 @@ Each run card has up to three switches: whether Claude can reach the skill's too
 | `data.py.txt` | The dataset: 36 skills, seven roles, six motions, eight tool categories, 23 readiness switches, the connector list, the run cards, the routines, the model tiers and the write-up of the model test |
 | `plugins_data.py.txt`, `plugins_views.py.txt` | The front door and the shorter plugin pages: every plugin, version and restated skill, checked by script against Anthropic's repository |
 | `chatgpt_data.py.txt`, `chatgpt_views.py.txt` | The ChatGPT for Sales entry: 18 restated skills, the plugin-level facts, the markup, and the checks that hold the entry to ChatGPT's reply and keep the plugin's wording out of it |
+| `salesforce_data.py.txt`, `salesforce_views.py.txt` | The Salesforce in Claude entry, from public pages only: 37 skills restated from Salesforce's skills reference, placed under the 13 GTM jobs, the comparison with Anthropic's Sales plugin by skill ID, and the checks that hold the entry to the reference and keep Salesforce's wording out of it. The descriptions file the wording check reads is not published |
 | `chatgpt/` | That entry's own notes: how it was made and checked, the inventory prompt and the restated skills as data. ChatGPT's reply is not here, because it carries the plugin's own text |
 | `mk_kit.py.txt` | Copies the sources into this kit and lists the files to publish |
 | `pilot.json` | The model test's combined result, which the tables in the page are built from |

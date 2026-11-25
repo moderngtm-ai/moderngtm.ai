@@ -17,7 +17,7 @@ import chatgpt_data as G    # noqa: E402
 
 KIT = os.path.join(HERE, "out", "kit")
 AS_TEXT = ["build.py", "check.cjs", "core.py", "data.py", "extract.py", "extract_base.py", "guide_port.py", "house_rules.py", "mk_modeltest_kit.py", "mk_test.py",
-           "plugins_data.py", "plugins_views.py", "chatgpt_data.py", "chatgpt_views.py", "mk_kit.py"]
+           "plugins_data.py", "plugins_views.py", "chatgpt_data.py", "chatgpt_views.py", "salesforce_data.py", "salesforce_views.py", "mk_kit.py"]
 AS_IS = ["app.js", "base.css", "entry.css", "facts.json", "pilot.json"]
 
 LABEL = {"when": "use_when", "ask": "example_request_ours", "needs": "needs", "back": "returns", "reads": "reads", "makes": "can_create_or_change", "asks": "asks_first",

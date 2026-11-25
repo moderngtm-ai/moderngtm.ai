@@ -6,6 +6,8 @@ import html
 import chatgpt_data as G
 import chatgpt_views as GV
 import plugins_data as P
+import salesforce_data as SD
+import salesforce_views as SV
 
 e = html.escape
 WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
@@ -24,11 +26,14 @@ PAGES = [
      "An owner's sales, marketing, finance and hiring. Of its 44 workflows, 18 serve sales, marketing or customers.", "Skill list"),
     ("chatgpt-sales", "ChatGPT for Sales", "OpenAI", f"Version {G.VERSION}, {G.SKILLS_N} skills",
      "Researching accounts, preparing and following up meetings, planning deals, reviewing a forecast and coaching reps.", "Reported by ChatGPT"),
+    ("salesforce-in-claude", "Salesforce in Claude", "Salesforce", f"Beta, {SD.SKILLS_N} skills",
+     "Researching accounts, preparing and following up meetings, working deals, reviewing pipeline and keeping Salesforce up to date.", "Public pages only"),
 ]
 DEPTH = [
     ("Full entry", "Every skill, one by one: what it reads and can change, who it suits, what to settle before rollout and how to configure it."),
     ("Skill list", "Every relevant skill, restated from its own description. Nothing is rated."),
     ("Reported by ChatGPT", "Every skill, as the provider's own assistant reported it from an installed copy. We did not read the files, and nothing is rated."),
+    ("Public pages only", "What its makers publish about a plugin in beta. No skill file was read, and nothing is rated."),
 ]
 
 
@@ -74,7 +79,7 @@ def home_view(n_adj):
  <section class="open">
   <div class="wrap">
    <h1>Plugins from the AI labs, for revenue teams</h1>
-   <p class="lede">Anthropic and OpenAI, both AI labs and vendors, publish plugins: sets of skills that their assistants run for one kind of work. Choose one to see what it holds.</p>
+   <p class="lede">Anthropic and OpenAI, both AI labs and vendors, publish plugins: sets of skills that their assistants run for one kind of work. Salesforce, a CRM vendor, publishes one for Claude. Choose one to see what it holds.</p>
    <p class="who"><span><b>Preview.</b> Compiled by Claude and not yet reviewed.</span><span>Checked on {P.CHECKED_ON}</span><span>For revenue leaders and operators</span></p>
   </div>
  </section>
@@ -84,6 +89,8 @@ def home_view(n_adj):
    {plugin_rows("Anthropic")}
    <h2 id="from-openai" style="margin-top:44px">From OpenAI</h2>
    {plugin_rows("OpenAI")}
+   <h2 id="from-salesforce" style="margin-top:44px">From Salesforce</h2>
+   {plugin_rows("Salesforce")}
    <dl class="depth">{depth}</dl>
   </div>
  </section>
@@ -146,12 +153,17 @@ def chatgpt_view():
     return GV.view()
 
 
+def salesforce_view():
+    return SV.view()
+
+
 def method_extra():
     return f'''   <h2 id="other-listings">How the other plugin pages were put together</h2>
    <ul>
     <li>Anthropic's plugins were read from a copy of its <a href="{P.REPO_URL}">public repository</a> at {P.REPO_READ}. Each plugin's version and each skill's name and description were taken by script, and the build checks every name and count on these pages against them.</li>
     <li>A skill list restates each skill's own description. The steps inside the skill files were read only for the Sales plugin.</li>
 {GV.method()}
+{SV.method()}
     <li>Which skills count as leader skills, and who may reach for each, is our read. The note on Google rests on one search and on its <a href="{P.GOOGLE_URL}">Workspace Updates</a> post about skills. The note on Microsoft rests on its <a href="{P.MS_DOCS_URL}">documentation of the sales skills in Copilot Cowork</a> and on its <a href="{P.MS_POST_URL}">post of {P.MS_POST_DATE}</a>, both read on {P.MS_READ_ON}. How the 18 skills divide between its two plugins is our count from the table in that documentation.</li>
     <li>Nothing on those pages is rated, and none of their skills was run.</li>
    </ul>
@@ -173,4 +185,4 @@ def check(idx_path="/home/claude/plugins_index.json"):
             assert sk in names, (plug, sk)
     sb = {n for n, _ in idx["small-business"]["skills"]}
     assert {s for s, _ in P.LISTED["small-business"]} | set(P.SMALL_BUSINESS_REST) == sb
-    return "checked against the repository index; ChatGPT for Sales: " + GV.check()
+    return "checked against the repository index; ChatGPT for Sales: " + GV.check() + "; Salesforce in Claude: " + SV.check()

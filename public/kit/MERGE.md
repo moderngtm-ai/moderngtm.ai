@@ -24,11 +24,13 @@ The script stops when the site's page no longer has something it relies on, and 
 
 ## The plugin area
 
-- Its sources are in `kit/plugins/`, with a README of their own. It was built as a page of its own, "Plugins for GTM teams on Modern GTM", and that page's 11 views go into the site inside one wrapper.
-- Its styles are tied to the wrapper with `:where()`, which adds no weight. Nine class names that mean something else on the site are renamed inside the wrapper, and four site rules stop at its edge. One router answers every address for all 19 views.
+- Its sources are in `kit/plugins/`, with a README of their own. It was built as a page of its own, "Plugins for GTM teams on Modern GTM", and that page's 12 views go into the site inside one wrapper.
+- Its styles are tied to the wrapper with `:where()`, which adds no weight. Nine class names that mean something else on the site are renamed inside the wrapper, and four site rules stop at its edge. One router answers every address for all 20 views.
 - Its method page is at `#plugins-method`, because the site already uses `#method`.
 - The 60-second film is left out of Configure, at the owner's request.
 - The page links to `kit/modeltest/README.md` and `kit/chatgpt/inventory-prompt.md`, so those two folders sit directly under `kit/`.
+- **Salesforce in Claude, since November 25, 2026.** A page on Salesforce's plugin for Claude, which is in a beta under a confidentiality agreement, so it rests on Salesforce's and Anthropic's public pages only. It is built from `salesforce_data.py` and `salesforce_views.py`, and `merge.py` lists it in `llms.txt`. OpenAI's Codex checked it against the same pages that day, and the editor accepted its 18 corrections.
+- **Skill chips and the way back, since November 25, 2026.** A click on a skill chip shows that skill's line where the reader is, with a link on to the full card or row, and after a long jump a button returns the reader to the same place, as the browser's Back does. Both are in `app.js` and `entry.css`, and without scripts the chips stay plain links.
 - **When a plugin entry changes:** rebuild the plugin page from `kit/plugins/`, put its new `index.html`, `entry.css` and `app.js` into `plugins/`, and run `merge.py` again.
 
 ## Checks on the version of November 23, 2026, with 94 records
@@ -91,11 +93,11 @@ The page served at https://moderngtm.ai/ takes one more step after the merge. `d
 python3 domain.py site/index.html public --llms site/llms.txt --robots robots.txt
 ```
 
-Each change is anchored on text that must occur once on the merged page, so a page that has drifted stops the script. `check_site.cjs` takes `DOMAIN=1` for this version, which has 20 views. `og.html.txt` is the source of `og.png`, rendered at 1200 by 630 pixels. The fonts are Archivo and Source Serif 4, under the SIL Open Font License 1.1, whose text is in `fonts/`.
+Each change is anchored on text that must occur once on the merged page, so a page that has drifted stops the script. `check_site.cjs` takes `DOMAIN=1` for this version, which has 21 views. `og.html.txt` is the source of `og.png`, rendered at 1200 by 630 pixels. The fonts are Archivo and Source Serif 4, under the SIL Open Font License 1.1, whose text is in `fonts/`.
 
 ## Still the editor's
 
 - The headline says "AI strategy", as Salesloft's release does. The findings list, Figure 1 and the report say "call it production-ready".
 - The release gives neither the 200-employee threshold nor the fieldwork dates. Both come from the register's record.
 - "Open the guide" on Playbooks leads to the public guide. It could lead to Configure inside the site.
-- The plugin area is compiled with Claude. Its editor has changed parts of the Claude Sales entry, and the rest awaits his review. `kit/plugins/README.md` lists what is open, and `kit/CROSSLAB.md` what two other labs' models checked and what he decided.
+- The plugin area is compiled with Claude. On the Salesforce in Claude page, the beta agreement's printed title and date wait for the editor's reading of the PDF. Its editor has changed parts of the Claude Sales entry, and the rest awaits his review. `kit/plugins/README.md` lists what is open, and `kit/CROSSLAB.md` what two other labs' models checked and what he decided.

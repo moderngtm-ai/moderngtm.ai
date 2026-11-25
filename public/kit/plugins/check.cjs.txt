@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const AXE = fs.readFileSync('/home/claude/work/axe/node_modules/axe-core/axe.min.js', 'utf8');
 const URL = 'http://localhost:8766/index.html';
-const VIEWS = ['plugins', 'overview', 'skills', 'fit', 'rollout', 'configure', 'marketing', 'customer-support', 'small-business', 'chatgpt-sales', 'method'];
+const VIEWS = ['plugins', 'overview', 'skills', 'fit', 'rollout', 'configure', 'marketing', 'customer-support', 'small-business', 'chatgpt-sales', 'salesforce-in-claude', 'method'];
 const SALES = ['overview', 'skills', 'fit', 'rollout', 'configure'];
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console.log('FAIL', name, extra === undefined ? '' : JSON.stringify(extra)); } };
@@ -32,7 +32,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console
   const count = sel => p.locator(sel).count();
 
   // ------------------------------------------------------------------ structure
-  ok('eleven views', (await p.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).map(v => v.dataset.view))).join() === VIEWS.join());
+  ok('twelve views', (await p.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).map(v => v.dataset.view))).join() === VIEWS.join());
   ok('the list of plugins shows first', await onView(p) === 'plugins');
   ok('36 skills', await count('details.sk') === 36);
   ok('5 groups, 9 9 9 6 3', (await p.evaluate(() => Array.from(document.querySelectorAll('.grp')).map(g => g.querySelectorAll('details.sk').length))).join() === '9,9,9,6,3');
@@ -46,7 +46,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console
   ok('ten connector rows', await count('.glance table tbody tr') === 10);
   ok('vendor flagged in the opener', (await p.locator('[data-view="overview"] .open .lede').textContent()).includes('is the vendor'));
   ok('preview is stated', (await p.locator('[data-view="overview"] .open .who').textContent()).includes('Preview'));
-  ok('one h1 in each view', (await p.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).map(v => v.querySelectorAll('h1').length))).join() === '1,1,1,1,1,1,1,1,1,1,1');
+  ok('one h1 in each view', (await p.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).map(v => v.querySelectorAll('h1').length))).join() === '1,1,1,1,1,1,1,1,1,1,1,1');
   const skips = await p.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).map(v => {
     let last = 0, bad = [];
     v.querySelectorAll('h1,h2,h3,h4').forEach(h => { const n = +h.tagName[1]; if (n > last + 1) bad.push(h.textContent.trim().slice(0, 30)); last = n; });
@@ -94,10 +94,10 @@ const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console
 
   // ------------------------------------------------------------------ the front door and the one navigation row
   await go(p, 'plugins');
-  ok('five plugins on the front door', await count('.plist a.pl') === 5);
-  ok('each plugin row leads to a page', await p.evaluate(() => Array.from(document.querySelectorAll('.plist a.pl')).map(a => a.getAttribute('href')).join()) === '#overview,#marketing,#customer-support,#small-business,#chatgpt-sales');
-  ok('each row says how deep its page goes', (await p.locator('.plist .pgo').allTextContents()).join('|') === 'Full entry|Skill list|Skill list|Skill list|Reported by ChatGPT');
-  ok('three depths are explained', await count('.depth > div') === 3);
+  ok('six plugins on the front door', await count('.plist a.pl') === 6);
+  ok('each plugin row leads to a page', await p.evaluate(() => Array.from(document.querySelectorAll('.plist a.pl')).map(a => a.getAttribute('href')).join()) === '#overview,#marketing,#customer-support,#small-business,#chatgpt-sales,#salesforce-in-claude');
+  ok('each row says how deep its page goes', (await p.locator('.plist .pgo').allTextContents()).join('|') === 'Full entry|Skill list|Skill list|Skill list|Reported by ChatGPT|Public pages only');
+  ok('four depths are explained', await count('.depth > div') === 4);
   ok('eight other plugins hold 32 leader skills', await count('.lsk details') === 8 && await count('.lsk tbody tr') === 32);
   ok('Microsoft is named under what is not listed, with what was read and when', await p.evaluate(() => { const li = Array.from(document.querySelectorAll('#not-listed + ul.lim li')); const m = li.filter(x => x.querySelector('strong').textContent === 'Microsoft.'); return li.length === 4 && m.length === 1 && m[0].textContent.includes('Its documentation, last updated on November 3, 2026, describes two sales plugins for Copilot Cowork') && m[0].textContent.includes('Both also need a license for Microsoft Copilot, and Microsoft says Cowork is billed on usage.') && m[0].textContent.includes('lists 18 skills by name: by our count of its table, 17 are in Sales and 6 in Sales for Cowork, with 5 in both') && m[0].textContent.includes('neither plugin has been installed here') && m[0].textContent.includes('read on November 23, 2026'); }));
   ok('Method says the split between the two Microsoft plugins is our count', (await p.locator('[data-view="method"]').textContent()).includes('How the 18 skills divide between its two plugins is our count from the table in that documentation.'));
@@ -136,6 +136,11 @@ const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console
   ok('every example request calls @Sales and is marked as ours', await p.evaluate(() => Array.from(document.querySelectorAll('details.gsk')).every(d => d.querySelector('.sayt').textContent.indexOf('@Sales ') === 0 && d.querySelector('.runhead p').textContent.indexOf('The example request is ours and was not run') > 0)));
   ok('the GTM job on each card is marked as our read', await p.evaluate(() => Array.from(document.querySelectorAll('details.gsk')).every(d => { const dts = Array.from(d.querySelectorAll('dl.kv dt')); return dts[dts.length - 1].textContent === 'GTM job Our read'; })));
   ok('the tallies match the cards', await p.evaluate(() => { const tags = Array.from(document.querySelectorAll('details.gsk .fitm .t')).map(t => t.textContent); const n = w => tags.filter(t => t === w).length; const tally = Array.from(document.querySelectorAll('.gtally b')).map(x => x.textContent).join('|'); return n('Can be scheduled') === 7 && n('For a named seller') === 5 && tally === '7 of 18|5 of 18|18 of 18|None'; }));
+  ok('Salesforce in Claude: 37 skills in eight groups, as Salesforce groups them', await count('tr[id^="sfk-"]') === 37 && await count('.sfgrp') === 8 && await p.evaluate(() => Array.from(document.querySelectorAll('.sfgrp')).map(g => g.querySelectorAll('tr[id^="sfk-"]').length).join()) === '6,7,6,3,3,5,6,1');
+  ok('Salesforce in Claude: six skills carry the mark for changing records, and the tally says so', await count('.sft .t') === 6 && await p.evaluate(() => Array.from(document.querySelectorAll('.sftally b')).map(x => x.textContent).join('|')) === '6 of 37|None|Configure|27|10|Nine');
+  ok('Salesforce in Claude: the beta and its agreement come first, with the agreement linked', await p.evaluate(() => { const l = document.querySelector('#sf-source + .lead2'); return !!l && /confidential information/.test(l.textContent) && /Beta-Services-Agreement\.pdf$/.test(l.querySelector('a').getAttribute('href')); }));
+  ok('Salesforce in Claude: every chip leads to a skill row or a Claude Sales card', await p.evaluate(() => Array.from(document.querySelectorAll('[data-view="salesforce-in-claude"] a.chip')).every(a => { const h = a.getAttribute('href'); return /^#(sfk|skill)-/.test(h) && !!document.getElementById(h.slice(1)); })));
+  ok('Salesforce in Claude: the job table has 13 rows and three columns', await p.evaluate(() => { const t = Array.from(document.querySelectorAll('[data-view="salesforce-in-claude"] table')).pop(); return t.querySelectorAll('tbody tr').length === 13 && t.querySelectorAll('thead th').length === 3; }));
   ok('16 skills are placed in a GTM job and two are named as outside', await count('[data-view="chatgpt-sales"] .glance .jobs .chip') === 16 && await count('[data-view="chatgpt-sales"] .glance .jobs + .note .chip') === 2);
   ok('35 Claude skills are placed in a GTM job and one is named as outside', await count('[data-view="overview"] .glance .jobs .chip') === 35 && await count('[data-view="overview"] .glance .jobs li[id^="cjob-"]') === 11 && await count('[data-view="overview"] .glance .jobs + .note .chip') === 1);
   ok('every skill link in the entry has its card', await p.evaluate(() => Array.from(document.querySelectorAll('[data-view="chatgpt-sales"] a[href^="#gpt-"]')).every(a => !!document.getElementById(a.getAttribute('href').slice(1)))));
@@ -497,6 +502,41 @@ const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console
     await q.context().close();
   }
 
+  // ------------------------------------------------------------------ a look at a skill, and the way back
+  const lk = await open(1440, 900, { hash: 'sf-compare' });
+  {
+    const chipSel = '[data-view="salesforce-in-claude"] .sfonly a.chip[href="#sfk-calendar-events"]';
+    const y0 = await lk.evaluate(() => window.scrollY);
+    await lk.click(chipSel); await lk.waitForTimeout(150);
+    ok('a chip shows its skill where the reader is', await lk.evaluate(() => { const k = document.querySelector('.pk'); return !!k && !k.hidden && /calendar-events/.test(k.textContent) && /View My Calendar/.test(k.textContent) && /Salesforce in Claude/.test(k.textContent) && document.activeElement === document.getElementById('pk-t'); }));
+    ok('the look leaves the page where it was', Math.abs(await lk.evaluate(() => window.scrollY) - y0) < 3);
+    ok('the look sits by its chip and inside the window', await lk.evaluate(sel => { const r = document.querySelector('.pk').getBoundingClientRect(), c = document.querySelector(sel).getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight && (Math.abs(r.top - c.bottom) < 20 || Math.abs(r.bottom - c.top) < 20); }, chipSel));
+    await lk.keyboard.press('Escape'); await lk.waitForTimeout(100);
+    ok('Escape closes the look and gives focus back to the chip', await lk.evaluate(sel => document.querySelector('.pk').hidden && document.activeElement === document.querySelector(sel), chipSel));
+    await lk.click(chipSel); await lk.waitForTimeout(150);
+    await lk.click('.pk [data-pk-go]'); await lk.waitForTimeout(300);
+    ok('the look leads on to the row', await lk.evaluate(() => { const r = document.getElementById('sfk-calendar-events').getBoundingClientRect(); return r.top >= 0 && r.top < 240 && document.querySelector('.pk').hidden; }));
+    ok('after a long jump the way back shows', await lk.evaluate(() => { const b = document.querySelector('.bk'); return !!b && !b.hidden; }));
+    await lk.click('.bk'); await lk.waitForTimeout(350);
+    ok('Back to where you were returns to the same place', Math.abs(await lk.evaluate(() => window.scrollY) - y0) < 4 && await lk.evaluate(() => document.querySelector('.bk').hidden));
+    await lk.click('[data-view="salesforce-in-claude"] .sfonly a.chip[href="#skill-setup"]'); await lk.waitForTimeout(150);
+    ok('a chip for a Claude Sales skill shows that card\'s line', await lk.evaluate(() => /Claude Sales plugin/.test(document.querySelector('.pk').textContent) && /setup/.test(document.getElementById('pk-t').textContent)));
+    await lk.click('.pk [data-pk-x]'); await lk.waitForTimeout(100);
+    ok('Close shuts the look', await lk.evaluate(() => document.querySelector('.pk').hidden));
+    await go(lk, 'sf-glance');
+    const far = lk.locator('[data-view="salesforce-in-claude"] .glance a[href="#sf-open"]');
+    await far.scrollIntoViewIfNeeded(); await lk.waitForTimeout(100);
+    const y1 = await lk.evaluate(() => window.scrollY);
+    await far.click(); await lk.waitForTimeout(300);
+    ok('a link that jumps far offers the way back', await lk.evaluate(() => !document.querySelector('.bk').hidden));
+    await lk.goBack(); await lk.waitForTimeout(350);
+    ok('the browser\'s Back returns to the same place', Math.abs(await lk.evaluate(() => window.scrollY) - y1) < 4 && await lk.evaluate(() => document.querySelector('.bk').hidden));
+    await go(lk, 'chatgpt-sales');
+    await lk.click('[data-view="chatgpt-sales"] .glance .jobs a.chip'); await lk.waitForTimeout(150);
+    ok('a ChatGPT chip shows its skill too', await lk.evaluate(() => /ChatGPT for Sales/.test(document.querySelector('.pk').textContent) && !document.querySelector('.pk').hidden));
+    await lk.context().close();
+  }
+
   // ------------------------------------------------------------------ phone
   const ph = await open(390, 844, { touch: true });
   ok('tabs stay in view on a phone', await ph.evaluate(() => { window.scrollTo(0, 1200); return new Promise(r => setTimeout(() => { const b = document.querySelector('.tabs').getBoundingClientRect(); r(Math.abs(b.top) < 1 && b.height < 60); }, 120)); }));
@@ -523,6 +563,11 @@ const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console
   await go(ph, 'configure');
   ok('guide contents fold into a list on a phone', await ph.evaluate(() => getComputedStyle(document.querySelector('.tocm')).display !== 'none' && getComputedStyle(document.querySelector('.toc')).display === 'none'));
   ok('tables stack on a phone', await ph.evaluate(() => getComputedStyle(document.querySelector('[data-view="configure"] table.stack thead')).display === 'none'));
+  await go(ph, 'sf-compare');
+  await ph.click('[data-view="salesforce-in-claude"] .sfonly a.chip[href="#sfk-calendar-events"]'); await ph.waitForTimeout(200);
+  ok('on a phone the look opens as a sheet from the bottom', await ph.evaluate(() => { const k = document.querySelector('.pk'), r = k.getBoundingClientRect(); return !k.hidden && Math.abs(r.bottom - innerHeight) < 2 && r.left === 0 && Math.abs(r.right - innerWidth) < 2 && !document.querySelector('.pk-bg').hidden; }));
+  await ph.mouse.click(20, 20); await ph.waitForTimeout(150);
+  ok('a tap outside the sheet closes it', await ph.evaluate(() => document.querySelector('.pk').hidden && document.querySelector('.pk-bg').hidden));
   await ph.context().close();
 
   // ------------------------------------------------------------------ an address on first load
@@ -537,7 +582,7 @@ const ok = (name, cond, extra) => { if (cond) { pass++; } else { fail++; console
 
   // ------------------------------------------------------------------ without scripts
   const ns = await open(1280, 900, { js: false });
-  ok('without scripts the bar lists every page', await ns.evaluate(() => { const vis = el => getComputedStyle(el).display !== 'none'; const n = document.getElementById('nav'); return Array.from(n.querySelectorAll('.tl')).filter(vis).map(l => l.dataset.nav).join() === 'all' && n.querySelectorAll('[data-nav="all"] a').length === 6 && !vis(n.querySelector('.back')); }));
+  ok('without scripts the bar lists every page', await ns.evaluate(() => { const vis = el => getComputedStyle(el).display !== 'none'; const n = document.getElementById('nav'); return Array.from(n.querySelectorAll('.tl')).filter(vis).map(l => l.dataset.nav).join() === 'all' && n.querySelectorAll('[data-nav="all"] a').length === 7 && !vis(n.querySelector('.back')); }));
   ok('without scripts every view shows', await ns.evaluate(() => Array.from(document.querySelectorAll('[data-view]')).every(v => getComputedStyle(v).display !== 'none')));
   ok('without scripts the controls are gone', await ns.evaluate(() => Array.from(document.querySelectorAll('.jsonly')).every(e => getComputedStyle(e).display === 'none')));
   ok('without scripts the notes show', await ns.evaluate(() => Array.from(document.querySelectorAll('.nojs')).every(e => getComputedStyle(e).display !== 'none')));

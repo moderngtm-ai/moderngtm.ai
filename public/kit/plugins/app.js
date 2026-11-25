@@ -45,6 +45,8 @@
   var viewByName = {};
   views.forEach(function (v) { viewByName[v.getAttribute('data-view')] = v; v.removeAttribute('id'); });
   var tabLinks = $$('.tabs .tl:not([data-nav="all"]) a');
+  var restoreY = null;   // set by the browser's Back: the place to return to instead of the link's target
+  var pendingBack = null;   // set by a click on a link: where the reader was, for "Back to where you were"
   var navEl = $('#nav'), hereEl = $('#here');
 
   // The one navigation row follows the page: on the front door it lists the page's parts, inside a plugin
@@ -63,7 +65,8 @@
         a.removeAttribute('aria-current');
       }
     });
-    if (el === view) { window.scrollTo(0, 0); } else { jump(el); }
+    if (restoreY !== null) { var y = restoreY; restoreY = null; window.scrollTo(0, y); } else if (el === view) { window.scrollTo(0, 0); } else { jump(el); }
+    if (pendingBack) { offerBack(pendingBack, view); pendingBack = null; }
     if (user) {
       var target = el === view ? $('h1', view) : (el.tagName === 'DETAILS' ? $('summary', el) : el);
       if (target) {
@@ -94,8 +97,141 @@
   // A link to the address already showing fires no hashchange, so go there by hand.
   document.addEventListener('click', function (e) {
     var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
-    if (a && a.getAttribute('href') === window.location.hash) { route(true); }
+    if (a && !e.defaultPrevented && a.getAttribute('href') === window.location.hash) { route(true); }
   });
+
+  /* ---------------------------------------------------------------- a look at a skill, and the way back */
+  // A chip names a skill whose row or card may sit far down this view or in another one. A click shows that
+  // skill's own line where the reader is, with a link to the full card. A jump a link does make can be undone:
+  // "Back to where you were", or the browser's Back, returns to the same place on the page. Without scripts the
+  // chips stay plain links.
+  var host = (typeof PLG !== 'undefined' && PLG) ? PLG : document.body;
+  var KICK = { sk: 'Claude Sales plugin', gsk: 'ChatGPT for Sales', sfk: 'Salesforce in Claude' };
+  function narrow() { return window.matchMedia('(max-width: 719px)').matches; }
+  function txt(el) { return el ? el.textContent.replace(/\s+/g, ' ').trim() : ''; }
+  function cap(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : t; }
+
+  function peekData(id) {
+    var t = document.getElementById(id);
+    if (!t) { return null; }
+    if (t.tagName === 'TR' && id.indexOf('sfk-') === 0) {
+      var cells = $$('td[data-l]', t), d = { kick: KICK.sfk, code: txt($('th code', t)), name: txt($('.sfn', t)), does: '', facts: [], go: 'Show it in the list' };
+      cells.forEach(function (c) {
+        var l = c.getAttribute('data-l');
+        if (l === 'What it does') { d.does = txt(c); } else { d.facts.push([l, txt(c)]); }
+      });
+      return d;
+    }
+    if (t.classList.contains('sk')) {
+      var ch = $('summary .chip', t), k = ch ? (ch.className.match(/k-[A-Z]/) || [''])[0] : '';
+      return { kick: KICK.sk, code: t.getAttribute('data-id') || id.replace(/^skill-/, ''), name: txt($('summary .tg', t)), does: txt($('.body .does', t)),
+        facts: KIND_WORDS[k] ? [['Marked', cap(KIND_WORDS[k])]] : [], go: 'Open the full card' };
+    }
+    if (t.classList.contains('gsk')) {
+      var fit = txt($('summary .fitm', t));
+      return { kick: KICK.gsk, code: txt($('summary code', t)), name: txt($('summary .tg', t)), does: txt($('.body .does', t)),
+        facts: fit ? [['For', fit]] : [], go: 'Open the full card' };
+    }
+    return null;
+  }
+
+  var peekEl = null, peekBg = null, peekFrom = null;
+  function buildPeek() {
+    peekBg = document.createElement('div'); peekBg.className = 'pk-bg'; peekBg.hidden = true;
+    peekEl = document.createElement('div'); peekEl.className = 'pk'; peekEl.hidden = true;
+    peekEl.setAttribute('role', 'dialog'); peekEl.setAttribute('aria-labelledby', 'pk-t');
+    host.appendChild(peekBg); host.appendChild(peekEl);
+    peekBg.addEventListener('click', function () { closePeek(true); });
+    peekEl.addEventListener('click', function (e) {
+      if (e.target.closest('[data-pk-x]')) { closePeek(true); }
+      else if (e.target.closest('[data-pk-go]')) { closePeek(false); }
+    });
+  }
+  function placePeek() {
+    if (!peekEl || peekEl.hidden) { return; }
+    if (narrow()) { peekEl.style.left = ''; peekEl.style.top = ''; peekEl.style.width = ''; return; }
+    var r = peekFrom.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > window.innerHeight) { closePeek(false); return; }
+    var w = Math.min(440, window.innerWidth - 32), h, top;
+    peekEl.style.width = w + 'px';
+    h = peekEl.offsetHeight;
+    top = r.bottom + 8;
+    if (top + h > window.innerHeight - 12 && r.top - 8 - h >= 64) { top = r.top - 8 - h; }
+    top = Math.max(64, Math.min(top, window.innerHeight - h - 12));
+    peekEl.style.left = Math.min(Math.max(16, r.left), window.innerWidth - w - 16) + 'px';
+    peekEl.style.top = top + 'px';
+  }
+  function openPeek(a, d) {
+    if (!peekEl) { buildPeek(); }
+    peekFrom = a;
+    var facts = d.facts.length ? '<dl class="pk-f">' + d.facts.map(function (f) { return '<dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd>'; }).join('') + '</dl>' : '';
+    peekEl.innerHTML = '<p class="pk-k">' + esc(d.kick) + '</p>' +
+      '<h2 class="pk-t" id="pk-t" tabindex="-1"><code>' + esc(d.code) + '</code>' + (d.name ? '<span>' + esc(d.name) + '</span>' : '') + '</h2>' +
+      (d.does ? '<p class="pk-d">' + esc(d.does) + '</p>' : '') + facts +
+      '<div class="pk-a"><a class="btn sm pri" href="' + esc(a.getAttribute('href')) + '" data-pk-go>' + esc(d.go) + '</a><button class="btn sm" type="button" data-pk-x>Close</button></div>';
+    peekEl.hidden = false;
+    peekBg.hidden = !narrow();
+    placePeek();
+    focusQuiet($('#pk-t', peekEl));
+  }
+  function closePeek(refocus) {
+    if (!peekEl || peekEl.hidden) { return; }
+    peekEl.hidden = true; peekBg.hidden = true;
+    if (refocus && peekFrom && peekFrom.isConnected) { focusQuiet(peekFrom); }
+  }
+
+  var backEl = null, backFrom = null;
+  function hideBack() { if (backEl) { backEl.hidden = true; } backFrom = null; }
+  function offerBack(from, view) {
+    var far = from.view !== view || Math.abs(window.scrollY - from.y) > window.innerHeight * 0.75;
+    if (!far) { hideBack(); return; }
+    if (!backEl) {
+      backEl = document.createElement('button');
+      backEl.type = 'button'; backEl.className = 'bk'; backEl.hidden = true;
+      backEl.textContent = 'Back to where you were';
+      host.appendChild(backEl);
+      backEl.addEventListener('click', function () { hideBack(); window.history.back(); });
+    }
+    backFrom = { y: from.y, view: from.view };
+    backEl.hidden = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (backFrom && backFrom.view.classList.contains('on') && Math.abs(window.scrollY - backFrom.y) < 160) { hideBack(); }
+    if (peekEl && !peekEl.hidden) { window.requestAnimationFrame(placePeek); }
+  }, { passive: true });
+  window.addEventListener('resize', function () { if (peekEl && !peekEl.hidden) { peekBg.hidden = !narrow(); placePeek(); } });
+
+  // The browser's Back returns to the place the reader left, not to the top of the section the address names.
+  window.addEventListener('popstate', function (e) {
+    restoreY = e.state && typeof e.state.mgY === 'number' ? e.state.mgY : null;
+    hideBack(); closePeek(false);
+    // An address that does not change fires no hashchange, so restore here as well.
+    window.setTimeout(function () { if (restoreY !== null) { window.scrollTo(0, restoreY); restoreY = null; } }, 0);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && peekEl && !peekEl.hidden) { closePeek(true); }
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (peekEl && !peekEl.hidden && !e.target.closest('.pk, .pk-bg') && a !== peekFrom) { closePeek(false); }
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+    var href = a.getAttribute('href'), id = href.slice(1);
+    if (a.classList.contains('chip') && /^(skill|sfk|gpt)-/.test(id) && !a.closest('.map, .pk')) {
+      var d = peekData(id);
+      if (d) {
+        e.preventDefault();
+        if (peekEl && !peekEl.hidden && peekFrom === a) { closePeek(true); } else { openPeek(a, d); }
+        return;
+      }
+    }
+    if (href === window.location.hash || href === '#' || a.closest('.tabs, .mast')) { return; }
+    try { window.history.replaceState({ mgY: window.scrollY }, '', window.location.href); } catch (err) { /* the place is a convenience */ }
+    var cur = views.filter(function (v) { return v.classList.contains('on'); })[0] || views[0];
+    var mark = pendingBack = { y: window.scrollY, view: cur };
+    // A link whose jump some other handler stops leaves nothing to come back from.
+    window.setTimeout(function () { if (pendingBack === mark) { pendingBack = null; } }, 600);
+  }, true);
 
   /* ---------------------------------------------------------------- one choice of role and sales motion */
   function setRole(k) {

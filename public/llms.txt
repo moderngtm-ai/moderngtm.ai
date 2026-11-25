@@ -23,12 +23,13 @@ Every finding in the register carries a grade (A financial, B measured, C survey
 
 ## Plugins
 
-- [Plugins](/#plugins): what Anthropic and OpenAI, both AI labs and vendors, publish for revenue teams, with one page for each plugin
+- [Plugins](/#plugins): what Anthropic and OpenAI, both AI labs and vendors, and Salesforce, a CRM vendor, publish for revenue teams, with one page for each plugin
 - [Claude Sales plugin](/#overview): 36 skills, each with what it does, reads and can change, then fit, rollout and configuration
 - [ChatGPT for Sales](/#chatgpt-sales): 18 skills as ChatGPT reported them from an installed copy, checked against OpenAI's pages
+- [Salesforce in Claude](/#salesforce-in-claude): 37 skills of a plugin in beta, from Salesforce's and Anthropic's public pages only
 - [Claude Sales skills as JSON](/skills.json)
 
-Claude compiled the plugin pages. The ratings in the Claude Sales entry are its own read and await their editor's review, and nothing in the ChatGPT for Sales entry is rated.
+Claude compiled the plugin pages. The ratings in the Claude Sales entry are its own read and await their editor's review, and nothing in the ChatGPT for Sales or Salesforce in Claude entries is rated.
 
 ## Contributing
 
