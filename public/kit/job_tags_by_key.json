@@ -301,6 +301,24 @@
   "Zendesk|Zendesk reports that 81% of the business": {
    "job": "Support",
    "note": "Leaders in customer experience, IT and contact centers, and consumers."
+  },
+  "Monaco|Monaco, which sells an AI sales platform": {
+   "job": "Outreach and follow-up",
+   "note": "Outbound prospecting by the vendor’s own SDRs."
+  },
+  "Anthropic|Of 58 U.S. companies adopting AI, all An": {
+   "job": "Beyond the revenue organization",
+   "note": "Hiring across whole companies, not the revenue organization alone."
+  },
+  "Anthropic|At one fintech among the companies Anthr": {
+   "job": "Support"
+  },
+  "Anthropic|One executive among the companies Anthro": {
+   "job": "The revenue organization as a whole",
+   "note": "One role from lead sourcing to customer success."
+  },
+  "Anthropic|The founder of a marketing startup among": {
+   "job": "Marketing (jobs to come)"
   }
  }
 }

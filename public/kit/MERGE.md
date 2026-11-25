@@ -71,6 +71,8 @@ If a finding's first 40 characters change, change its key in `job_tags_by_key.js
 
 **The corrections of that evening were made the same way.** A model from another lab checked the eight new records against their sources. Six rows changed, in wording or in a source link and in no figure. No row's first 40 characters changed, so every key and every job tag stayed where it was. The six carry November 23, 2026 as their correction date in `credits.json`, and Appendix C of the report lists each change.
 
+**The round of November 25, 2026 was built the same way.** The owner accepted five rows on the Queue sheet: one on Monaco from a podcast interview and four from Anthropic's interview study "Working with AI". They are records 95 to 99, at the end of Appendix A. Their jobs are the ones proposed in the queue, which he accepted when he said to publish. "Evidence through" stays November 23, 2026, the date of the newest source. Checks: 230 of 230 site-level checks on the site's page and on the staging copy, 483 of 483 merged-page checks and the same eight house-rules candidates as the page before it.
+
 ## A staging copy
 
 "Modern GTM: merged preview" is a private page built by the same script with `--preview`, which adds a lime strip and that title. Changes are tried there before they go to the site. Since November 23, 2026 the two are the same build apart from the strip, except while a change waits there for the editor's word:

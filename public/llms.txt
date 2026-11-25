@@ -13,7 +13,7 @@ Every finding in the register carries a grade (A financial, B measured, C survey
 
 ## Evidence
 
-- [Evidence register](/#evidence): 94 records, each with its population, period, basis, grade and source
+- [Evidence register](/#evidence): 99 records, each with its population, period, basis, grade and source
 - [Register as JSON](/evidence.json)
 
 ## Playbooks and tools

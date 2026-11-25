@@ -21,7 +21,9 @@
   "Vercel|A later snapshot, from a talk: the suppo": "GPT-6.2 Astra (AI model, OpenAI)",
   "Tannenbaum (arXiv preprint)|In a randomized trial on 100 live websit": "GPT-6.2 Astra (AI model, OpenAI)",
   "Nandi and others (arXiv preprint)|Across 13 enterprise-style procedures, c": "GPT-6.2 Astra (AI model, OpenAI)",
-  "ChurnZero|81% of customer success leaders say AI r": "GPT-6.2 Astra (AI model, OpenAI)"
+  "ChurnZero|81% of customer success leaders say AI r": "GPT-6.2 Astra (AI model, OpenAI)",
+  "Monaco": "Nathan Fierley",
+  "Anthropic": "Nathan Fierley"
  },
  "people": {
   "Andy Jolls": {
@@ -68,7 +70,12 @@
   "Richardson|Richardson reports that 62% of sales lea": "2026-11-23",
   "SnapLogic|SnapLogic reports that 54% of the IT dec": "2026-11-23",
   "Gartner|91% of C-level executives expect AI to p": "2026-11-23",
-  "Zendesk|Zendesk reports that 81% of the business": "2026-11-23"
+  "Zendesk|Zendesk reports that 81% of the business": "2026-11-23",
+  "Monaco|Monaco, which sells an AI sales platform": "2026-11-25",
+  "Anthropic|Of 58 U.S. companies adopting AI, all An": "2026-11-25",
+  "Anthropic|At one fintech among the companies Anthr": "2026-11-25",
+  "Anthropic|One executive among the companies Anthro": "2026-11-25",
+  "Anthropic|The founder of a marketing startup among": "2026-11-25"
  },
  "corrected": {
   "Fiserv|Agentic call center built with Sierra: a": "2026-11-20",

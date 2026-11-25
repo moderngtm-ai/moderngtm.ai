@@ -3,11 +3,11 @@
  "our_read": "Which job a record or a skill belongs to is this site's read. Nathan Fierley accepted the tags and placements on November 22, 2026.",
  "as_of": "November 22, 2026",
  "register": {
-  "records": 94,
-  "on_one_job": 33,
-  "the_revenue_organization_as_a_whole": 32,
-  "beyond_the_revenue_organization": 27,
-  "marketing": 2
+  "records": 99,
+  "on_one_job": 35,
+  "the_revenue_organization_as_a_whole": 33,
+  "beyond_the_revenue_organization": 28,
+  "marketing": 3
  },
  "plugins": {
   "anthropic": {
@@ -97,13 +97,14 @@
    "slug": "outreach-and-follow-up",
    "what": "Writing to prospects and customers, booking meetings and following up after a call.",
    "records": {
-    "count": 2,
+    "count": 3,
     "by_grade": {
-     "B": 2
+     "B": 3
     },
     "numbers": [
      15,
-     30
+     30,
+     95
     ]
    },
    "example": {
@@ -266,11 +267,11 @@
    "slug": "support",
    "what": "Answering customers' questions and problems.",
    "records": {
-    "count": 24,
+    "count": 25,
     "by_grade": {
      "A": 3,
      "B": 15,
-     "C": 6
+     "C": 7
     },
     "numbers": [
      1,
@@ -296,7 +297,8 @@
      47,
      79,
      89,
-     94
+     94,
+     97
     ]
    },
    "example": {

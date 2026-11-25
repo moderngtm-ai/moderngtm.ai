@@ -2171,6 +2171,126 @@
     "source_checked_by": "Claude (AI model, Anthropic)",
     "edited_by": "Nathan Fierley"
    }
+  },
+  {
+   "organization": "Monaco",
+   "finding": "Monaco, which sells an AI sales platform, says one of its own SDRs created about 300 and then about 400 outbound opportunities in a month with it. It expects about 500 from its two SDRs in the month of the interview. It does not define an opportunity or say how many became pipeline. Its chief executive says customers should not expect the same, because the outreach goes out in his name and the company is better known than most startups of its age. He puts the number of agents running in Monaco at 250",
+   "population_and_period": "Monaco’s own outbound sales development: two SDRs, the second still ramping, selling to venture-backed tech startups of up to about 250 employees; two earlier months for one SDR and the month of the recording, none of them dated; recorded about 9 months after Monaco’s public beta of February 11, 2026, by the chief executive’s count; published November 22, 2026",
+   "basis": "Self-reported (vendor); part forecast",
+   "grade": "B",
+   "sources": [
+    {
+     "label": "Topline podcast episode on YouTube, November 22, 2026",
+     "url": "https://www.youtube.com/watch?v=xnvuN3rIqSk"
+    },
+    {
+     "label": "TechCrunch on Monaco’s launch, February 11, 2026",
+     "url": "https://techcrunch.com/2026/02/11/former-founders-fund-vc-sam-blond-launches-ai-sales-startup-to-upend-salesforce/"
+    }
+   ],
+   "added_on": "2026-11-25",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Anthropic",
+   "finding": "Of 58 U.S. companies adopting AI, all Anthropic enterprise customers, people at two-thirds reported hiring less because of AI, mostly by forgoing hires they would otherwise have needed to grow. 10 companies reported hiring more, mainly for AI implementation and IT support, and two had seen automation fully eliminate a position and cost someone a job",
+   "population_and_period": "Executives, managers and individual contributors at 58 U.S. companies adopting AI, all Anthropic enterprise customers, chosen for range and not a representative sample; 66 interviews, dates not stated; published November 23, 2026",
+   "basis": "Self-reported (vendor); interviews",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Anthropic, Working with AI, November 23, 2026",
+     "url": "https://www.anthropic.com/research/working-with-ai"
+    },
+    {
+     "label": "The report as a PDF",
+     "url": "https://assets.claude.com/0cb09418f04d09baf72922e53a3f17383ef838c9.pdf"
+    }
+   ],
+   "added_on": "2026-11-25",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Anthropic",
+   "finding": "At one fintech among the companies Anthropic interviewed, AI customer service agents replaced offshore customer service contracts. Its managers now review transcripts of the agents’ conversations and edit their prompts, knowledge graphs and operating procedures, where they used to manage representatives and handle escalations. Nine of the 58 companies described cutting contracted roles, customer service representatives among them",
+   "population_and_period": "One unnamed fintech, and nine companies for the contract cuts, among 58 U.S. companies adopting AI, all Anthropic enterprise customers; interview dates not stated; published November 23, 2026",
+   "basis": "Self-reported (vendor); narrative",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Anthropic, Working with AI, November 23, 2026",
+     "url": "https://www.anthropic.com/research/working-with-ai"
+    },
+    {
+     "label": "The report as a PDF",
+     "url": "https://assets.claude.com/0cb09418f04d09baf72922e53a3f17383ef838c9.pdf"
+    }
+   ],
+   "added_on": "2026-11-25",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Anthropic",
+   "finding": "One executive among the companies Anthropic interviewed merged lead sourcing, account executive and customer success into a single role that handles the whole customer life cycle. The reason given: AI made each step of a deal easier to track, so the context lost in handoffs between colleagues cost more",
+   "population_and_period": "One executive at an unnamed company among 58 U.S. companies adopting AI, all Anthropic enterprise customers; interview dates not stated; published November 23, 2026",
+   "basis": "Self-reported (vendor); narrative",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Anthropic, Working with AI, November 23, 2026",
+     "url": "https://www.anthropic.com/research/working-with-ai"
+    },
+    {
+     "label": "The report as a PDF",
+     "url": "https://assets.claude.com/0cb09418f04d09baf72922e53a3f17383ef838c9.pdf"
+    }
+   ],
+   "added_on": "2026-11-25",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
+  },
+  {
+   "organization": "Anthropic",
+   "finding": "The founder of a marketing startup among the companies Anthropic interviewed says its “marketing factory” went from people doing 80% of the work and AI 20% to the reverse. Separately, the report cites a marketing manager who edits skill files holding the brand guidelines instead of designing each document, as an example of the role changes behind higher-value uses of AI",
+   "population_and_period": "A marketing startup and a marketing manager at an unnamed company, among 58 U.S. companies adopting AI, all Anthropic enterprise customers; interview dates not stated; published November 23, 2026",
+   "basis": "Self-reported (vendor); narrative",
+   "grade": "C",
+   "sources": [
+    {
+     "label": "Anthropic, Working with AI, November 23, 2026",
+     "url": "https://www.anthropic.com/research/working-with-ai"
+    },
+    {
+     "label": "The report as a PDF",
+     "url": "https://assets.claude.com/0cb09418f04d09baf72922e53a3f17383ef838c9.pdf"
+    }
+   ],
+   "added_on": "2026-11-25",
+   "credit": {
+    "spotted_by": "Nathan Fierley",
+    "compiled_by": "Claude (AI model, Anthropic)",
+    "source_checked_by": "Claude (AI model, Anthropic)",
+    "edited_by": "Nathan Fierley"
+   }
   }
  ]
 }

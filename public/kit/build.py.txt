@@ -25,7 +25,7 @@ for line in md[a0:b0].splitlines():
         if cells[4] == 'Context only':
             cells[4] = 'Context'
         rows.append(cells)
-assert len(rows) == 94, len(rows)
+assert len(rows) == 99, len(rows)
 
 links = re.findall(r'\[([^\]]+)\]\((https?://[^)\s]+)\)', md[b0:c0])
 def url(sub):
@@ -187,9 +187,9 @@ def page(fonts):
 '''
 
 LD_OBJ = {"@context": "https://schema.org", "@graph": [
- {"@type": "WebSite", "name": "Modern GTM", "description": DESC, "inLanguage": "en", "dateModified": "2026-11-23"},
- {"@type": "Report", "name": "AI and the Redefinition of GTM Work: Leaders, Laggards and the Evidence", "author": {"@type": "Person", "name": "Nathan Fierley"}, "dateModified": "2026-11-23", "about": ["AI in go-to-market", "AI agents in sales, marketing, customer success and support"]},
- {"@type": "Dataset", "name": "Modern GTM evidence register", "description": f"{len(reg)} graded records on AI in go-to-market work, each with its population, period, basis, grade and source. Most are self-reported, and vendor sources are flagged. Compiled and checked against sources by Claude, an AI model made by Anthropic, rechecked by a second AI model, GPT-6.2 Astra, made by OpenAI, and edited by Nathan Fierley. Not peer reviewed.", "dateModified": "2026-11-23", "editor": {"@type": "Person", "name": "Nathan Fierley"}, "distribution": {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "evidence.json"}}]}
+ {"@type": "WebSite", "name": "Modern GTM", "description": DESC, "inLanguage": "en", "dateModified": "2026-11-25"},
+ {"@type": "Report", "name": "AI and the Redefinition of GTM Work: Leaders, Laggards and the Evidence", "author": {"@type": "Person", "name": "Nathan Fierley"}, "dateModified": "2026-11-25", "about": ["AI in go-to-market", "AI agents in sales, marketing, customer success and support"]},
+ {"@type": "Dataset", "name": "Modern GTM evidence register", "description": f"{len(reg)} graded records on AI in go-to-market work, each with its population, period, basis, grade and source. Most are self-reported, and vendor sources are flagged. Compiled and checked against sources by Claude, an AI model made by Anthropic, rechecked by a second AI model, GPT-6.2 Astra, made by OpenAI, and edited by Nathan Fierley. Not peer reviewed.", "dateModified": "2026-11-25", "editor": {"@type": "Person", "name": "Nathan Fierley"}, "distribution": {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "evidence.json"}}]}
 ld = json.dumps(LD_OBJ, ensure_ascii=False).replace('</', '<\\/')
 
 def prerender(path):

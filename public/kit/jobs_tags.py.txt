@@ -129,6 +129,8 @@ def main():
          "It is our read throughout. The use-case index on Home is built from it: in the staging copy since November 22, and on the site since November 23, 2026, when he said the staging copy goes to the site.", "",
          "**On November 23, 2026 eight records were added, numbers 87 to 94.** He had accepted them on the Queue sheet that day and told the plugin thread to merge them. They went into the staging copy first and onto the site the same day, on his word \"publish\". "
          "Claude proposed a job for each. He answered the same day, when he said to publish: Lowe's and Walmart move from lead qualification to the revenue organization as a whole, and he named no other change. Claude read that as accepting the other six and told him so.", "",
+         "**On November 25, 2026 five records were added, numbers 95 to 99.** He had accepted them on the Queue sheet that morning: Monaco, from a podcast interview he sent, and four from Anthropic's interview study \"Working with AI\". They went into the staging copy first and to the site on his word \"publish\". "
+         "Claude proposed a job for each in the queue's reviewer notes and on the sheet Job tags. He changed none before he said to publish, and Claude read that as accepting all five and told him so: Monaco under outreach and follow-up, and Anthropic's four under beyond the revenue organization, support, the revenue organization as a whole and marketing.", "",
          "## The 13 jobs", "",
          "The 10 that the plugin entries use, and three new ones, marked.", "",
          "| Job | What it is | Records | Best grade | Claude Sales | Claude Customer support | ChatGPT for Sales |", "| --- | --- | --- | --- | --- | --- | --- |"]
