@@ -85,7 +85,7 @@ python3 merge.py --site dist/index.html --plugins plugins --out staging/index.ht
 
 ## The domain version
 
-The page served at https://moderngtm.ai/ takes one more step after the merge. `domain.py` (stored here as `domain.py.txt`) serves the fonts from the site in place of Google Fonts, adds the canonical address and the preview image, opens the proposal route on Contribute, names `sitemap.xml` and the public repository, adds the line that reuse terms are not set, adds the privacy notice in About and moves Home's Latest list to a Changes view, reached from the footer and from the "Evidence through" dates. It writes the page with `robots.txt`, `llms.txt`, `sitemap.xml`, `og.png` and `fonts/`:
+The page served at https://moderngtm.ai/ takes one more step after the merge. `domain.py` (stored here as `domain.py.txt`) serves the fonts from the site in place of Google Fonts, adds the canonical address and the preview image, opens the proposal route on Contribute, names `sitemap.xml` and the public repository, adds the line that reuse terms are not set, adds the privacy notice in About and moves Home's Latest list to a Changes view, reached from the footer and from the "Evidence through" dates. Since November 25, 2026 it also puts an empty fixed element at the top edge, painted with nothing, whose colour Safari on iPhone uses for the strip behind the status bar. It writes the page with `robots.txt`, `llms.txt`, `sitemap.xml`, `og.png` and `fonts/`:
 
 ```
 python3 domain.py site/index.html public --llms site/llms.txt --robots robots.txt

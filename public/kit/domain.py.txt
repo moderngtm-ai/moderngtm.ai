@@ -4,7 +4,7 @@
   python3 domain.py IN_HTML OUT_DIR --llms LLMS_TXT --robots ROBOTS_TXT [--date YYYY-MM-DD]
 
 Runs after merge.py, on the page merge.py writes (the site's or the staging copy's). It changes the page in
-six places and writes the page, robots.txt, llms.txt, sitemap.xml, og.png and fonts/ into OUT_DIR:
+seven places and writes the page, robots.txt, llms.txt, sitemap.xml, og.png and fonts/ into OUT_DIR:
 
   1. Head: fonts served from the site in place of Google Fonts, the canonical address and the preview-image tags.
   2. Contribute: the route for proposals, which replaces "Intake opens with the public site."
@@ -13,6 +13,9 @@ six places and writes the page, robots.txt, llms.txt, sitemap.xml, og.png and fo
   5. About: the privacy notice.
   6. Home: the Latest list moves to a Changes view of its own, reached from the footer and from the
      "Evidence through" date in the header and the footer.
+  7. Body: an empty fixed element at the top edge, painted with nothing, whose colour Safari on iPhone reads
+     for the strip behind the status bar. Since iOS 26 Safari ignores theme-color and takes that colour from
+     the first fixed or sticky element at the top edge, else from the body's background, which is white here.
 
 Each change is anchored on text that must occur exactly once, so a page that has drifted stops the script
 rather than producing a half-changed page. The fonts are Archivo and Source Serif 4 (SIL Open Font License 1.1),
@@ -57,7 +60,12 @@ def font_head():
         f'src:url(fonts/{fn}) format("woff2");unicode-range:{ur}}}\n'
         for fam, style, wt, extra, fn, ur in FACES)
     links = ".asof a{text-decoration-color:var(--lime)}.asof a:hover{color:var(--lime)}\n"
-    return pre + "<style>\n" + rules + links + "</style>"
+    # The status bar on iPhone: Safari reads the background-color of a full-width fixed element at the top edge
+    # when it is more than 10px tall. Clipped to text it has none of, the element paints nothing; elsewhere it is 0px.
+    tint = (".tint{position:fixed;top:0;left:0;right:0;z-index:2147483647;height:0;margin:0;border:0;pointer-events:none;"
+            "background-color:var(--v);-webkit-background-clip:text;background-clip:text}\n"
+            "@supports (-webkit-touch-callout:none){@media (hover:none) and (pointer:coarse){.tint{height:11px}}}\n")
+    return pre + "<style>\n" + rules + links + tint + "</style>"
 
 
 def meta_head():
@@ -94,6 +102,7 @@ def changes():
         ("head: Google Fonts preconnect", GOOGLE_FONTS[0] + "\n", ""),
         ("head: Google Fonts preconnect (static)", GOOGLE_FONTS[1] + "\n", ""),
         ("head: fonts served from the site", GOOGLE_FONTS[2], font_head()),
+        ("body: the status bar on iPhone", "<body>\n", '<body>\n<div class="tint" aria-hidden="true"></div>\n'),
         ("head: canonical and preview image", '<meta property="og:type" content="website">',
          '<meta property="og:type" content="website">\n' + meta_head()),
         ("contribute: the route for proposals",
