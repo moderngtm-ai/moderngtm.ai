@@ -8,8 +8,8 @@
 :root[data-theme=light]{color-scheme:light}
 :root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
-html{scroll-padding-top:84px;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--disp);overflow-x:clip;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html{scroll-padding-top:84px;-webkit-text-size-adjust:100%;background:var(--v)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--disp);overflow-x:clip;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 ::selection{background:var(--lime);color:#1E1E32}
 a{color:inherit;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:3px}
 a:hover{color:var(--link)}
